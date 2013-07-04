@@ -9,6 +9,8 @@
             const float = 3;
             const text = 4;
             const blob = 5;
+            const date = 6;
+            const datetime = 7;
         }
 
         class action
@@ -148,6 +150,78 @@
                     return "BLOB";
                 }
                 return "TEXT";
+            }
+        }
+
+        interface link
+        {
+            public function open ($hostname, $username, $password, $database);
+            public function close ();
+            public function query ($query);
+        }
+
+        class table
+        {
+            public function __construct ()
+            {
+
+            }
+            public function field ($name)
+            {
+            }
+            public function load ($query)
+            {
+
+            }
+            public function save ($query)
+            {
+            }
+            public function delete ($query)
+            {
+            }
+            public function exists ($query)
+            {
+            }
+            public function of ($object)
+            {
+            }
+        }
+
+        class database
+        {
+            public $link;
+            public $tables = array ();
+            public function __construct (link $link)
+            {
+                $this->link = $link;
+            }
+            public function add ()
+            {
+            }
+            public function table ($name)
+            {
+                return $this->tables[$name];
+            }
+        }
+    }
+
+    namespace db\link
+    {
+        class mysql implements \db\link
+        {
+            public $link;
+            public function open ($hostname, $username, $password, $database)
+            {
+                $this->link = mysql_connect ($hostname, $username, $password);
+                mysql_select_db ($database, $this->link);
+            }
+            public function close ()
+            {
+                mysql_close ($this->link);
+            }
+            public function query ($query)
+            {
+                return mysql_query ($query);
             }
         }
     }
