@@ -11,6 +11,50 @@
             const blob = 5;
             const date = 6;
             const datetime = 7;
+            /**
+             *
+             * @var \ReflectionProperty
+             */
+            public $value;
+            /**
+             * @var \ReflectionClass
+             */
+            public $class;
+            public $name;
+            public $field;
+            public $type;
+            public function __construct (\ReflectionProperty $value)
+            {
+                $this->value = $value;
+                $this->name = $this->value->getName();
+                $comment = $this->value->getDocComment();
+                if ($comment!='')
+                {
+                    $comments = explode("\n", $comment);
+                    if (is_array($comments))
+                    {
+                        foreach ($comments as $line)
+                        {
+                            if (strpos($line,"@var"))
+                            {
+                                $value = trim(substr($line, strpos($line,"@var")+5));
+                                if ($value)
+                                {
+                                    $this->class = new \ReflectionClass($value);
+                                }
+                            }
+                            else if (strpos($line,'field'))
+                            {
+                                $value = trim(substr($line,strpos($line,"field")+6));
+                                if ($value)
+                                {
+                                    $this->field = $value;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         class action
@@ -168,12 +212,55 @@
         class table
         {
             /**
+             *
+             * @var string
+             */
+            public $id;
+            /**
+             * @var \db\database
+             */
+            public $database;
+            /**
              * @var string
              */
             public $name;
-            public function __construct ()
-            {
+            /**
+             * @var \ReflectionClass
+             */
+            public $class;
+            /**
+             * @var \db\field[]
+             */
+            public $fields = array();
 
+            public function __construct (\db\database &$database, $class)
+            {
+                $this->database = &$database;
+                $class = str_replace ("\\", ".", $class);
+                if ($class[0]!='.')
+                {
+                    $class = '.'.$class;
+                }
+                if ($class[strlen($class)-1]=='.')
+                {
+                    $class = substr($class, 0, -1);
+                }
+                $this->id = $class;
+                if (strripos($class,"."))
+                {
+                    $this->name = substr($class,strripos($class,"."));
+                }
+                else
+                {
+                    $this->name = $class;
+                }
+                $this->class = new \ReflectionClass (str_replace (".", "\\", $class));
+                foreach ($this->class->getProperties() as $value)
+                {
+                    /* @var $value \ReflectionProperty */
+                    $type = new \db\type($value);
+                    $type->
+                }
             }
             public function field ($name)
             {
@@ -446,7 +533,7 @@
              */
             public $link;
             /**
-             * @var array[\db\table]
+             * @var \db\table[]
              */
             public $tables = array ();
             /**
