@@ -2,6 +2,58 @@
 
     namespace db
     {
+        /**
+         * goals:
+         * 1. code first (generate database tables, maintain class property changes, alter field alter field properties)
+         * 2. database abstraction interface
+         * 3. caching engine
+         * 4. cache abstraction interface
+         * 5. language interface
+         * 6. multilang field support (field_1_en, field_1_ge, field_1_fr, field_1_fr, ...)
+         * 7. permission support
+         * 8. user abstrction interface
+         * 9. group abstraction interface
+         *
+         * objects with which database can work via interfaces:
+         * user - your instance of user
+         * group - your instance of user group
+         * culture - your instance of culture
+         * cultures - your instance of cultures
+         * cache - your instance of cache
+         * link - your database connection
+         */
+
+        /*
+         * table sample_foo
+         * prefix foo
+         */
+        class foo extends \db\entity
+        {
+            /**
+             *required
+             * field users_bio
+             * type tinyint|smallint|mediumint|int|integer|bigint|decimal|numeric|float|real|double|bit|
+             * length 32
+             * unsigned
+             * zerofill
+             * default 3
+             * null
+             * primary
+             * foreign \db\bar
+             * deny insert
+             * allow update
+             * deny insert for user biohazard
+             * @var \test\master
+             */
+            public $name;
+
+        }
+
+        class bar extends db\entity
+        {
+
+        }
+
         class type
         {
             const integer = 1;
