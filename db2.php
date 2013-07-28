@@ -32,12 +32,12 @@
             /**
              *required
              * field users_bio
-             * type tinyint|smallint|mediumint|int|integer|bigint|decimal|numeric|float|real|double|bit|
+             * type integer|boolean|float|text|binary|date
+             * data
              * length 32
              * unsigned
              * zerofill
-             * default 3
-             * null
+             * default/value 3
              * primary
              * foreign \db\bar
              * deny insert
@@ -54,59 +54,82 @@
 
         }
 
+        class flag
+        {
+            public $name;
+            public $value;
+            public function __construct ($name, $value=null)
+            {
+                $this->name = $name;
+                $this->value = $value;
+            }
+            /**
+             *
+             * @param string $line
+             * @return \db\flag
+             */
+            public static function flag ($line)
+            {
+                $line = trim ($line);
+                $start = strpos('*', $line);
+                if ($start!==false)
+                {
+                    $crop = trim(substr($line,$start));
+                    $set = explode(" ", $crop);
+                    if (is_array($set) && count($set))
+                    {
+                        if (count($set)==1)
+                        {
+                            return new \db\flag($set[0]);
+                        }
+                        else
+                        {
+                            return new \db\flag($set[0],$set[1]);
+                        }
+                    }
+                }
+            }
+            /**
+             * @param \ReflectionProperty $value
+             * @param \ReflectionClass $value
+             * @return flag[] array of flags
+             */
+            public static function set ($value)
+            {
+                if ($value!=null)
+                {
+                    $comment = $value->getDocComment();
+                }
+                if ($comment)
+                {
+                    $result = array();
+                    $comment = $value->getDocComment();
+                    $lines = explode (" ", $comment);
+                    if (is_array($lines) && $lines)
+                    {
+                        foreach ($lines as $line)
+                        {
+                            $flag = self::flag($line);
+                            if ($flag!=null)
+                            {
+                                $result[] = $flag;
+                            }
+                        }
+                        return $result;
+                    }
+                }
+                return array();
+            }
+        }
+
         class type
         {
             const integer = 1;
             const boolean = 2;
             const float = 3;
-            const text = 4;
-            const blob = 5;
+            const string = 4;
+            const binary = 5;
             const date = 6;
-            const datetime = 7;
-            /**
-             *
-             * @var \ReflectionProperty
-             */
-            public $value;
-            /**
-             * @var \ReflectionClass
-             */
-            public $class;
-            public $name;
-            public $field;
-            public $type;
-            public function __construct (\ReflectionProperty $value)
-            {
-                $this->value = $value;
-                $this->name = $this->value->getName();
-                $comment = $this->value->getDocComment();
-                if ($comment!='')
-                {
-                    $comments = explode("\n", $comment);
-                    if (is_array($comments))
-                    {
-                        foreach ($comments as $line)
-                        {
-                            if (strpos($line,"@var"))
-                            {
-                                $value = trim(substr($line, strpos($line,"@var")+5));
-                                if ($value)
-                                {
-                                    $this->class = new \ReflectionClass($value);
-                                }
-                            }
-                            else if (strpos($line,'field'))
-                            {
-                                $value = trim(substr($line,strpos($line,"field")+6));
-                                if ($value)
-                                {
-                                    $this->field = $value;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
 
         class action
@@ -159,29 +182,45 @@
         class field
         {
             /**
+             * name of field
              * @var string
              */
             public $name;
+
             /**
+             * basic type of field
              * @var int
              */
-            public $type = 0;
+            public $type = type::string;
+
+            /**
+             * field class if any
+             * @var \ReflectionClass
+             */
+            public $class = null;
+
+            /**
+             * foreign field table id
+             * @var \ReflectionClass
+             */
+            public $foreign = null;
+
+            /**
+             * sql store type of field
+             * @var string
+             */
+            public $data;
+
             /**
              * @var bool
              */
             public $required = false;
-            /**
-             * @var \ReflectionClass
-             */
-            public $foreign = null;
+
             /**
              * @var primary
              */
             public $primary = false;
-            /**
-             * @var \ReflectionClass
-             */
-            public $value = null;
+
             /**
              * @var bool
              */
@@ -204,9 +243,9 @@
              */
             public $config = null;
             /**
-             * @var int
+             * @var string
              */
-            public $length = 0;
+            public $length;
             /**
              * not null
              * defualt hihu
@@ -215,21 +254,125 @@
              * @var boolean
              */
             public $unsigned = false;
-            /**
-             * @var field
-             */
-            public $after;
-            /**
-             * @var field
-             */
-            public $before;
+            public $null = false;
+            public $zero = false;
 
-            public $null;
-            public function __construct ($name)
+            public function __construct (\db\table &$table, \ReflectionProperty $value)
             {
-                $this->name = $name;
+                if ($value==null)
+                {
+                    throw new \Exception();
+                }
                 $this->event = new event ();
                 $this->config = new config ();
+                $this->name = $value->getName();
+                if (strtolower($this->name)=='id')
+                {
+                    $table->primary = &$this;
+                }
+                $flags = flag::set($value);
+                if (is_array($flags))
+                {
+                    foreach ($flags as &$flag)
+                    {
+                        /* @var flag \db\flag */
+                        if ($flag->name=='@var')
+                        {
+                            if ($flag->value=='')
+                            {
+                                throw new \Exception('@var doc comment required for '.$table->name.'.'.$this->name.' property');
+                            }
+                            if ($flag->value=='integer')
+                            {
+                                $this->type = type::integer;
+                            }
+                            else if ($flag->value=='text')
+                            {
+                                $this->type = type::string;
+                            }
+                            else if ($flag->value=='date')
+                            {
+                                $this->type = type::date;
+                            }
+                            else if ($flag->value=='boolean')
+                            {
+                                $this->type = type::boolean;
+                            }
+                            else if ($flag->value=='float')
+                            {
+                                $this->type = type::float;
+                            }
+                            else if ($flag->value=='binary')
+                            {
+                                $this->type = type::binary;
+                            }
+                            else
+                            {
+                                $this->class= new \ReflectionClass($flag->value);
+                                if ($this->class!=null)
+                                {
+                                    if ($this->class->isSubclassOf('\db\entity'))
+                                    {
+                                        $this->type = type::integer;
+                                        $this->foreign = table::id ($flag->value);
+                                    }
+                                    else if ($this->class->implementsInterface('\db\value'))
+                                    {
+                                        $this->type = type::string;
+                                    }
+                                    else
+                                    {
+                                        throw new \Exception ('field not needed');
+                                    }
+                                }
+                            }
+                        }
+                        elseif ($flag->name=='type')
+                        {
+                            $this->data = strtolower($flag->value);
+                        }
+                        elseif ($flag->name=='required')
+                        {
+                            $this->required = true;
+                        }
+                        elseif ($flag->name=='primary')
+                        {
+                            $this->primary = true;
+                        }
+                        elseif ($flag->name=='deny')
+                        {
+                            if ($flag->value=='insert')
+                            {
+                                $this->insert = false;
+                            }
+                            else if ($flag->value=='update')
+                            {
+                                $this->update = false;
+                            }
+                            else if ($flag->value=='select')
+                            {
+                                $this->select = false;
+                            }
+                        }
+                        else if ($flag->name=='length')
+                        {
+                            $this->length = $flag->value;
+                        }
+                        else if ($flag->name=='unsigned')
+                        {
+                            $this->unsigned = true;
+                        }
+                        else if ($flag->name=='null')
+                        {
+                            $this->null = true;
+                        }
+                        else if ($flag->name=='zerofill' || $flag->name=='zero')
+                        {
+                            $this->zero = true;
+                        }
+
+                    }
+                }
             }
             public function type ()
             {
@@ -284,7 +427,35 @@
              * @var \db\field[]
              */
             public $fields = array();
-
+            /**
+             * @var \db\field
+             */
+            public $primary;
+            /**
+             * @var string
+             */
+            public $prefix;
+            /**
+             * @return string get id for class
+             * @param string $class
+             */
+            public static function id ($class)
+            {
+                $class = str_replace ("\\", ".", $class);
+                if ($class[0]!='.')
+                {
+                    $class = '.'.$class;
+                }
+                if ($class[strlen($class)-1]=='.')
+                {
+                    $class = substr($class, 0, -1);
+                }
+                $this->id = $class;
+            }
+            /**
+             * @param \db\database $database
+             * @param type $class
+             */
             public function __construct (\db\database &$database, $class)
             {
                 $this->database = &$database;
@@ -310,8 +481,17 @@
                 foreach ($this->class->getProperties() as $value)
                 {
                     /* @var $value \ReflectionProperty */
-                    $type = new \db\type($value);
-                    $type->
+                    try
+                    {
+                        $field = new \db\field($value);
+                        $this->fields[$field->name] = $field;
+                    }
+                    catch (Exception $fail)
+                    {
+
+                    }
+                    //$type = new \db\type($value);
+                    //$type->
                 }
             }
             public function field ($name)
@@ -606,6 +786,24 @@
             {
                 return $this->tables[$name];
             }
+        }
+
+        interface culture
+        {
+            /**
+             * @return string get culture name
+             */
+            public function name ();
+            /**
+             *
+             * @param string $name
+             * @return boolean check if culture exists
+             */
+            public function exists ($name);
+            /**
+             * @return culture[] get defined cultures
+             */
+            public function items ();
         }
 
         abstract class entity
