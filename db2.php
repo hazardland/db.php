@@ -693,6 +693,8 @@
             /**
              * @var query
              */
+            private $select;
+            private $from;
             public $query;
             /**
              * @var \db\field[]
@@ -822,9 +824,13 @@
                     {
                         $field = $this->fields[$field];
                     }
-                    if ($full)
+                    if (!is_object($full) && $full)
                     {
-                        return $this->name()."`".$this->prefix.$field->column."`";
+                        return $this->name().".`".$this->prefix.$field->column."`";
+                    }
+                    else if (is_object($full) && isset($full->name))
+                    {
+                        return $this->name().".`".$this->prefix.$field->column."_".$full->name."`";
                     }
                     else
                     {
@@ -832,13 +838,112 @@
                     }
                 }
             }
+            public function enum ($set)
+            {
+                return $set;
+            }
             public function field ($name)
             {
 
             }
-            public function load ($query)
+            public function create ($row, $from=0)
             {
+                global $database;
+                $cell = 0;
+                if ($from)
+                {
+                    $cell = $from;
+                }
+                $result = $this->class->newInstance();
+                foreach ($this->fields as $field)
+                {
+                    if ($field->locale && $database->locales && is_array($field))
+                    {
+                        foreach ($database->locales as $locale)
+                        {
+                            $result->{$field->name."_".$locale->name} = $row[$cell];
+                            $cell++;
+                        }
+                        $result->{$field->name} = &$result->{$field->name."_".$database->locale->name};
+                    }
+                    else
+                    {
+                        $result->{$field->name} = $row[$cell];
+                        $cell++;
+                    }
+                    if ($field->enum && $field->foreign)
+                    {
+                        $result->{$field->name} = $this->enum($row[$cell]);
+                    }
+                    else if ($field->foreign)
+                    {
+                        if (!$from)
+                        {
+                            $table = $database->table ($field->foreign);
+                            if ($table)
+                            {
+                                if ($table->link==$this->link)
+                                {
+                                    $result->{$field->name} = $table->create($row,$cell);
+                                    if ($result->{$field->name}->id===null && $row[$cell-1]!==null)
+                                    {
+                                        $result->{$field->name}->id = $row[$cell-1];
+                                    }
+                                    foreach ($table->fields as $foreign)
+                                    {
+                                        if ($foreign->locale && $database->locales && is_array($database->locales))
+                                        {
+                                            $cell += count($database->locales);
+                                        }
+                                        else
+                                        {
+                                            $cell++;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    $result->{$field->name} = $table->load($row[$cell-1]);
+                                    if ($result->{$field->name}===false)
+                                    {
+                                        $result->{$field->name} = $row[$cell-1];
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            $result->{$field->name} = $row[$cell];
+                            $cell++;
+                        }
+                    }
+                }
+                return $result;
+            }
+            public function load ($query, $single=false)
+            {
+                global $database;
+                if (!is_object($query))
+                {
+                    $single = true;
+                    $request = "select ".$this->fields()." from ".$this->tables()." where ".$this->name($this->primary)."='".query::string($query)."'";
+                    debug ($request);
+                    $database->links[$this->link]->debug = true;
+                    $result = $database->links[$this->link]->query ($request);
+                }
+                else
+                {
 
+                }
+                if (!$result)
+                {
+                    return false;
+                }
+                if ($single)
+                {
+                    $row = $result->fetch();
+                    return $this->create ($row);
+                }
             }
             public function save ($query)
             {
@@ -856,11 +961,74 @@
             }
             public function fields ()
             {
+                if ($this->select===null)
+                {
+                    global $database;
+                    foreach ($this->fields as $field)
+                    {
+                        if ($field->locale && $database->locales && is_array($database->locales))
+                        {
+                            foreach ($database->locales as $locale)
+                            {
+                                $this->select .= $this->name($field,$locale).', ';
+                            }
+                        }
+                        else
+                        {
+                            $this->select .= $this->name($field).', ';
+                        }
+                        if ($field->enum && $field->foreign)
+                        {
 
+                        }
+                        else if ($field->foreign)
+                        {
+                            $table = $database->table ($field->foreign);
+                            if ($table->link==$this->link)
+                            {
+                                foreach ($table->fields as $foreign)
+                                {
+                                    if ($foreign->locale && $database->locales && is_array($database->locales))
+                                    {
+                                        foreach ($database->locales as $locale)
+                                        {
+                                            $this->select .= $table->name($foreign,$locale).', ';
+                                        }
+                                    }
+                                    else
+                                    {
+                                        $this->select .= $table->name($foreign).', ';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if ($this->select!==null)
+                    {
+                        $this->select = substr($this->select,0,-2);
+                    }
+                }
+                return $this->select;
             }
             public function tables ()
             {
-
+                if ($this->from===null)
+                {
+                    global $database;
+                    $this->from .= $this->name();
+                    foreach ($this->fields as $field)
+                    {
+                        if ($field->foreign)
+                        {
+                            $table = $database->table ($field->foreign);
+                            if ($table)
+                            {
+                                $this->from .= " left join ".$table->name()." on ".$this->name($field)."=".$table->name($table->primary);
+                            }
+                        }
+                    }
+                }
+                return $this->from;
             }
         }
 
@@ -878,6 +1046,15 @@
              * @param \db\link $link
              */
             public $default = null;
+            /**
+             * just an array of objects which have property name
+             * @var locale[]
+             */
+            public $locales;
+            /**
+             * @param string $default default database name
+             * @param \db\link $link default connection to database
+             */
             public function __construct ($default=null, \db\link $link=null)
             {
                 $this->default = $default;
@@ -1323,21 +1500,9 @@
         class query
         {
             /**
-             * @var \db\select
-             */
-            public $select;
-            /**
-             * @var \db\from
-             */
-            public $from;
-            /**
-             * @var \db\where
-             */
+            * @var \db\where
+            */
             public $where;
-            /**
-             * @var \db\set
-             */
-            public $set;
             /**
              * @var \db\order
              */
@@ -1363,37 +1528,9 @@
                 $this->order = new \db\order ($table);
                 $this->limit = new \db\limit ();
             }
-        }
-
-        class select
-        {
-            /**
-             * @var \db\table
-             */
-            private $table;
-            public function __construct (\db\table &$table)
+            public function string ($input)
             {
-                $this->table = &$table;
-            }
-            public function __toString ()
-            {
-                return " select " + $this->table->fields() + " ";
-            }
-        }
-
-        class from
-        {
-            /**
-             * @var \db\table
-             */
-            private $table;
-            public function __construct (\db\table &$table)
-            {
-                $this->table = &$table;
-            }
-            public function __toString ()
-            {
-                return " from " + $this->table->tables() + " ";
+                return $input;
             }
         }
 
@@ -1413,45 +1550,15 @@
             }
         }
 
-        class set
-        {
-            /**
-             * @var string
-             */
-            public $query;
-            public function __toString()
-            {
-                if ($this->query!="")
-                {
-                    return " ".$this->query." ";
-                }
-                return "";
-            }
-        }
-
         class order
         {
-            /**
-             * @var \db\order[]
-             */
             public $items = array();
-            /**
-             * @var \db\table
-             */
-            public $table;
-            /**
-             * @var \db\field
-             */
             public $field;
-            /**
-             * @var \db\method
-             */
             public $method;
-            public function __construct (\db\table &$table, \db\field &$field=null, \db\method &$method=null)
+            public function __construct ($field=null, $method=null)
             {
-                $this->table = &$table;
-                $this->field = &$field;
-                $this->method = &$method;
+                $this->field = $field;
+                $this->method = $method;
             }
             public function add (\db\order $order)
             {
@@ -1462,11 +1569,7 @@
              */
             public function field ()
             {
-                if ($this->field!=null)
-                {
-                    return "`".$this->table->name."`.`".$this->field->name."`";
-                }
-                return "`".$this->table->name."`.`id`";
+                return $this->field;
             }
             /**
              * @return string
@@ -1479,21 +1582,21 @@
             {
                 if (is_array($this->items) && $this->items)
                 {
-                    $result = "ORDER BY ";
+                    $result = " order by ";
                     foreach ($this->items as $item)
                     {
                         $result .= substr($item,10).",";
                     }
                     return " "+substr($item,0,-1)." ";
                 }
-                return " ORDER BY ".$this->field." ".$this->method." ";
+                return " order by ".$this->field." ".$this->method." ";
             }
         }
 
         class method
         {
-            const asc = "ASC";
-            const desc = "DESC";
+            const asc = "asc";
+            const desc = "desc";
             public $name = self::asc;
             public function __construct ($name=self::asc)
             {
@@ -1545,12 +1648,27 @@
                 }
                 if ($this->from==null)
                 {
-                    return " LIMIT ".intval($this->count)." ";
+                    return " limit ".intval($this->count)." ";
                 }
-                return " LIMIT ".intval($this->from).",".intval($this->count)." ";
+                return " limit ".intval($this->from).",".intval($this->count)." ";
             }
         }
 
+        function id (&$object)
+        {
+            if (is_object($object))
+            {
+                if ($object->id)
+                {
+                    $id = $object->id;
+                }
+            }
+            else
+            {
+                $id = $object;
+            }
+            return intval ($id);
+        }
     }
 
 ?>
