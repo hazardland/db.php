@@ -30,6 +30,7 @@
          * prefix foo
          * charset utf8
          * engine myisam
+         * rename oldname
          * unique name
          * unique search id,name
          * index fast id,name
@@ -69,7 +70,7 @@
         class link
         {
             public $name;
-            public $debug = true;
+            public $debug = false;
             /**
              * @var PDO
              */
@@ -132,9 +133,43 @@
             public function value ($query)
             {
                 $result = $this->link->query ($query);
+                if ($this->debug)
+                {
+                    if ($this->error())
+                    {
+                        $error = $this->error();
+                        $debug .= $query."\n".$error[2];
+                        debug ($debug);
+                    }
+                    else
+                    {
+                        debug($query);
+                    }
+                }
                 if ($result)
                 {
                     return $result->fetchColumn(0);
+                }
+            }
+            public function fetch ($query)
+            {
+                $result = $this->link->query ($query);
+                if ($this->debug)
+                {
+                    if ($this->error())
+                    {
+                        $error = $this->error();
+                        $debug .= $query."\n".$error[2];
+                        debug ($debug);
+                    }
+                    else
+                    {
+                        debug($query);
+                    }
+                }
+                if ($result)
+                {
+                    return $result->fetch();
                 }
             }
             public function error ($code=null)
@@ -622,12 +657,17 @@
             /**
              * @var string
              */
-            public $engine = 'MyISAM';
+            public $engine = 'myisam';
 
             /**
              * @var string
              */
             public $charset = 'utf8';
+
+            /**
+             * @var bool
+             */
+            public $rename = null;
 
             /**
              * @var string
@@ -724,6 +764,10 @@
                         else if ($flag->name=='charset')
                         {
                             $this->charset = $flag->value;
+                        }
+                        else if ($flag->name=='rename')
+                        {
+                            $this->rename = $flag->value;
                         }
                     }
                 }
@@ -913,37 +957,100 @@
                     $file = $log;
                     $log = '';
                 }
+                $databases = array ();
                 foreach ($this->tables as &$table)
                 {
-                    debug ("in table ".$table->name);
+                    //debug ("in table ".$table->name);
                     $link = $this->links[$table->link];
                     $result = $link->select ("describe ".$table->name());
+
                     if (!$result && $link->error('42S02'))
                     {
-                        debug ("in create table ".$table->name);
-                        $query = 'create table '.$table->name()." (";
-                        foreach ($table->fields as &$field)
+                        if (!isset($databases[$table->link][$table->database]))
                         {
-                            $query .= " ".$table->name($field,false)." ".$field->type()." ".$field->extra().",";
+                            $query = "create database if not exists `".$table->database."` default character set utf8 collate utf8_general_ci";
+                            $databases[$table->link][$table->database] = true;
+                            if ($file)
+                            {
+                                $log .= $query.";\n";
+                            }
+                            else
+                            {
+                                $link->query($query);
+                            }
                         }
-                        if ($table->primary)
+                        if ($table->rename)
                         {
-                            $query .= "primary key (".$table->name($table->primary,false).")";
-                        }
-                        //$query = substr($query, 0, -1);
-                        $query .= ") engine=".$table->engine." default charset=".$table->charset;
-                        if ($file)
-                        {
-                            $log .= $query."\n";
+                            $from = '';
+                            if ($table->database!==null)
+                            {
+                                $from .= "`".$table->database."`.";
+                            }
+                            $from .= "`".$table->rename."`";
+                            $query = "rename table ".$from." to ".$table->name();
+                            if ($file)
+                            {
+                                $log .= $query.";\n";
+                            }
+                            else
+                            {
+                                $link->query($query);
+                            }
                         }
                         else
                         {
-                            $link->query($query);
+                            //debug ("in create table ".$table->name);
+                            $query = 'create table '.$table->name()." (";
+                            foreach ($table->fields as &$field)
+                            {
+                                $query .= " ".$table->name($field,false)." ".$field->type()." ".$field->extra().",";
+                            }
+                            if ($table->primary)
+                            {
+                                $query .= "primary key (".$table->name($table->primary,false).")";
+                            }
+                            //$query = substr($query, 0, -1);
+                            $query .= ") engine=".$table->engine." default charset=".$table->charset;
+                            if ($file)
+                            {
+                                $log .= $query.";\n";
+                            }
+                            else
+                            {
+                                $link->query($query);
+                            }
                         }
+                        $result = false;
                     }
-                    else if ($result)
+                    if ($result)
                     {
-                        debug ("in modify table ".$table->name);
+                        if ($table->database!==null)
+                        {
+                            $query = "show table status from `".$table->database."` where name = '".$table->table."'";
+                        }
+                        else
+                        {
+                            $query = "show table status where name = '".$table->table."'";
+                        }
+                        $info = $link->fetch($query);
+                        if ($info)
+                        {
+                            //debug ($info);
+                            if (strtolower($table->engine)!=strtolower($info['Engine']))
+                            {
+                                $query = "alter table ".$table->name()." engine=".$table->engine;
+                                if ($file)
+                                {
+                                    $log .= $query.";\n";
+                                }
+                                else
+                                {
+                                    $link->query($query);
+                                }
+                            }
+                        }
+
+                        //debug ("in modify table ".$table->name);
                         $update = array ();
                         $columns = array ();
                         $insert = array ();
@@ -994,8 +1101,9 @@
                                 $column['null'] = false;
                             }
                             $columns[$column[name]] = $column;
+                            //debug ($row);
                         }
-                        debug ($columns);
+                        //debug ($columns);
 
                         foreach ($table->fields as &$field)
                         {
@@ -1046,14 +1154,14 @@
                             foreach ($update as &$field)
                             {
                                 $query = "alter table ".$table->name()." change ".($field->rename ? ("`".$table->prefix.$field->rename."`") : $table->name($field,false))." ".$table->name($field,false)." ".$field->type()." ".$field->extra();
-                                debug ($query);
+                                //debug ($query);
                                 if ($file)
                                 {
-                                    $log .= $query."\n";
+                                    $log .= $query.";\n";
                                 }
                                 else
                                 {
-                                    //$link->query($query);
+                                    $link->query($query);
                                 }
                             }
                         }
@@ -1070,14 +1178,14 @@
                                 {
                                     if (isset($table->fields[$field->after]))
                                     {
-                                        debug ($table->fields[$field->after]);
+                                        //debug ($table->fields[$field->after]);
                                         $query .= " after ".$table->name($field->after,false);
                                     }
                                 }
-                                debug ($query);
+                                //debug ($query);
                                 if ($file)
                                 {
-                                    $log .= $query."\n";
+                                    $log .= $query.";\n";
                                 }
                                 else
                                 {
@@ -1089,11 +1197,13 @@
                 }
                 if ($file)
                 {
+                    debug ($log);
                     file_put_contents($file, $log);
                 }
             }
             function debug ($name, $field, $table=null)
             {
+                return;
                 echo "<span style='font-family:\"dejavu sans mono\";font-size:11pt;font-weight:bold;'>"
                 .$table->name." ".$name." on field ".$field->name."(".$field->column.")</span>";
                 debug ($field);
