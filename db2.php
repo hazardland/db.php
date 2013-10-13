@@ -44,6 +44,7 @@
              * type integer|boolean|float|text|binary|date
              * data
              * length 32
+             * locale
              * unsigned
              * zerofill
              * default 3
@@ -509,6 +510,10 @@
                         {
                             $this->required = true;
                         }
+                        elseif ($flag->locale=='locale')
+                        {
+                            $this->locale = true;
+                        }
                         elseif ($flag->name=='primary')
                         {
                             $this->primary = true;
@@ -685,6 +690,10 @@
              * @var \db\field
              */
             public $primary;
+            /**
+             * @var query
+             */
+            public $query;
             /**
              * @var \db\field[]
              */
@@ -1368,7 +1377,7 @@
             }
             public function __toString ()
             {
-                return " SELECT " + $this->table->fields() + " ";
+                return " select " + $this->table->fields() + " ";
             }
         }
 
@@ -1384,7 +1393,7 @@
             }
             public function __toString ()
             {
-                return " FROM " + $this->table->tables() + " ";
+                return " from " + $this->table->tables() + " ";
             }
         }
 
@@ -1398,7 +1407,7 @@
             {
                 if ($this->query!="")
                 {
-                    return " WHERE ".$this->query." ";
+                    return " where ".$this->query." ";
                 }
                 return "";
             }
