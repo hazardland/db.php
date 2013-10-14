@@ -38,6 +38,7 @@
          * unique search id,name
          * index fast id,name
          * ignore
+         * deny insert|select|update|delete
          */
         class foo extends entity
         {
@@ -189,6 +190,10 @@
                     return false;
                 }
                 return $this->link->errorInfo();
+            }
+            public function id ()
+            {
+                return $this->link->lastInsertId();
             }
         }
 
@@ -355,6 +360,7 @@
              * @var bool
              */
             public $first = false;
+            public $last = null;
             /**
              * rename from
              * @var string
@@ -503,7 +509,10 @@
                                         {
                                             $this->length = 10;
                                         }
-                                        $this->unsigned = true;
+                                        if ($this->type==type::integer)
+                                        {
+                                            $this->unsigned = true;
+                                        }
                                         $this->foreign = table::id ($flag->value);
                                     }
                                     else if ($this->class->isSubclassOf('\db\entity'))
@@ -551,6 +560,12 @@
                         }
                         elseif ($flag->name=='enum')
                         {
+                            $this->type = type::string;
+                            $this->data = 'char';
+                            if ($this->length===null)
+                            {
+                                $this->length = 32;
+                            }
                             $this->enum = true;
                         }
                         elseif ($flag->name=='first')
@@ -597,9 +612,9 @@
                 if ($this->data===null)
                 {
                     $this->data = 'char';
-                    $this->length = 128;
+                    //$this->length = 128;
                 }
-                if ($this->data=='char' && $this->length!=null)
+                if ($this->data=='char' && $this->length==null)
                 {
                     $this->length = 128;
                 }
@@ -660,18 +675,6 @@
                 }
                 return $result;
             }
-            public static function name ($prefix, $column, $locale=null)
-            {
-                if ($column==null)
-                {
-                    return null;
-                }
-                if ($locale!=null)
-                {
-                    return $prefix.$column."_".$locale->name;
-                }
-                return $prefix.$column;
-            }
         }
 
         class table
@@ -730,10 +733,14 @@
             /**
              * @var query
              */
-            private $select;
-            private $from;
+            private $columns;
+            private $tables;
             public $query;
             private $hash;
+            public $insert = true;
+            public $select = true;
+            public $update = true;
+            public $delete = true;
             /**
              * @var \db\field[]
              */
@@ -857,7 +864,25 @@
                                 $this->project = scope::project;
                             }
                         }
-
+                        elseif ($flag->name=='deny')
+                        {
+                            if ($flag->value=='insert')
+                            {
+                                $this->insert = false;
+                            }
+                            else if ($flag->value=='update')
+                            {
+                                $this->update = false;
+                            }
+                            else if ($flag->value=='select')
+                            {
+                                $this->select = false;
+                            }
+                            else if ($flag->value=='delete')
+                            {
+                                $this->delete = false;
+                            }
+                        }
                     }
                 }
                 foreach ($this->class->getProperties() as $value)
@@ -928,7 +953,7 @@
                     }
                 }
             }
-            public function enum ($set,$table=null)
+            public function enum ($set,&$table=null)
             {
                 if (is_array($set))
                 {
@@ -948,7 +973,24 @@
                 }
                 else if ($table)
                 {
-
+                    if (strlen($set)>2)
+                    {
+                        $result = array();
+                        $keys = explode ('|',substr($set,1,-1));
+                        if ($keys && is_array($keys))
+                        {
+                            foreach ($keys as $key)
+                            {
+                                if ($key)
+                                {
+                                    $object = $table->load ($key);
+                                    $result[$object->{$table->primary->name}] = $result;
+                                }
+                            }
+                        }
+                        return $result;
+                    }
+                    return array ();
                 }
                 return $set;
             }
@@ -967,66 +1009,23 @@
                 $result = $this->class->newInstance();
                 foreach ($this->fields as $field)
                 {
-                    if ($field->locale && $database->locales())
+                    if ($field->select)
                     {
-                        foreach ($database->locales() as $locale)
-                        {
-                            $result->{$field->name."_".$locale->name} = $row[$cell];
-                            $cell++;
-                        }
-                        $result->{$field->name} = &$result->{$field->name."_".$database->locale()->name};
-                        if ($result->{$field->name."_".$database->locale(true)->name}!='')
+                        if ($field->locale && $database->locales())
                         {
                             foreach ($database->locales() as $locale)
                             {
-                                if ($result->{$field->name."_".$locale->name}=='')
-                                {
-                                    $result->{$field->name."_".$locale->name} = $result->{$field->name."_".$database->locale(true)->name};
-                                }
+                                $result->{$field->name."_".$locale->name} = $row[$cell];
+                                $cell++;
                             }
-                        }
-                    }
-                    else
-                    {
-                        $result->{$field->name} = $row[$cell];
-                        $cell++;
-                    }
-                    if ($field->enum && $field->foreign)
-                    {
-                        $result->{$field->name} = $this->enum($row[$cell]);
-                    }
-                    else if ($field->foreign)
-                    {
-                        if (!$from)
-                        {
-                            $table = $database->table ($field->foreign);
-                            if ($table)
+                            $result->{$field->name} = &$result->{$field->name."_".$database->locale()->name};
+                            if ($result->{$field->name."_".$database->locale(true)->name}!='')
                             {
-                                if ($table->link==$this->link)
+                                foreach ($database->locales() as $locale)
                                 {
-                                    $result->{$field->name} = $table->create($row,$cell);
-                                    if ($result->{$field->name}->id===null && $row[$cell-1]!==null)
+                                    if ($result->{$field->name."_".$locale->name}=='')
                                     {
-                                        $result->{$field->name}->id = $row[$cell-1];
-                                    }
-                                    foreach ($table->fields as $foreign)
-                                    {
-                                        if ($foreign->locale && $database->locales())
-                                        {
-                                            $cell += count($database->locales());
-                                        }
-                                        else
-                                        {
-                                            $cell++;
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    $result->{$field->name} = $table->load($row[$cell-1]);
-                                    if ($result->{$field->name}===false)
-                                    {
-                                        $result->{$field->name} = $row[$cell-1];
+                                        $result->{$field->name."_".$locale->name} = $result->{$field->name."_".$database->locale(true)->name};
                                     }
                                 }
                             }
@@ -1036,6 +1035,52 @@
                             $result->{$field->name} = $row[$cell];
                             $cell++;
                         }
+                        if ($field->enum && $field->foreign)
+                        {
+                            $result->{$field->name} = $this->enum($row[$cell],$database->table($this->foreign));
+                        }
+                        else if ($field->foreign)
+                        {
+                            if (!$from)
+                            {
+                                $table = $database->table ($field->foreign);
+                                if ($table)
+                                {
+                                    if ($table->link==$this->link)
+                                    {
+                                        $result->{$field->name} = $table->create($row,$cell);
+                                        if ($result->{$field->name}->id===null && $row[$cell-1]!==null)
+                                        {
+                                            $result->{$field->name}->id = $row[$cell-1];
+                                        }
+                                        foreach ($table->fields as $foreign)
+                                        {
+                                            if ($foreign->locale && $database->locales())
+                                            {
+                                                $cell += count($database->locales());
+                                            }
+                                            else
+                                            {
+                                                $cell++;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        $result->{$field->name} = $table->load($row[$cell-1]);
+                                        if ($result->{$field->name}===false)
+                                        {
+                                            $result->{$field->name} = $row[$cell-1];
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                $result->{$field->name} = $row[$cell];
+                                $cell++;
+                            }
+                        }
                     }
                 }
                 return $result;
@@ -1043,16 +1088,20 @@
             public function load ($query=null)
             {
                 global $database;
+                if (!$this->select)
+                {
+                    return false;
+                }
                 if ($query===null)
                 {
                     $query = $this->query;
                 }
                 if (!is_object($query))
                 {
-                    $row = $database->get ($this, query::string($query));
+                    $row = $database->get ($this, string($query));
                     if (!$row)
                     {
-                        $request = "select ".$this->fields()." from ".$this->tables()." where ".$this->name($this->primary)."='".query::string($query)."'";
+                        $request = "select ".$this->fields()." from ".$this->tables()." where ".$this->name($this->primary)."='".string($query)."'";
                         $database->link($this->link)->debug = true;
                         $result = $database->link($this->link)->query ($request);
                         if (!$result)
@@ -1062,7 +1111,7 @@
                         $row = $result->fetch();
                         if ($row)
                         {
-                            $database->set ($this, query::string($input), $row);
+                            $database->set ($this, string($input), $row);
                         }
                     }
                     if ($row)
@@ -1077,12 +1126,13 @@
                     {
                         $rows = array ();
                         $request = "select ".$this->fields()." from ".$this->tables()." ".$query->where($this)." ".$query->order($this)." ".$query->limit($this);
+                        $database->link($this->link)->debug = true;
                         $result = $database->link($this->link)->query ($request);
                         if ($result)
                         {
                             foreach ($result as $row)
                             {
-                                $rows[] = $row;
+                                $rows[$row[$this->primary->position]] = $row;
                             }
                             $database->set ($this, $query, $rows);
                         }
@@ -1092,15 +1142,102 @@
                         $result = array();
                         foreach ($rows as $row)
                         {
-                            $result[$this->primary->position] = $this->create ($row);
+                            $result[$row[$this->primary->position]] = $this->create ($row);
                         }
                         return $result;
                     }
                 }
                 return false;
             }
-            public function save ($query)
+            public function save (&$object, $event=null)
             {
+                if (is_object($object))
+                {
+                    global $database;
+                    if ($event===null || ($event!==event::insert && $event!==event::update))
+                    {
+                        if ($object->{$this->primary->name})
+                        {
+                            $event = event::update;
+                        }
+                        else
+                        {
+                            $event = event::insert;
+                        }
+                    }
+                    if (($event==event::update && $this->update) || ($event==event::insert && $this->insert))
+                    {
+                        debug ($object);
+                        $set .= '';
+                        foreach ($this->fields as &$field)
+                        {
+                            if (($event==event::update && $field->update) || ($event==event::insert && $field->insert))
+                            {
+                                if (($event==event::update && $field->primary) || ($field->primary && !$object->{$this->primary->name}))
+                                {
+                                    continue;
+                                }
+                                echo $field->name;
+                                if ($field->locale && $database->locales())
+                                {
+                                    foreach ($database->locales() as $locale)
+                                    {
+                                        $set .= $this->name($field,$locale)."='".string($object->{field(null,$field->name,$locale)})."', ";
+                                    }
+                                }
+                                else if ($field->foreign && $field->enum)
+                                {
+                                    $set .= $this->name($field)."='".enum($object->{$field->name})."', ";
+                                }
+                                else if ($field->foreign)
+                                {
+                                    $set .= $this->name($field)."='".string(id($object->{$field->name}))."', ";
+                                }
+                                else
+                                {
+                                    $set .= $this->name($field)."='".string($object->{$field->name})."', ";
+                                }
+                            }
+                        }
+                        if ($set!='')
+                        {
+                            $set = substr ($set, 0, -2);
+                            if ($event==event::update)
+                            {
+                                $query = "update ".$this->name()." set ".$set." where ".$this->name($this->primary)."='".string($object->{$this->primary->name})."' limit 1";
+                                if ($database->link($this->link)->query ($query))
+                                {
+                                    $database->set ($this,$object->{field(null,$field->name,$locale)},null);
+                                    return true;
+                                }
+                            }
+                            else
+                            {
+                                $query = "insert into ".$this->name()." set ".$set;
+                                if ($database->link($this->link)->query ($query))
+                                {
+                                    $object->{field(null,$field->name,$locale)} = $database->link($this->link)->id();
+                                    $database->set ($this,$object->{field(null,$field->name,$locale)},null);
+                                    return true;
+                                }
+                            }
+
+                        }
+                    }
+                    return false;
+                }
+                else if (is_array($object))
+                {
+                    $result = true;
+                    foreach ($object as &$item)
+                    {
+                        if (!$this->save($item))
+                        {
+                            $result = false;
+                        }
+                    }
+                    return $result;
+                }
             }
             public function delete ($query)
             {
@@ -1115,80 +1252,83 @@
             }
             public function fields ()
             {
-                if ($this->select===null)
+                if ($this->columns===null)
                 {
                     global $database;
                     $cell = 0;
                     foreach ($this->fields as $field)
                     {
-                        $field->position = $cell;
-                        if ($field->locale && $database->locales())
+                        if ($field->select)
                         {
-                            foreach ($database->locales() as $locale)
+                            $field->position = $cell;
+                            if ($field->locale && $database->locales())
                             {
-                                $this->select .= $this->name($field,$locale).', ';
+                                foreach ($database->locales() as $locale)
+                                {
+                                    $this->columns .= $this->name($field,$locale).', ';
+                                    $cell++;
+                                }
+                            }
+                            else
+                            {
+                                $this->columns .= $this->name($field).', ';
                                 $cell++;
                             }
-                        }
-                        else
-                        {
-                            $this->select .= $this->name($field).', ';
-                            $cell++;
-                        }
-                        if ($field->enum && $field->foreign)
-                        {
-
-                        }
-                        else if ($field->foreign)
-                        {
-                            $table = $database->table ($field->foreign);
-                            if ($table->link==$this->link)
+                            if ($field->enum && $field->foreign)
                             {
-                                foreach ($table->fields as $foreign)
+
+                            }
+                            else if ($field->foreign)
+                            {
+                                $table = $database->table ($field->foreign);
+                                if ($table->link==$this->link)
                                 {
-                                    if ($foreign->locale && $database->locales())
+                                    foreach ($table->fields as $foreign)
                                     {
-                                        foreach ($database->locales() as $locale)
+                                        if ($foreign->locale && $database->locales())
                                         {
-                                            $this->select .= $table->name($foreign,$locale).', ';
+                                            foreach ($database->locales() as $locale)
+                                            {
+                                                $this->columns .= $table->name($foreign,$locale).', ';
+                                                $cell++;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            $this->columns .= $table->name($foreign).', ';
                                             $cell++;
                                         }
-                                    }
-                                    else
-                                    {
-                                        $this->select .= $table->name($foreign).', ';
-                                        $cell++;
                                     }
                                 }
                             }
                         }
                     }
-                    if ($this->select!==null)
+                    if ($this->columns!==null)
                     {
-                        $this->select = substr($this->select,0,-2);
+                        $this->columns = substr($this->columns,0,-2);
                     }
                 }
-                return $this->select;
+                return $this->columns;
             }
             public function tables ()
             {
-                if ($this->from===null)
+                if ($this->tables===null)
                 {
                     global $database;
-                    $this->from .= $this->name();
+                    $this->tables .= $this->name();
                     foreach ($this->fields as $field)
                     {
-                        if ($field->foreign)
+                        if ($field->foreign && !$field->enum)
                         {
                             $table = $database->table ($field->foreign);
                             if ($table)
                             {
-                                $this->from .= " left join ".$table->name()." on ".$this->name($field)."=".$table->name($table->primary);
+                                $this->tables .= " left join ".$table->name()." on ".$this->name($field)."=".$table->name($table->primary);
                             }
                         }
                     }
                 }
-                return $this->from;
+                return $this->tables;
             }
             public function hash ()
             {
@@ -1292,6 +1432,7 @@
                         $class = table::id($class);
                         if (strpos($class,$prefix)===0)
                         {
+                            $this->add ($class);
                             debug ($class);
                         }
                     }
@@ -1329,11 +1470,14 @@
                     //debug ("in table ".$table->name);
                     $link = $this->link($table->link);
                     $result = $link->select ("describe ".$table->name());
-
+                    //check if table exists
                     if (!$result && $link->error('42S02'))
                     {
+                        //table does not exist
+                        //check if database exists
                         if (!isset($databases[$table->link][$table->database]))
                         {
+                            //create database as it does not exist
                             $query = "create database if not exists `".$table->database."` default character set utf8 collate utf8_general_ci";
                             $databases[$table->link][$table->database] = true;
                             if ($file)
@@ -1345,8 +1489,12 @@
                                 $link->query($query);
                             }
                         }
+                        //check if table does not exist
+                        //because programmer renamed class
+                        //and hinted to rename from old name
                         if ($table->rename)
                         {
+                            //okey rename table
                             $from = '';
                             if ($table->database!==null)
                             {
@@ -1365,6 +1513,8 @@
                         }
                         else
                         {
+                            //well we have to create talble at last
+                            //as it does not exist and it does not require rename
                             //debug ("in create table ".$table->name);
                             $query = 'create table '.$table->name()." (";
                             foreach ($table->fields as &$field)
@@ -1385,7 +1535,6 @@
                             {
                                 $query .= "primary key (".$table->name($table->primary,true).")";
                             }
-                            //$query = substr($query, 0, -1);
                             $query .= ") engine=".$table->engine." default charset=".$table->charset;
                             if ($file)
                             {
@@ -1398,6 +1547,17 @@
                         }
                         $result = false;
                     }
+                    //damn table update
+                    //multilangual fields complicate
+                    //everithing
+                    //but it alows to:
+                    //1. rename field and all its child multilang fields will be renamed
+                    //2. localize field add language fields and rename original field for default language field
+                    //3. add new language causes to add fields right aftet fields last localized child
+                    //4. add field after field
+                    //5. natsionaluri modzraoba
+                    //6. compare changes and alter changes
+                    //7. add new fields
                     if ($result)
                     {
                         if ($table->database!==null)
@@ -1490,57 +1650,59 @@
                             }
                             foreach ($locales as $locale)
                             {
-                                if (isset($columns[field::name($table->prefix,$field->rename,$locale)]))
+                                //debug ($columns[field($table->prefix,$field->column,$locale)]['length']." ".$field->length);
+                                if (isset($columns[field($table->prefix,$field->rename,$locale)]))
                                 {
                                     $update[$field->name] = &$field;
                                 }
-                                else if (isset($columns[field::name($table->prefix,$field->column,$locale)]))
+                                else if (isset($columns[field($table->prefix,$field->column,$locale)]))
                                 {
-                                    if ($columns[field::name($table->prefix,$field->column,$locale)]['data']!=$field->data)
+                                    $field->rename = null;
+                                    if ($columns[field($table->prefix,$field->column,$locale)]['data']!=$field->data)
                                     {
                                         $update[$field->name] = &$field;
                                         $this->debug ("type mismatch",$field);
                                     }
-                                    else if ($columns[field::name($table->prefix,$field->column,$locale)]['length']!=$field->length)
+                                    else if ($columns[field($table->prefix,$field->column,$locale)]['length']!=$field->length)
                                     {
                                         $update[$field->name] = &$field;
                                         $this->debug ("length mismatch",$field,$table);
                                     }
-                                    else if ($columns[field::name($table->prefix,$field->column,$locale)]['default']!=null && $columns[field::name($table->prefix,$field->column,$locale)]['default']!=$field->default)
+                                    else if ($columns[field($table->prefix,$field->column,$locale)]['default']!=null && $columns[field($table->prefix,$field->column,$locale)]['default']!=$field->default)
                                     {
                                         $update[$field->name] = &$field;
                                         $this->debug ("default mismatch",$field);
                                     }
-                                    else if($columns[field::name($table->prefix,$field->column,$locale)]['null']!=$field->null)
+                                    else if($columns[field($table->prefix,$field->column,$locale)]['null']!=$field->null)
                                     {
                                         $update[$field->name] = &$field;
                                         $this->debug ("null mismatch",$field);
                                     }
-                                    else if ($columns[field::name($table->prefix,$field->column,$locale)]['zero']!=$field->zero)
+                                    else if ($columns[field($table->prefix,$field->column,$locale)]['zero']!=$field->zero)
                                     {
                                         $update[$field->name] = &$field;
                                         $this->debug ("zero mismatch",$field);
                                     }
-                                    else if ($columns[field::name($table->prefix,$field->column,$locale)]['unsigned']!=$field->unsigned)
+                                    else if ($columns[field($table->prefix,$field->column,$locale)]['unsigned']!=$field->unsigned)
                                     {
                                         $update[$field->name] = &$field;
                                         $this->debug ("unsigned mismatch",$field);
                                     }
                                 }
-                                else if (!isset($columns[field::name($table->prefix,$field->column,$locale)]))
+                                else if (!isset($columns[field($table->prefix,$field->column,$locale)]))
                                 {
-                                    if (isset($columns[field::name($table->prefix,$field->column)]))
+                                    if (isset($columns[field($table->prefix,$field->column)]))
                                     {
                                         $field->ignore = $this->locale(true);
                                         $localize[$field->name]  = &$field;
                                     }
-                                    echo field::name($table->prefix,$field->column,$locale)."<br>";
+                                    echo field($table->prefix,$field->column,$locale)."<br>";
                                     $insert[$field->name] = &$field;
                                 }
                             }
                         }
                         ////
-                        debug ($localize);
+                        //debug ($localize);
                         if ($localize)
                         {
                             foreach ($localize as &$field)
@@ -1557,7 +1719,7 @@
                                 }
                             }
                         }
-                        debug ($update);
+                        //debug ($update);
                         if ($update)
                         {
                             foreach ($update as &$field)
@@ -1569,7 +1731,7 @@
                                 }
                                 foreach ($locales as $locale)
                                 {
-                                    $query = "alter table ".$table->name()." change ".($field->rename ? ("`".field::name($table->prefix,$field->rename,$locale)."`") : $table->name($field,$locale,true))." ".$table->name($field,$locale,true)." ".$field->type()." ".$field->extra();
+                                    $query = "alter table ".$table->name()." change ".($field->rename ? ("`".field($table->prefix,$field->rename,$locale)."`") : $table->name($field,$locale,true))." ".$table->name($field,$locale,true)." ".$field->type()." ".$field->extra();
                                     debug ($query);
                                     if ($file)
                                     {
@@ -1582,7 +1744,7 @@
                                 }
                             }
                         }
-                        debug ($insert);
+                        //debug ($insert);
                         if ($insert)
                         {
                             $last = null;
@@ -1598,16 +1760,27 @@
                                     $locales = array (null);
                                 }
                                 $after = null;
+                                $previous = null;
+                                if ($field->locale && $this->locales())
+                                {
+                                    foreach ($this->locales() as $item)
+                                    {
+                                        if (isset($columns[field($table->prefix,$field->column,$item)]))
+                                        {
+                                            $previous = $table->name ($field, $item, true);
+                                        }
+                                    }
+                                }
                                 foreach ($locales as $locale)
                                 {
-                                    if ($field->ignore->name!=$locale->name)
+                                    if ((!isset($field->ignore) && !$locale) || ($field->ignore->name!=$locale->name && !isset($columns[field($table->prefix,$field->column,$locale)])))
                                     {
                                         $query = "alter table ".$table->name()." add ".$table->name($field,$locale,true)." ".$field->type()." ".$field->extra();
                                         if ($field->first)
                                         {
                                             $query .= " first";
                                         }
-                                        else if ($field->after)
+                                        else if ($field->after && !$previous)
                                         {
                                             if (!$after && isset($table->fields[$field->after]))
                                             {
@@ -1615,6 +1788,18 @@
                                             }
                                             $query .= " after ".$after;
                                             $after = $table->name ($field, $locale, true);
+                                        }
+                                        else if ($previous)
+                                        {
+                                            if (!$after)
+                                            {
+                                                $after = $previous;
+                                            }
+                                            if ($after)
+                                            {
+                                                $query .= " after ".$after;
+                                                $after = $table->name ($field, $locale, true);
+                                            }
                                         }
                                         debug ($query);
                                         if ($file)
@@ -1820,10 +2005,6 @@
                 }
                 return null;
             }
-            public static function string ($input)
-            {
-                return $input;
-            }
         }
 
         class where
@@ -1887,7 +2068,10 @@
                     }
                     return " ".substr($result,0,-2)." ";
                 }
-                return " order by ".$table->name($this->field,$database->locale())." ".$this->method->result($table)." ";
+                if ($this->field)
+                {
+                    return " order by ".$table->name($this->field,$database->locale())." ".$this->method->result($table)." ";
+                }
                 //return " order by ".(is_object($database->locale()) ? $table->name($this->field,$database->locale()) : $table->name($this->field))." ".$this->method->result($table)." ";
             }
         }
@@ -1958,22 +2142,6 @@
             }
         }
 
-        function id (&$object)
-        {
-            if (is_object($object))
-            {
-                if ($object->id)
-                {
-                    $id = $object->id;
-                }
-            }
-            else
-            {
-                $id = $object;
-            }
-            return intval ($id);
-        }
-
         class cache
         {
             const none = 1; //no store
@@ -2017,6 +2185,40 @@
         class long
         {
 
+        }
+
+        function string ($input)
+        {
+            return $input;
+        }
+
+        function id (&$object)
+        {
+            if (is_object($object))
+            {
+                if ($object->id)
+                {
+                    $id = $object->id;
+                }
+            }
+            else
+            {
+                $id = $object;
+            }
+            return intval ($id);
+        }
+
+        function field ($prefix, $column, $locale=null)
+        {
+            if ($column==null)
+            {
+                return null;
+            }
+            if ($locale!=null)
+            {
+                return $prefix.$column."_".$locale->name;
+            }
+            return $prefix.$column;
         }
 
     }
