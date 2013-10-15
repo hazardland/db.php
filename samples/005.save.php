@@ -30,7 +30,7 @@
 
     $database->update ();
 
-    //create john
+    //create lazarus
     $lazarus = new \user;
     $lazarus->name = 'Lazarus';
 

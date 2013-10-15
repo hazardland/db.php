@@ -513,9 +513,9 @@
                                         {
                                             $this->unsigned = true;
                                         }
-                                        $this->foreign = table::id ($flag->value);
+                                        $this->foreign = table ($flag->value);
                                     }
-                                    else if ($this->class->isSubclassOf('\db\entity'))
+                                    else if ($this->class->isSubclassOf('\db\value'))
                                     {
                                         $this->type = type::string;
                                     }
@@ -747,23 +747,6 @@
              * @var \db\field[]
              */
             public $fields = array();
-            /**
-             * @return string get id for class
-             * @param string $class
-             */
-            public static function id ($class, $trim=true)
-            {
-                $class = str_replace ("\\", ".", $class);
-                if ($class[0]!='.')
-                {
-                    $class = '.'.$class;
-                }
-                if ($trim && $class[strlen($class)-1]=='.')
-                {
-                    $class = substr($class, 0, -1);
-                }
-                return $class;
-            }
             /**
              * @param \db\database $database
              * @param type $class
@@ -1008,7 +991,7 @@
                 {
                     $cell = $from;
                 }
-                $result = $this->class->newInstance();
+                $result = @$this->class->newInstance();
                 foreach ($this->fields as $field)
                 {
                     if ($field->select)
@@ -1156,30 +1139,30 @@
                 if (is_object($object))
                 {
                     global $database;
-                    if ($event===null || ($event!==event::insert && $event!==event::update))
+                    if ($event===null || ($event!==query::insert && $event!==query::update))
                     {
                         if ($object->{$this->primary->name})
                         {
-                            $event = event::update;
+                            $event = query::update;
                         }
                         else
                         {
-                            $event = event::insert;
+                            $event = query::insert;
                         }
                     }
-                    if (($event==event::update && $this->update) || ($event==event::insert && $this->insert))
+                    if (($event==query::update && $this->update) || ($event==query::insert && $this->insert))
                     {
-                        debug ($object);
+                        //debug ($object);
                         $set = '';
                         foreach ($this->fields as &$field)
                         {
-                            if (($event==event::update && $field->update) || ($event==event::insert && $field->insert))
+                            if (($event==query::update && $field->update) || ($event==query::insert && $field->insert))
                             {
-                                if (($event==event::update && $field->primary) || ($field->primary && !$object->{$this->primary->name}))
+                                if (($event==query::update && $field->primary) || ($field->primary && !$object->{$this->primary->name}))
                                 {
                                     continue;
                                 }
-                                echo $field->name;
+                                //echo $field->name;
                                 if ($field->locale && $database->locales())
                                 {
                                     foreach ($database->locales() as $locale)
@@ -1197,6 +1180,29 @@
                                 }
                                 else
                                 {
+                                    if ($object->{$field->name}!==null)
+                                    {
+                                        if ($field->type==type::integer)
+                                        {
+                                            $object->{$field->name} = intval ($object->{$field->name});
+                                        }
+                                        else if ($field->type==type::float)
+                                        {
+                                            $object->{$field->name} = floatval ($object->{$field->name});
+                                        }
+                                        else if ($field->type==type::boolean)
+                                        {
+                                            $object->{$field->name} = ($object->{$field->name});
+                                        }
+                                        else if ($field->type==type::date)
+                                        {
+                                            $object->{$field->name} = date($object->{$field->name});
+                                        }
+                                        else if ($field->type==type::time)
+                                        {
+                                            $object->{$field->name} = time($object->{$field->name});
+                                        }
+                                    }
                                     $set .= $this->name($field)."='".string($object->{$field->name})."', ";
                                 }
                             }
@@ -1204,12 +1210,12 @@
                         if ($set!='')
                         {
                             $set = substr ($set, 0, -2);
-                            if ($event==event::update)
+                            if ($event==query::update)
                             {
                                 $query = "update ".$this->name()." set ".$set." where ".$this->name($this->primary)."='".string($object->{$this->primary->name})."' limit 1";
                                 if ($database->link($this->link)->query ($query))
                                 {
-                                    $database->set ($this,$object->{field(null,$field->name,$locale)},null);
+                                    @$database->set ($this,$object->{$this->primary->name},null);
                                     return true;
                                 }
                             }
@@ -1218,8 +1224,8 @@
                                 $query = "insert into ".$this->name()." set ".$set;
                                 if ($database->link($this->link)->query ($query))
                                 {
-                                    @$object->{field(null,$field->name,$locale)} = $database->link($this->link)->id();
-                                    @$database->set ($this,$object->{field(null,$field->name,$locale)},null);
+                                    $object->{$this->primary->name} = $database->link($this->link)->id();
+                                    @$database->set ($this,$object->{$this->primary->name},null);
                                     return true;
                                 }
                             }
@@ -1425,13 +1431,13 @@
             }
             function scan ($prefix)
             {
-                $prefix = table::id($prefix,false);
+                $prefix = table($prefix,false);
                 $result = get_declared_classes ();
                 if ($prefix!=null)
                 {
                     foreach ($result as $class)
                     {
-                        $class = table::id($class);
+                        $class = table($class);
                         if (strpos($class,$prefix)===0)
                         {
                             $this->add ($class);
@@ -1702,7 +1708,7 @@
                                         $field->ignore = $this->locale(true);
                                         $localize[$field->name]  = &$field;
                                     }
-                                    echo field($table->prefix,$field->column,$locale)."<br>";
+                                    //echo field($table->prefix,$field->column,$locale)."<br>";
                                     $insert[$field->name] = &$field;
                                 }
                             }
@@ -1933,10 +1939,6 @@
 
         class event
         {
-            const select = 1;
-            const insert = 2;
-            const update = 3;
-            const delete = 4;
             /**
              * @var action
              */
@@ -1969,6 +1971,10 @@
 
         class query
         {
+            const select = 1;
+            const insert = 2;
+            const update = 3;
+            const delete = 4;
             public $type;
             public $where;
             public $order;
@@ -2214,6 +2220,24 @@
             return intval ($id);
         }
 
+        /**
+         * @return string get id for class
+         * @param string $class
+         */
+        function table ($class, $trim=true)
+        {
+            $class = str_replace ("\\", ".", $class);
+            if ($class[0]!='.')
+            {
+                $class = '.'.$class;
+            }
+            if ($trim && $class[strlen($class)-1]=='.')
+            {
+                $class = substr($class, 0, -1);
+            }
+            return $class;
+        }
+
         function field ($prefix, $column, $locale=null)
         {
             if ($column==null)
@@ -2225,6 +2249,83 @@
                 return $prefix.$column."_".$locale->name;
             }
             return $prefix.$column;
+        }
+
+        function date ($destroy=null, $restore=null)
+        {
+            $user = 0;
+            $zone = intval(\date('Z'));
+            if (isset($GLOBALS['user']->zone))
+            {
+                $user = intval(strval($GLOBALS['user']->zone));
+            }
+            if ($restore!==null)
+            {
+                $restore = strtotime ($restore);
+                if ($restore===false)
+                {
+                    return '0000-00-00';
+                }
+                if ($user)
+                {
+                    $zone = $user;
+                }
+                return \date('Y-m-d',$restore+$zone);
+            }
+            if ($destroy===null)
+            {
+                return \date('Y-m-d H:i:s',\time()-$zone);
+            }
+            $destroy = strtotime ($destroy);
+            if (!$destroy)
+            {
+                return '0000-00-00';
+            }
+            if ($user)
+            {
+                $zone = $user;
+            }
+            return \date('Y-m-d',$destroy-$zone);
+        }
+
+        //პარამეტრის გარეშე აბრუნებს მიმდინარე უნვერსალური დროს
+        //პირველი პარამეტრის შემთხვევაში აკონვერტირებს მითითებულ დროს უნვერსალური დროში
+        //მეორე პარამეტრის შემთხვევაში აკონვერტირებს მითითებულ დროს უნვერსალური დროდან
+        function time ($destroy=null, $restore=null)
+        {
+            $user = 0;
+            $zone = intval(\date('Z'));
+            if (isset($GLOBALS['user']->zone))
+            {
+                $user = intval(strval($GLOBALS['user']->zone));
+            }
+            if ($restore!==null)
+            {
+                $restore = strtotime ($restore);
+                if ($restore===false)
+                {
+                    return '0000-00-00 00:00:00';
+                }
+                if ($user)
+                {
+                    $zone = $user;
+                }
+                return \date('Y-m-d H:i:s',$restore+$zone);
+            }
+            if ($destroy===null)
+            {
+                return \date('Y-m-d H:i:s',\time()-$zone);
+            }
+            $destroy = strtotime ($destroy);
+            if (!$destroy)
+            {
+                return '0000-00-00 00:00:00';
+            }
+            if ($user)
+            {
+                $zone = $user;
+            }
+            return \date('Y-m-d H:i:s',$destroy-$zone);
         }
 
         function debug ($input)
