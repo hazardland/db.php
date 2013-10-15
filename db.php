@@ -1113,7 +1113,7 @@
                         $row = $result->fetch();
                         if ($row)
                         {
-                            $database->set ($this, string($input), $row);
+                            $database->set ($this, string($query), $row);
                         }
                     }
                     if ($row)
@@ -1170,7 +1170,7 @@
                     if (($event==event::update && $this->update) || ($event==event::insert && $this->insert))
                     {
                         debug ($object);
-                        $set .= '';
+                        $set = '';
                         foreach ($this->fields as &$field)
                         {
                             if (($event==event::update && $field->update) || ($event==event::insert && $field->insert))
@@ -1218,8 +1218,8 @@
                                 $query = "insert into ".$this->name()." set ".$set;
                                 if ($database->link($this->link)->query ($query))
                                 {
-                                    $object->{field(null,$field->name,$locale)} = $database->link($this->link)->id();
-                                    $database->set ($this,$object->{field(null,$field->name,$locale)},null);
+                                    @$object->{field(null,$field->name,$locale)} = $database->link($this->link)->id();
+                                    @$database->set ($this,$object->{field(null,$field->name,$locale)},null);
                                     return true;
                                 }
                             }
