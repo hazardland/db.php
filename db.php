@@ -106,7 +106,7 @@
                     if ($this->error())
                     {
                         $error = $this->error();
-                        $debug .= $query."\n".$error[2];
+                        $debug = $query.($error[2]?"\n".$error[2]:"");
                         debug ($debug);
                     }
                     else
@@ -125,7 +125,7 @@
                     if ($this->error())
                     {
                         $error = $this->error();
-                        $debug .= $query."\n".$error[2];
+                        $debug = $query.($error[2]?"\n".$error[2]:"");
                         debug ($debug);
                     }
                     else
@@ -144,7 +144,7 @@
                     if ($this->error())
                     {
                         $error = $this->error();
-                        $debug .= $query."\n".$error[2];
+                        $debug = $query.($error[2]?"\n".$error[2]:"");
                         debug ($debug);
                     }
                     else
@@ -165,7 +165,7 @@
                     if ($this->error())
                     {
                         $error = $this->error();
-                        $debug .= $query."\n".$error[2];
+                        $debug = $query.($error[2]?"\n".$error[2]:"");
                         debug ($debug);
                     }
                     else
@@ -534,10 +534,6 @@
                         {
                             $this->required = true;
                         }
-                        elseif ($flag->locale=='locale')
-                        {
-                            $this->locale = true;
-                        }
                         elseif ($flag->name=='primary')
                         {
                             $this->primary = true;
@@ -641,6 +637,12 @@
                 $this->primary = true;
                 $this->default = null;
                 $this->null = false;
+                if ($this->type!=type::integer)
+                {
+                    $this->type = type::integer;
+                    $this->data = 'int';
+                    $this->length = 10;
+                }
             }
             public function extra ()
             {
@@ -1353,7 +1355,7 @@
             /**
              * @param \db\link $link
              */
-            private $default = null;
+            public $default = null;
             /**
              * just an array of objects which have property name
              * @var locale[]
@@ -1463,6 +1465,10 @@
                 {
                     $file = $log;
                     $log = '';
+                }
+                else
+                {
+                    $file = false;
                 }
                 $databases = array ();
                 foreach ($this->tables as &$table)
@@ -1637,7 +1643,7 @@
                             {
                                 $column['null'] = false;
                             }
-                            $columns[$column[name]] = $column;
+                            $columns[$column['name']] = $column;
                             //debug ($row);
                         }
                         //debug ($columns);
@@ -1708,7 +1714,7 @@
                             foreach ($localize as &$field)
                             {
                                 $query = "alter table ".$table->name()." change ".$table->name($field,true)." ".$table->name($field,$field->ignore,true)." ".$field->type()." ".$field->extra();
-                                debug ($query);
+                                //debug ($query);
                                 if ($file)
                                 {
                                     $log .= $query.";\n";
@@ -1732,7 +1738,7 @@
                                 foreach ($locales as $locale)
                                 {
                                     $query = "alter table ".$table->name()." change ".($field->rename ? ("`".field($table->prefix,$field->rename,$locale)."`") : $table->name($field,$locale,true))." ".$table->name($field,$locale,true)." ".$field->type()." ".$field->extra();
-                                    debug ($query);
+                                    //debug ($query);
                                     if ($file)
                                     {
                                         $log .= $query.";\n";
@@ -1801,7 +1807,7 @@
                                                 $after = $table->name ($field, $locale, true);
                                             }
                                         }
-                                        debug ($query);
+                                        //debug ($query);
                                         if ($file)
                                         {
                                             $log .= $query.";\n";
@@ -2219,6 +2225,20 @@
                 return $prefix.$column."_".$locale->name;
             }
             return $prefix.$column;
+        }
+
+        function debug ($input)
+        {
+            $backtrace = debug_backtrace();
+            $result = "<div style=\"font-family:'dejavu sans mono,consolas,monospaced,monospace';font-size:10pt;width:600px;margin-bottom:20px\"><div style='background:#f0f0f0'>";
+            foreach ($backtrace as $key => $value)
+            {
+                $result .= $value['file']." [".$value['line']."] <font color=red>".$value['function']."</font><br>";
+            }
+            $result .= '</div>';
+            $result .= str_replace (array("\n"," ","var","array","class","=&gt;","&nbsp;&nbsp;&nbsp;'","'&nbsp;&nbsp;<b><font color=green>="),array("<br>\n",'&nbsp;&nbsp;',"<b><font color=blue>var</font></b>","<b><font color=red>array</font></b>","<b><font color=green>class</font></b>","<b><font color=green>=</font></b>","&nbsp;&nbsp;&nbsp;<font color=green>'","'</font>&nbsp;&nbsp;<b><font color=green>="), htmlspecialchars (var_export($input,true),ENT_NOQUOTES,'UTF-8'));
+            $result .= "</div>";
+            echo $result;
         }
 
     }
