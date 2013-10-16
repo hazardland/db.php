@@ -500,18 +500,21 @@
                                 {
                                     if ($this->class->isSubclassOf('\db\entity'))
                                     {
-                                        $this->type = type::integer;
-                                        if ($this->data===null)
+                                        if (!$this->enum)
                                         {
-                                            $this->data = 'int';
-                                        }
-                                        if ($this->length===null)
-                                        {
-                                            $this->length = 10;
-                                        }
-                                        if ($this->type==type::integer)
-                                        {
-                                            $this->unsigned = true;
+                                            $this->type = type::integer;
+                                            if ($this->data===null)
+                                            {
+                                                $this->data = 'int';
+                                            }
+//                                            if ($this->length===null)
+//                                            {
+//                                                $this->length = 10;
+//                                            }
+//                                            if ($this->type==type::integer)
+//                                            {
+//                                                $this->unsigned = true;
+//                                            }
                                         }
                                         $this->foreign = table ($flag->value);
                                     }
@@ -614,6 +617,14 @@
                 {
                     $this->length = 128;
                 }
+                if (strtolower($this->default)==='null')
+                {
+                    $this->null = true;
+                }
+                else if ($this->null && $this->default===null)
+                {
+                    $this->default = 'null';
+                }
                 if ($this->primary)
                 {
                     $this->primary();
@@ -666,7 +677,7 @@
                 if ($this->default!==null)
                 {
                     $result .= ' default ';
-                    if (($this->default==='null' || $this->default==='NULL' || $this->default==='Null') || ($this->null && $this->default===null))
+                    if (strtolower($this->default)==='null')
                     {
                         $result .= 'null';
                     }
@@ -947,7 +958,7 @@
                     {
                         if (id($item))
                         {
-                            $result .= $item.'|';
+                            $result .= id($item).'|';
                         }
                     }
                     if (strlen($result)==1)
@@ -969,7 +980,7 @@
                                 if ($key)
                                 {
                                     $object = $table->load ($key);
-                                    $result[$object->{$table->primary->name}] = $result;
+                                    $result[$object->{$table->primary->name}] = $object;
                                 }
                             }
                         }
@@ -1015,14 +1026,10 @@
                                 }
                             }
                         }
-                        else
+                        else if ($field->enum && $field->foreign)
                         {
-                            $result->{$field->name} = $row[$cell];
+                            $result->{$field->name} = $this->enum($row[$cell],$database->table($field->foreign));
                             $cell++;
-                        }
-                        if ($field->enum && $field->foreign)
-                        {
-                            $result->{$field->name} = $this->enum($row[$cell],$database->table($this->foreign));
                         }
                         else if ($field->foreign)
                         {
@@ -1033,10 +1040,10 @@
                                 {
                                     if ($table->link==$this->link)
                                     {
-                                        $result->{$field->name} = $table->create($row,$cell);
-                                        if ($result->{$field->name}->id===null && $row[$cell-1]!==null)
+                                        $result->{$field->name} = $table->create($row,$cell+1);
+                                        if ($result->{$field->name}->{$table->primary->name}===null && $row[$cell]!==null)//***
                                         {
-                                            $result->{$field->name}->id = $row[$cell-1];
+                                            $result->{$field->name}->{$table->primary->name} = $row[$cell];//***
                                         }
                                         foreach ($table->fields as $foreign)
                                         {
@@ -1052,10 +1059,10 @@
                                     }
                                     else
                                     {
-                                        $result->{$field->name} = $table->load($row[$cell-1]);
+                                        $result->{$field->name} = $table->load($row[$cell]);//***
                                         if ($result->{$field->name}===false)
                                         {
-                                            $result->{$field->name} = $row[$cell-1];
+                                            $result->{$field->name} = $row[$cell];//***
                                         }
                                     }
                                 }
@@ -1063,9 +1070,43 @@
                             else
                             {
                                 $result->{$field->name} = $row[$cell];
-                                $cell++;
                             }
+                            $cell++;
                         }
+                        else
+                        {
+
+                            if ($row[$cell]!==null && $field->type==type::float)
+                            {
+                                $result->{$field->name} = (float) $row[$cell];
+                            }
+                            else if ($row[$cell]!==null && $field->type==type::integer)
+                            {
+                                $result->{$field->name} = (int) $row[$cell];
+                            }
+                            else if ($row[$cell]!==null && $field->type==type::boolean)
+                            {
+                                $result->{$field->name} = (bool) $row[$cell];
+                            }
+                            else if ($row[$cell]!==null && $field->type==type::date)
+                            {
+                                $result->{$field->name} = date (null, $row[$cell]);
+                            }
+                            else if ($row[$cell]!==null && $field->type==type::time)
+                            {
+                                $result->{$field->name} = time (null, $row[$cell]);
+                            }
+                            else if ($row[$cell]!==null && $field->type==type::binary)
+                            {
+                                $result->{$field->name} = base64_encode (null, $row[$cell]);
+                            }
+                            else
+                            {
+                                $result->{$field->name} = $row[$cell];
+                            }
+                            $cell++;
+                        }
+
                     }
                 }
                 return $result;
@@ -1172,7 +1213,7 @@
                                 }
                                 else if ($field->foreign && $field->enum)
                                 {
-                                    $set .= $this->name($field)."='".enum($object->{$field->name})."', ";
+                                    $set .= $this->name($field)."='".$this->enum($object->{$field->name})."', ";
                                 }
                                 else if ($field->foreign)
                                 {
@@ -1182,28 +1223,49 @@
                                 {
                                     if ($object->{$field->name}!==null)
                                     {
-                                        if ($field->type==type::integer)
+                                        if ($field->type==type::string)
+                                        {
+                                            $set .= $this->name($field)."='".string($object->{$field->name})."', ";
+                                        }
+                                        else if ($field->type==type::integer)
                                         {
                                             $object->{$field->name} = intval ($object->{$field->name});
+                                            $set .= $this->name($field)."='".$object->{$field->name}."', ";
                                         }
                                         else if ($field->type==type::float)
                                         {
                                             $object->{$field->name} = floatval ($object->{$field->name});
+                                            $set .= $this->name($field)."='".$object->{$field->name}."', ";
                                         }
                                         else if ($field->type==type::boolean)
                                         {
-                                            $object->{$field->name} = ($object->{$field->name});
+                                            $object->{$field->name} = (bool)($object->{$field->name});
+                                            $set .= $this->name($field)."='".intval($object->{$field->name})."', ";
                                         }
                                         else if ($field->type==type::date)
                                         {
-                                            $object->{$field->name} = date($object->{$field->name});
+                                            $object->{$field->name} = date(null,date($object->{$field->name}));
+                                            $set .= $this->name($field)."='".date($object->{$field->name})."', ";
                                         }
                                         else if ($field->type==type::time)
                                         {
-                                            $object->{$field->name} = time($object->{$field->name});
+                                            $object->{$field->name} = time(null,time($object->{$field->name}));
+                                            $set .= $this->name($field)."='".time($object->{$field->name})."', ";
+                                        }
+                                        else if ($field->type==type::binary)
+                                        {
+                                            $set .= $this->name($field)."='".base64_encode($object->{$field->name})."', ";
                                         }
                                     }
-                                    $set .= $this->name($field)."='".string($object->{$field->name})."', ";
+                                    else if (strtolower($field->default)==='null')
+                                    {
+                                        $set .= $this->name($field)."=null, ";
+                                    }
+                                    else
+                                    {
+                                        $set .= $this->name($field)."='".string($object->{$field->name})."', ";
+                                    }
+                                    //$set .= $this->name($field)."='".string($object->{$field->name})."', ";
                                 }
                             }
                         }
@@ -1249,6 +1311,28 @@
             }
             public function delete ($query)
             {
+                if (is_array($query))
+                {
+                    $result = true;
+                    foreach ($query as $item)
+                    {
+                        if (!$this->delete($item))
+                        {
+                            $result = false;
+                        }
+                    }
+                    return $result;
+                }
+                else
+                {
+                    global $database;
+                    $request = "delete from ".$this->name()." where ".$this->name($this->primary)."='".string($query)."' limit 1";
+                    $result = $database->link($this->link)->query ($request);
+                    if ($result)
+                    {
+                        $database->set ($this, $query, null);
+                    }
+                }
             }
             public function exists ($query)
             {
@@ -1675,13 +1759,14 @@
                                         $update[$field->name] = &$field;
                                         $this->debug ("type mismatch",$field);
                                     }
-                                    else if ($columns[field($table->prefix,$field->column,$locale)]['length']!=$field->length)
+                                    else if ($field->length!==null && $columns[field($table->prefix,$field->column,$locale)]['length']!=$field->length)
                                     {
                                         $update[$field->name] = &$field;
                                         $this->debug ("length mismatch",$field,$table);
                                     }
-                                    else if ($columns[field($table->prefix,$field->column,$locale)]['default']!=null && $columns[field($table->prefix,$field->column,$locale)]['default']!=$field->default)
+                                    else if ($columns[field($table->prefix,$field->column,$locale)]['default']!==null && $columns[field($table->prefix,$field->column,$locale)]['default']!=$field->default)
                                     {
+                                        //debug ($columns[field($table->prefix,$field->column,$locale)]);
                                         $update[$field->name] = &$field;
                                         $this->debug ("default mismatch",$field);
                                     }
@@ -2331,7 +2416,7 @@
         function debug ($input)
         {
             $backtrace = debug_backtrace();
-            $result = "<div style=\"font-family:'dejavu sans mono,consolas,monospaced,monospace';font-size:10pt;width:600px;margin-bottom:20px\"><div style='background:#f0f0f0'>";
+            $result = "<div style=\"font-family:'dejavu sans mono','consolas','monospaced','monospace';font-size:10pt;width:600px;margin-bottom:20px\"><div style='background:#f0f0f0'>";
             foreach ($backtrace as $key => $value)
             {
                 $result .= $value['file']." [".$value['line']."] <font color=red>".$value['function']."</font><br>";
