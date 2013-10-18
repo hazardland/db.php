@@ -77,13 +77,18 @@
         {
             public $name;
             public $debug = false;
+            public $engine;
             /**
              * @var PDO
              */
             public $link;
             public $config = array (\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'");
-            public function __construct ($name, $database='127.0.0.1', $username='root', $password='1234', $settings=null)
+            public function __construct ($name, $database='mysql:host=127.0.0.1', $username='root', $password='1234', $settings=null)
             {
+                if (strpos($database,'mysql:')===0)
+                {
+                    $this->engine = 'myisam';
+                }
                 $this->name = $name;
                 if ($settings)
                 {
@@ -713,7 +718,7 @@
             /**
              * @var string
              */
-            public $engine = 'myisam';
+            public $engine;
 
             /**
              * @var string
@@ -728,7 +733,7 @@
             /**
              * @var string
              */
-            public $link = 'default';
+            public $link;
             /**
              * @var string
              */
@@ -949,7 +954,7 @@
                     }
                 }
             }
-            public function enum ($set,&$table=null)
+            public function enum ($set,$table=null)
             {
                 if (is_array($set))
                 {
@@ -1127,6 +1132,7 @@
                     $row = $database->get ($this, string($query));
                     if (!$row)
                     {
+                        $database->context->usage->query ++;
                         $request = "select ".$this->fields()." from ".$this->tables()." where ".$this->name($this->primary)."='".string($query)."'";
                         $database->link($this->link)->debug = true;
                         $result = $database->link($this->link)->query ($request);
@@ -1140,6 +1146,10 @@
                             $database->set ($this, string($query), $row);
                         }
                     }
+                    else
+                    {
+                        $database->context->usage->cache ++;
+                    }
                     if ($row)
                     {
                         return $this->create ($row);
@@ -1150,6 +1160,7 @@
                     $rows = $database->get ($this, $query);
                     if (!$rows)
                     {
+                        $database->context->usage->query ++;
                         $rows = array ();
                         $request = "select ".$this->fields()." from ".$this->tables()." ".$query->where($this)." ".$query->order($this)." ".$query->limit($this);
                         $database->link($this->link)->debug = true;
@@ -1163,6 +1174,10 @@
                             $database->set ($this, $query, $rows);
                         }
                     }
+                    else
+                    {
+                        $database->context->usage->cache ++;
+                    }
                     if (is_array($rows) && count($rows))
                     {
                         $result = array();
@@ -1175,7 +1190,7 @@
                 }
                 return false;
             }
-            public function save (&$object, $event=null)
+            public function save (&$object, $event=null, $clear=null)
             {
                 if (is_object($object))
                 {
@@ -1277,7 +1292,12 @@
                                 $query = "update ".$this->name()." set ".$set." where ".$this->name($this->primary)."='".string($object->{$this->primary->name})."' limit 1";
                                 if ($database->link($this->link)->query ($query))
                                 {
-                                    @$database->set ($this,$object->{$this->primary->name},null);
+                                    @$database->set ($this,$object->{$this->primary->name},false);
+                                    if ($clear===null)
+                                    {
+                                        $clear = new query();
+                                    }
+                                    @$database->set ($this,$clear,false);
                                     return true;
                                 }
                             }
@@ -1287,11 +1307,15 @@
                                 if ($database->link($this->link)->query ($query))
                                 {
                                     $object->{$this->primary->name} = $database->link($this->link)->id();
-                                    @$database->set ($this,$object->{$this->primary->name},null);
+                                    $database->set ($this,$object->{$this->primary->name},false);
+                                    if ($clear===null)
+                                    {
+                                        $clear = new query();
+                                    }
+                                    @$database->set ($this,$clear,false);
                                     return true;
                                 }
                             }
-
                         }
                     }
                     return false;
@@ -1330,7 +1354,7 @@
                     $result = $database->link($this->link)->query ($request);
                     if ($result)
                     {
-                        $database->set ($this, $query, null);
+                        $database->set ($this, string($query), false);
                     }
                 }
             }
@@ -1426,7 +1450,7 @@
             {
                 if ($this->hash===null)
                 {
-                    $this->name()."|".$this->fields()."|".$this->tables();
+                    $this->hash = md5($this->name()."|".$this->fields()."|".$this->tables());
                 }
                 return $this->hash;
             }
@@ -1434,43 +1458,30 @@
 
         class database
         {
-            /**
-             * @var \db\link[]
-             */
-            private $links = array();
-            /**
-             * @var \db\table[]
-             */
-            private $tables = array ();
-            /**
-             * @param \db\link $link
-             */
-            public $default = null;
-            /**
-             * just an array of objects which have property name
-             * @var locale[]
-             */
-            public $locales;
-            public $locale;
-            public $caches = array();
-            /**
+            public $context;
+             /**
              * @param string $default default database name
              * @param \db\link $link default connection to database
              */
             public function __construct ($default=null, link $link=null)
             {
-                $this->default = $default;
+                $this->context = new \stdClass();
+                $this->context->links = array ();
+                $this->context->tables = array ();
+                $this->context->locales = null;
+                $this->context->locale = null;
+                $this->context->caches = array ();
+                $this->context->default = $default;
+                $this->context->usage = new \stdClass();
+                $this->context->usage->query = 0;
+                $this->context->usage->cache = 0;
                 if ($link)
                 {
-                    $this->links[$link->name] = $link;
-                    if (!isset($this->links['default']))
-                    {
-                        $this->links['default'] = &$this->links[$link->name];
-                    }
+                    $this->context->links[$link->name] = $link;
                 }
-                $this->caches[cache::load] = new load ();
-                $this->caches[cache::long] = new long ();
-                $this->caches[cache::user] = new user ();
+                $this->context->caches[cache::load] = new load ();
+                $this->context->caches[cache::long] = new long ();
+                $this->context->caches[cache::user] = new user ();
             }
             /**
              * @param \db\table $table
@@ -1487,7 +1498,7 @@
                 }
                 if ($table->database===null)
                 {
-                    $table->database = $this->default;
+                    $table->database = $this->context->default;
                 }
                 if ($table->id[0]=='.')
                 {
@@ -1496,6 +1507,14 @@
                 else
                 {
                     $source = $table->id;
+                }
+                if ($table->link===null)
+                {
+                    $table->link = $this->link()->name;
+                }
+                if ($table->engine===null && $this->link($table->link))
+                {
+                    $table->engine = $this->link($table->link)->engine;
                 }
                 $result = explode ('.',$source);
                 if (!isset($this->{$result[0]}))
@@ -1511,7 +1530,7 @@
                     }
                     $space = $table;
                 }
-                $this->tables[$table->id] = $table;
+                $this->context->tables[$table->id] = $table;
             }
             function scan ($prefix)
             {
@@ -1532,21 +1551,25 @@
             }
             public function table ($id)
             {
-                return $this->tables[$id];
+                return $this->context->tables[$id];
             }
-            public function link ($link)
+            /**
+             * @param link $link
+             * @return link
+             */
+            public function link ($link=null)
             {
+                if ($link===null)
+                {
+                    return reset($this->context->links);
+                }
                 if (is_object($link))
                 {
-                    $this->links[$link->name] = $link;
-                    if (!isset($this->links['default']))
-                    {
-                        $this->links['default'] = &$this->links[$link->name];
-                    }
+                    $this->context->links[$link->name] = $link;
                 }
                 else
                 {
-                    return $this->links[$link];
+                    return $this->context->links[$link];
                 }
             }
             public function update ($log=null)
@@ -1561,7 +1584,7 @@
                     $file = false;
                 }
                 $databases = array ();
-                foreach ($this->tables as &$table)
+                foreach ($this->context->tables as &$table)
                 {
                     //debug ("in table ".$table->name);
                     $link = $this->link($table->link);
@@ -1930,13 +1953,13 @@
             {
                 if ($locales!==null)
                 {
-                    $this->locales = $locales;
+                    $this->context->locales = $locales;
                 }
                 else
                 {
-                    if (is_array($this->locales) && count($this->locales))
+                    if (is_array($this->context->locales) && count($this->context->locales))
                     {
-                        return $this->locales;
+                        return $this->context->locales;
                     }
                     return false;
                 }
@@ -1949,15 +1972,15 @@
                 }
                 if (is_object($locale))
                 {
-                    $this->locale = $locale;
+                    $this->context->locale = $locale;
                 }
                 else
                 {
-                    if ($this->locale===null && $this->locales())
+                    if ($this->context->locale===null && $this->locales())
                     {
                         return reset ($this->locales());
                     }
-                    return $this->locale;
+                    return $this->context->locale;
                 }
             }
             public function cache ($type, $table, $field, $id)
@@ -1966,10 +1989,69 @@
             }
             public function set (table &$table, $query, $value)
             {
-
+                $scope = null;
+                $cache = null;
+                if (is_object($query))
+                {
+                    if ($query->cache==null)
+                    {
+                        $cache = $table->cache;
+                    }
+                    else
+                    {
+                        $cache = $query->cache;
+                    }
+                    if ($query->scope==null)
+                    {
+                        $scope = $table->scope;
+                    }
+                    else
+                    {
+                        $scope = $table->scope;
+                    }
+                }
+                else
+                {
+                    $cache = $table->cache;
+                    $scope = $table->scope;
+                }
+                if ($cache==cache::load || $cache==cache::long || $cache==cache::user)
+                {
+                    $this->context->caches[$cache]->set ($scope, $table, $query, $value);
+                }
             }
             public function get (table &$table, $query)
             {
+                $scope = null;
+                $cache = null;
+                if (is_object($query))
+                {
+                    if ($query->cache==null)
+                    {
+                        $cache = $table->cache;
+                    }
+                    else
+                    {
+                        $cache = $query->cache;
+                    }
+                    if ($query->scope==null)
+                    {
+                        $scope = $table->scope;
+                    }
+                    else
+                    {
+                        $scope = $table->scope;
+                    }
+                }
+                else
+                {
+                    $cache = $table->cache;
+                    $scope = $table->scope;
+                }
+                if ($cache==cache::load || $cache==cache::long || $cache==cache::user)
+                {
+                    return $this->context->caches[$cache]->get ($scope, $table, $query);
+                }
                 return false;
             }
         }
@@ -2060,9 +2142,19 @@
             const insert = 2;
             const update = 3;
             const delete = 4;
-            public $type;
+            public $cache;
+            public $scope;
+            /**
+             * @var where
+             */
             public $where;
+            /**
+             * @var order
+             */
             public $order;
+            /**
+             * @var limit
+             */
             public $limit;
             public $debug = false;
             public function __construct ()
@@ -2073,15 +2165,48 @@
             }
             public function where (table &$table)
             {
-                return $this->where->result ($table);
+                if (is_object($table))
+                {
+                    if (is_object($this->where))
+                    {
+                        return $this->where->result ($table);
+                    }
+                    return $this->where;
+                }
+                if (is_object($this->where))
+                {
+                    $this->where->string = $table;
+                }
+                else
+                {
+                    $this->where = $table;
+                }
             }
-            public function order (table &$table)
+            public function order (table &$table, $method=null)
             {
-                return $this->order->result ($table);
+                if (is_object($table))
+                {
+                    return $this->order->result ($table);
+                }
+                $this->order->method($method);
+                $this->order->field ($table);
             }
-            public function limit (table &$table)
+            public function limit (table &$table, $count=null)
             {
-                return $this->limit->result ($table);
+                if (is_object($table))
+                {
+                    return $this->limit->result ($table);
+                }
+                if ($from===null)
+                {
+                    $this->limit->count = $table;
+                }
+                else
+                {
+                    $this->limit->from = $table;
+                    $this->limit->count = $from;
+                }
+
             }
             public function hash (table &$table)
             {
@@ -2239,22 +2364,58 @@
             }
         }
 
-        class cache
+        abstract class cache
         {
             const none = 1; //no store
             const load = 2; //store in array
             const user = 3; //store in session [database|]
             const long = 4; //store in apc cache
-            public $type;
-            public $scope;
-            public $table;
-            public $query;
-            public function __construct ($type, $scope, $table, $query)
+            public $store = array ();
+            public function __construct ()
             {
-                $this->type = $type;
-                $this->scope = $scope;
-                $this->table = $table;
-                $this->query = $query;
+
+            }
+            function set ($scope, &$table, $query, $value)
+            {
+                if (is_object($query))
+                {
+                    if (is_array($value))
+                    {
+                        foreach ($value as $item)
+                        {
+                            $this->store ('database|'.scope($scope).$table->hash().'|'.$item[field($table->prefix,$table->primary->name)], $item);
+                        }
+                        $this->store ('database|'.scope($scope).$table->hash().'|'.$query->hash($table), $value);
+                    }
+                }
+                else
+                {
+                    $this->store ('database|'.scope($scope).$table->hash().'|'.$query, $value);
+                }
+            }
+            function get ($scope, &$table, $query)
+            {
+                if (is_object($query))
+                {
+                    return $this->fetch ('database|'.scope($scope).$table->hash().'|'.$query->hash($table));
+                }
+                return $this->fetch ('database|'.scope($scope).$table->hash().'|'.$query);
+            }
+            function count ()
+            {
+                return $this->count;
+            }
+            function store ($name, $value)
+            {
+                $this->store [$name] = $value;
+            }
+            function fetch ($name)
+            {
+                return $this->store[$name];
+            }
+            function clear ()
+            {
+                $this->store = array ();
             }
         }
 
@@ -2264,24 +2425,54 @@
             const solution = 2; //[database|solution|[solution_name]|]
         }
 
-        class none
+        class load extends cache
         {
 
         }
 
-        class load
+        class user extends cache
         {
+            public $store = array ();
+            public function __construct ()
+            {
+                if (isset($_SESSION))
+                {
+                    if (!isset($_SESSION['database']))
+                    {
+                        $_SESSION['database'] = array ();
+                    }
+                    $this->store = &$_SESSION['database'];
+                }
+            }
 
         }
 
-        class user
+        class long extends cache
         {
-
+            function store ($name, $value)
+            {
+                apc_store ($name, $value);
+            }
+            function fetch ($name)
+            {
+                return apc_fetch ($name, $value);
+            }
+            function clear ()
+            {
+                apc_clear_cache ('user');
+            }
         }
 
-        class long
+        class locale
         {
-
+            public $id;
+            public $name;
+            public $default;
+            public function __construct ($name, $default=false)
+            {
+                $this->name = $name;
+                $this->default = $default;
+            }
         }
 
         function string ($input)
@@ -2427,6 +2618,24 @@
             echo $result;
         }
 
+        function scope ($scope)
+        {
+            global $system;
+            if ($scope==scope::project)
+            {
+                if (isset($system->solution->name) && isset($system->project->name))
+                {
+                    return $system->solution->name.'.'.$system->project->name."|";
+                }
+            }
+            if ($scope==scope::solution)
+            {
+                if (isset($system->solution->name) && isset($system->project->name))
+                {
+                    return $system->solution->name."|";
+                }
+            }
+        }
     }
 
 ?>

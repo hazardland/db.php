@@ -153,5 +153,6 @@
 
     //the end
 
+    \db\debug ($database->context->usage);
 
 ?>
