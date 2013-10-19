@@ -40,13 +40,13 @@
          * ignore
          * deny insert|select|update|delete
          */
+
         class foo extends entity
         {
             /**
              *required
              * field/column users_bio
-             * type integer|boolean|float|text|binary|date
-             * data
+             * type integer|boolean|float|text|binary|date|time
              * length 32
              * locale
              * enum
@@ -413,11 +413,11 @@
                             throw new \Exception ('field ignored');
                         }
                         /* @var flag \db\flag */
-                        else if ($flag->name=='@var')
+                        else if ($flag->name=='@var' || $flag->name=='type')
                         {
                             if ($flag->value=='')
                             {
-                                throw new \Exception('@var doc comment required for '.$table->name.'.'.$this->name.' property');
+                                throw new \Exception('@var doc comment required for '.$this->name.' property');
                             }
                             if ($flag->value=='integer' || $flag->value=='int')
                             {
@@ -491,7 +491,7 @@
                                     $this->data = 'blob';
                                 }
                             }
-                            else
+                            else if ($flag->name!=='type')
                             {
                                 try
                                 {
@@ -521,7 +521,7 @@
 //                                                $this->unsigned = true;
 //                                            }
                                         }
-                                        $this->foreign = table ($flag->value);
+                                        $this->foreign = type ($flag->value);
                                     }
                                     else if ($this->class->isSubclassOf('\db\value'))
                                     {
@@ -533,10 +533,6 @@
                                     }
                                 }
                             }
-                        }
-                        elseif ($flag->name=='type')
-                        {
-                            $this->data = strtolower($flag->value);
                         }
                         elseif ($flag->name=='required')
                         {
@@ -612,6 +608,10 @@
                             $this->zero = true;
                         }
                     }
+                }
+                if ($flag->name=='type' && $this->data==null)
+                {
+                    $this->data = strtolower($flag->value);
                 }
                 if ($this->data===null)
                 {
@@ -770,26 +770,17 @@
             public function __construct ($class)
             {
                 $this->query = new query();
-                $class = str_replace ("\\", ".", $class);
-                if ($class[0]!='.')
+                $this->id = type ($class);
+                $this->table = str_replace('.','_',substr($this->id,1));
+                if (strripos($this->id,".")!==false)
                 {
-                    $class = '.'.$class;
-                }
-                if ($class[strlen($class)-1]=='.')
-                {
-                    $class = substr($class, 0, -1);
-                }
-                $this->id = $class;
-                if (strripos($class,".")!==false)
-                {
-                    $this->name = substr($class,strripos($class,".")+1);
+                    $this->name = substr($class,strripos($this->id,".")+1);
                 }
                 else
                 {
-                    $this->name = $class;
+                    $this->name = $this->id;
                 }
-                $this->table = $this->name;
-                $this->class = new \ReflectionClass (str_replace (".", "\\", $class));
+                $this->class = new \ReflectionClass (str_replace (".", "\\", $this->id));
                 $flags = flag::set($this->class);
                 if (is_array($flags))
                 {
@@ -961,9 +952,9 @@
                     $result = '|';
                     foreach ($set as $item)
                     {
-                        if (id($item))
+                        if (id($item,$table->primary->name))
                         {
-                            $result .= id($item).'|';
+                            $result .= id($item,$table->primary->name).'|';
                         }
                     }
                     if (strlen($result)==1)
@@ -1001,7 +992,7 @@
             }
             public function create ($row, $from=0)
             {
-                global $database;
+                $database = $this->database();
                 $cell = 0;
                 if ($from)
                 {
@@ -1114,14 +1105,49 @@
 
                     }
                 }
+                if (method_exists ($result,'create'))
+                {
+                    $result->create ();
+                }
                 return $result;
             }
-            public function load ($query=null)
+            public function load ($query=null, &$sender=null)
             {
-                global $database;
+                $debug = debug_backtrace();
+//                debug ($this->id);
+//                debug ($debug);
+                if ($debug>0)
+                {
+                    $first = false;
+                    foreach ($debug as $step)
+                    {
+                        if (!$first)
+                        {
+                            $first = true;
+                        }
+                        else
+                        {
+                            if (type($step['class']=='.db.table') && $step['function']=='load')
+                            {
+                                if ($step['object']->id==$this->id)
+                                {
+                                    return;
+                                }
+                            }
+                        }
+
+                    }
+                }
+                $database = $this->database();
                 if (!$this->select)
                 {
                     return false;
+                }
+                if (is_object($query) && type($query)=='.db.by')
+                {
+                    $where = $query->result ($this);
+                    $query = clone $this->query;
+                    $query->where ($where);
                 }
                 if ($query===null)
                 {
@@ -1190,11 +1216,11 @@
                 }
                 return false;
             }
-            public function save (&$object, $event=null, $clear=null)
+            public function save (&$object, $event=null)
             {
                 if (is_object($object))
                 {
-                    global $database;
+                    $database = $this->database();
                     if ($event===null || ($event!==query::insert && $event!==query::update))
                     {
                         if ($object->{$this->primary->name})
@@ -1228,11 +1254,15 @@
                                 }
                                 else if ($field->foreign && $field->enum)
                                 {
-                                    $set .= $this->name($field)."='".$this->enum($object->{$field->name})."', ";
+                                    if (!is_array($object->{$field->name}))
+                                    {
+                                        $object->{$field->name} = array ();
+                                    }
+                                    $set .= $this->name($field)."='".$this->enum($object->{$field->name},$database->table($field->foreign))."', ";
                                 }
                                 else if ($field->foreign)
                                 {
-                                    $set .= $this->name($field)."='".string(id($object->{$field->name}))."', ";
+                                    $set .= $this->name($field)."='".id($object->{$field->name},$database->table($field->foreign)->primary->name)."', ";
                                 }
                                 else
                                 {
@@ -1240,12 +1270,19 @@
                                     {
                                         if ($field->type==type::string)
                                         {
-                                            $set .= $this->name($field)."='".string($object->{$field->name})."', ";
+                                            $set .= $this->name($field)."='".id($object->{$field->name})."', ";
                                         }
                                         else if ($field->type==type::integer)
                                         {
-                                            $object->{$field->name} = intval ($object->{$field->name});
-                                            $set .= $this->name($field)."='".$object->{$field->name}."', ";
+                                            if (!is_object($object->{$field->name}))
+                                            {
+                                                $object->{$field->name} = intval ($object->{$field->name});
+                                                $set .= $this->name($field)."='".$object->{$field->name}."', ";
+                                            }
+                                            else
+                                            {
+                                                $set .= $this->name($field)."='".intval(id($object->{$field->name}))."', ";
+                                            }
                                         }
                                         else if ($field->type==type::float)
                                         {
@@ -1333,6 +1370,14 @@
                     return $result;
                 }
             }
+            public function reset ($query)
+            {
+                if (is_object($query))
+                {
+                    $database = $this->database();
+                    $database->set ($this, $query, false);
+                }
+            }
             public function delete ($query)
             {
                 if (is_array($query))
@@ -1349,7 +1394,7 @@
                 }
                 else
                 {
-                    global $database;
+                    $database = $this->database();
                     $request = "delete from ".$this->name()." where ".$this->name($this->primary)."='".string($query)."' limit 1";
                     $result = $database->link($this->link)->query ($request);
                     if ($result)
@@ -1370,7 +1415,7 @@
             {
                 if ($this->columns===null)
                 {
-                    global $database;
+                    $database = $this->database();
                     $cell = 0;
                     foreach ($this->fields as $field)
                     {
@@ -1430,7 +1475,7 @@
             {
                 if ($this->tables===null)
                 {
-                    global $database;
+                    $database = $this->database();
                     $this->tables .= $this->name();
                     foreach ($this->fields as $field)
                     {
@@ -1453,6 +1498,10 @@
                     $this->hash = md5($this->name()."|".$this->fields()."|".$this->tables());
                 }
                 return $this->hash;
+            }
+            public function database ()
+            {
+                return $GLOBALS['database'];
             }
         }
 
@@ -1490,7 +1539,7 @@
             {
                 try
                 {
-                    $table = new table($class);
+                    $table = new table ($class);
                 }
                 catch (\Exception $error)
                 {
@@ -1517,7 +1566,7 @@
                     $table->engine = $this->link($table->link)->engine;
                 }
                 $result = explode ('.',$source);
-                if (!isset($this->{$result[0]}))
+                if ($result[0]!='context')
                 {
                     $space = &$this;
                     foreach ($result as $item)
@@ -1529,28 +1578,46 @@
                         $space = &$space->{$item};
                     }
                     $space = $table;
+                    $this->context->tables[$table->id] = $table;
                 }
-                $this->context->tables[$table->id] = $table;
             }
-            function scan ($prefix)
+            public function save (&$object)
             {
-                $prefix = table($prefix,false);
+                if (is_array($object))
+                {
+                    foreach ($object as $item)
+                    {
+                        $this->save ($item);
+                    }
+                }
+                else
+                {
+                    $this->table($object)->save ($object);
+                }
+            }
+            public function scan ($prefix)
+            {
+                $prefix = type ($prefix);
                 $result = get_declared_classes ();
                 if ($prefix!=null)
                 {
                     foreach ($result as $class)
                     {
-                        $class = table($class);
+                        $class = type ($class);
                         if (strpos($class,$prefix)===0)
                         {
                             $this->add ($class);
-                            debug ($class);
+                            //debug ($class);
                         }
                     }
                 }
             }
             public function table ($id)
             {
+                if (is_object($id))
+                {
+                    return $this->context->tables[type($id)];
+                }
                 return $this->context->tables[$id];
             }
             /**
@@ -1968,7 +2035,7 @@
             {
                 if ($locale===true)
                 {
-                    return reset ($this->locales());
+                    return @reset ($this->locales());
                 }
                 if (is_object($locale))
                 {
@@ -1978,7 +2045,7 @@
                 {
                     if ($this->context->locale===null && $this->locales())
                     {
-                        return reset ($this->locales());
+                        return @reset ($this->locales());
                     }
                     return $this->context->locale;
                 }
@@ -2163,7 +2230,7 @@
                 $this->order = new order ();
                 $this->limit = new limit ();
             }
-            public function where (table &$table)
+            public function where (&$table)
             {
                 if (is_object($table))
                 {
@@ -2182,7 +2249,7 @@
                     $this->where = $table;
                 }
             }
-            public function order (table &$table, $method=null)
+            public function order (&$table, $method=null)
             {
                 if (is_object($table))
                 {
@@ -2191,7 +2258,7 @@
                 $this->order->method($method);
                 $this->order->field ($table);
             }
-            public function limit (table &$table, $count=null)
+            public function limit (&$table, $count=null)
             {
                 if (is_object($table))
                 {
@@ -2208,7 +2275,7 @@
                 }
 
             }
-            public function hash (table &$table)
+            public function hash (&$table)
             {
                 $result = array ();
                 $result[] = $this->where->result($table);
@@ -2280,7 +2347,6 @@
             }
             public function result (table &$table)
             {
-                global $database;
                 if (is_array($this->items) && $this->items)
                 {
                     $result = " order by ";
@@ -2292,6 +2358,7 @@
                 }
                 if ($this->field)
                 {
+                    $database = $table->database();
                     return " order by ".$table->name($this->field,$database->locale())." ".$this->method->result($table)." ";
                 }
                 //return " order by ".(is_object($database->locale()) ? $table->name($this->field,$database->locale()) : $table->name($this->field))." ".$this->method->result($table)." ";
@@ -2467,12 +2534,44 @@
         {
             public $id;
             public $name;
-            public $default;
-            public function __construct ($name, $default=false)
+            public $order;
+            public function __construct ($name)
             {
                 $this->name = $name;
-                $this->default = $default;
             }
+        }
+
+        //$pages->load (by('name','home')->and('name',more,'dad'));
+
+        class by
+        {
+            private $items = array();
+            public function by ($field, $value)
+            {
+                $this->items[$field] = $value;
+                return $this;
+            }
+            public function result (&$table)
+            {
+                if (is_object($table) && $this->items)
+                {
+                    $result = '';
+                    foreach ($this->items as $field=>$value)
+                    {
+                        $result .= $table->name($field)."='".id($value)."' and ";
+                    }
+                    if ($result!=='')
+                    {
+                        return substr($result, 0, -5);
+                    }
+                }
+            }
+        }
+
+        function by ($field, $value)
+        {
+            $object = new by ();
+            return $object->by ($field,$value);
         }
 
         function string ($input)
@@ -2480,36 +2579,41 @@
             return $input;
         }
 
-        function id (&$object)
+        function id (&$object,$field='id')
         {
             if (is_object($object))
             {
-                if ($object->id)
+                if ($object->{$field})
                 {
-                    $id = $object->id;
+                    $id = $object->{$field};
                 }
             }
             else
             {
                 $id = $object;
             }
-            return intval ($id);
+            return string ($id);
         }
 
         /**
          * @return string get id for class
          * @param string $class
          */
-        function table ($class, $trim=true)
+        function type ($input)
         {
+            if (is_object($input))
+            {
+                $reflection = new \ReflectionClass ($input);
+                $class = $reflection->getName();
+            }
+            else
+            {
+                $class = $input;
+            }
             $class = str_replace ("\\", ".", $class);
             if ($class[0]!='.')
             {
                 $class = '.'.$class;
-            }
-            if ($trim && $class[strlen($class)-1]=='.')
-            {
-                $class = substr($class, 0, -1);
             }
             return $class;
         }
@@ -2613,7 +2717,7 @@
                 $result .= $value['file']." [".$value['line']."] <font color=red>".$value['function']."</font><br>";
             }
             $result .= '</div>';
-            $result .= str_replace (array("\n"," ","var","array","class","=&gt;","&nbsp;&nbsp;&nbsp;'","'&nbsp;&nbsp;<b><font color=green>="),array("<br>\n",'&nbsp;&nbsp;',"<b><font color=blue>var</font></b>","<b><font color=red>array</font></b>","<b><font color=green>class</font></b>","<b><font color=green>=</font></b>","&nbsp;&nbsp;&nbsp;<font color=green>'","'</font>&nbsp;&nbsp;<b><font color=green>="), htmlspecialchars (var_export($input,true),ENT_NOQUOTES,'UTF-8'));
+            $result .= str_replace (array("\\'","\n"," ","var","array","class","=&gt;","&nbsp;&nbsp;&nbsp;'","'&nbsp;&nbsp;<b><font color=green>="),array("'","<br>\n",'&nbsp;&nbsp;',"<b><font color=blue>var</font></b>","<b><font color=red>array</font></b>","<b><font color=green>class</font></b>","<b><font color=green>=</font></b>","&nbsp;&nbsp;&nbsp;<font color=green>'","'</font>&nbsp;&nbsp;<b><font color=green>="), htmlspecialchars (var_export($input,true),ENT_NOQUOTES,'UTF-8'));
             $result .= "</div>";
             echo $result;
         }
@@ -2621,18 +2725,39 @@
         function scope ($scope)
         {
             global $system;
-            if ($scope==scope::project)
+            if (!is_object($scope))
             {
-                if (isset($system->solution->name) && isset($system->project->name))
+                if ($scope==scope::project)
                 {
-                    return $system->solution->name.'.'.$system->project->name."|";
+                    if (isset($system->solution->name) && isset($system->project->name))
+                    {
+                        return $system->solution->name.'.'.$system->project->name."|";
+                    }
+                }
+                if ($scope==scope::solution)
+                {
+                    if (isset($system->solution->name))
+                    {
+                        return $system->solution->name."|";
+                    }
                 }
             }
-            if ($scope==scope::solution)
+            else
             {
-                if (isset($system->solution->name) && isset($system->project->name))
+                $class = type ($scope);
+                if ($class=='.core.project')
                 {
-                    return $system->solution->name."|";
+                    if (isset($scope->solution->name) && isset($scope->name))
+                    {
+                        return $scope->solution->name.'.'.$scope->name."|";
+                    }
+                }
+                if ($class=='.core.solution')
+                {
+                    if (isset($scope->name))
+                    {
+                        return $scope->name."|";
+                    }
                 }
             }
         }

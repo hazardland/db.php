@@ -148,6 +148,9 @@
     $john->girl = null;
     $database->boy->save ($john);
 
+
+    \db\debug ($database->girl->pimary);
+
     $john = $database->boy->load ($john->id);
     \db\debug ($john);
 
