@@ -1160,7 +1160,6 @@
                     {
                         $database->context->usage->query ++;
                         $request = "select ".$this->fields()." from ".$this->tables()." where ".$this->name($this->primary)."='".string($query)."'";
-                        $database->link($this->link)->debug = true;
                         $result = $database->link($this->link)->query ($request);
                         if (!$result)
                         {
@@ -1189,7 +1188,6 @@
                         $database->context->usage->query ++;
                         $rows = array ();
                         $request = "select ".$this->fields()." from ".$this->tables()." ".$query->where($this)." ".$query->order($this)." ".$query->limit($this);
-                        $database->link($this->link)->debug = true;
                         $result = $database->link($this->link)->query ($request);
                         if ($result)
                         {
@@ -1378,12 +1376,12 @@
                     $database->set ($this, $query, false);
                 }
             }
-            public function delete ($query)
+            public function delete ($object)
             {
-                if (is_array($query))
+                if (is_array($object))
                 {
                     $result = true;
-                    foreach ($query as $item)
+                    foreach ($object as $item)
                     {
                         if (!$this->delete($item))
                         {
@@ -1395,11 +1393,11 @@
                 else
                 {
                     $database = $this->database();
-                    $request = "delete from ".$this->name()." where ".$this->name($this->primary)."='".string($query)."' limit 1";
+                    $request = "delete from ".$this->name()." where ".$this->name($this->primary)."='".id($object,$this->primary->name)."' limit 1";
                     $result = $database->link($this->link)->query ($request);
                     if ($result)
                     {
-                        $database->set ($this, string($query), false);
+                        $database->set ($this, string($object), false);
                     }
                 }
             }
@@ -1501,12 +1499,13 @@
             }
             public function database ()
             {
-                return $GLOBALS['database'];
+                return database::$object;
             }
         }
 
         class database
         {
+            public static $object;
             public $context;
              /**
              * @param string $default default database name
@@ -1531,6 +1530,7 @@
                 $this->context->caches[cache::load] = new load ();
                 $this->context->caches[cache::long] = new long ();
                 $this->context->caches[cache::user] = new user ();
+                self::$object = $this;
             }
             /**
              * @param \db\table $table
@@ -2230,7 +2230,7 @@
                 $this->order = new order ();
                 $this->limit = new limit ();
             }
-            public function where (&$table)
+            public function where ($table)
             {
                 if (is_object($table))
                 {
@@ -2249,7 +2249,7 @@
                     $this->where = $table;
                 }
             }
-            public function order (&$table, $method=null)
+            public function order ($table, $method=null)
             {
                 if (is_object($table))
                 {
@@ -2258,7 +2258,7 @@
                 $this->order->method($method);
                 $this->order->field ($table);
             }
-            public function limit (&$table, $count=null)
+            public function limit ($table, $count=null)
             {
                 if (is_object($table))
                 {
@@ -2275,7 +2275,7 @@
                 }
 
             }
-            public function hash (&$table)
+            public function hash ($table)
             {
                 $result = array ();
                 $result[] = $this->where->result($table);
