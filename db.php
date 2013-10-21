@@ -503,7 +503,11 @@
                                 }
                                 if ($this->class!=null)
                                 {
-                                    if ($this->class->isSubclassOf('\db\entity'))
+                                    if ($this->class->isSubclassOf('\db\value'))
+                                    {
+                                        $this->type = type::string;
+                                    }
+                                    else// ($this->class->isSubclassOf('\db\entity'))
                                     {
                                         if (!$this->enum)
                                         {
@@ -522,15 +526,11 @@
 //                                            }
                                         }
                                         $this->foreign = type ($flag->value);
-                                    }
-                                    else if ($this->class->isSubclassOf('\db\value'))
-                                    {
-                                        $this->type = type::string;
-                                    }
-                                    else
-                                    {
-                                        throw new \Exception ('field not needed');
-                                    }
+                                    }                                    
+                                    // else
+                                    // {
+                                    //     throw new \Exception ('field not needed');
+                                    // }
                                 }
                             }
                         }
@@ -653,7 +653,7 @@
                 $this->primary = true;
                 $this->default = null;
                 $this->null = false;
-                if ($this->type!=type::integer)
+                if ($this->name=='id' && $this->type!=type::integer)
                 {
                     $this->type = type::integer;
                     $this->data = 'int';
@@ -663,7 +663,7 @@
             public function extra ()
             {
                 $result = ' ';
-                if ($this->primary)
+                if ($this->primary && $this->type==type::integer)
                 {
                     $result .= ' auto_increment';
                 }
@@ -884,6 +884,10 @@
                     {
                         $field = new field($value);
                         $this->fields[$field->name] = $field;
+                        if ($field->primary)
+                        {
+                            $this->primary = &$this->fields[$field->name];
+                        }
                     }
                     catch (\Exception $fail)
                     {
@@ -1216,10 +1220,11 @@
             }
             public function save (&$object, $event=null)
             {
+                debug ($event);
                 if (is_object($object))
                 {
                     $database = $this->database();
-                    if ($event===null || ($event!==query::insert && $event!==query::update))
+                    if ($event===null)
                     {
                         if ($object->{$this->primary->name})
                         {
@@ -1238,6 +1243,7 @@
                         {
                             if (($event==query::update && $field->update) || ($event==query::insert && $field->insert))
                             {
+                                //debug ($event);
                                 if (($event==query::update && $field->primary) || ($field->primary && !$object->{$this->primary->name}))
                                 {
                                     continue;
@@ -1581,18 +1587,18 @@
                     $this->context->tables[$table->id] = $table;
                 }
             }
-            public function save (&$object)
+            public function save (&$object, $event=null)
             {
                 if (is_array($object))
                 {
                     foreach ($object as $item)
                     {
-                        $this->save ($item);
+                        $this->save ($item, $event);
                     }
                 }
                 else
                 {
-                    $this->table($object)->save ($object);
+                    $this->table($object)->save ($object, $event);
                 }
             }
             public function scan ($prefix)
@@ -1937,7 +1943,7 @@
                             $last = null;
                             if ($this->locales())
                             {
-                                $last = end ($this->locales());
+                                $last = @end ($this->locales());
                             }
                             foreach ($insert as &$field)
                             {
@@ -2302,9 +2308,9 @@
              * @var string
              */
             public $string;
-            public function result (table &$table)
+            public function result ($table)
             {
-                if ($this->query!="")
+                if ($this->string!='')
                 {
                     return " where ".$this->string." ";
                 }
@@ -2558,7 +2564,7 @@
                     $result = '';
                     foreach ($this->items as $field=>$value)
                     {
-                        $result .= $table->name($field)."='".id($value)."' and ";
+                        $result .= $table->name($field)."='".id($value,$table->primary->name)."' and ";
                     }
                     if ($result!=='')
                     {
