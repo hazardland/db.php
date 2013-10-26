@@ -83,7 +83,7 @@
              */
             public $link;
             public $config = array (\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'");
-            public function __construct ($name, $database='mysql:host=127.0.0.1', $username='root', $password='1234', $settings=null)
+            public function __construct ($name=null, $database='mysql:host=127.0.0.1', $username='root', $password='1234', $settings=null)
             {
                 if (strpos($database,'mysql:')===0)
                 {
@@ -1220,7 +1220,7 @@
             }
             public function save (&$object, $event=null)
             {
-                debug ($event);
+                //debug ($event);
                 if (is_object($object))
                 {
                     $database = $this->database();
@@ -1251,6 +1251,10 @@
                                 //echo $field->name;
                                 if ($field->locale && $database->locales())
                                 {
+                                    if ($object->{$field->name}!==null && $object->{field(null,$field->name,$database->locale())}===null)
+                                    {
+                                        $object->{field(null,$field->name,$database->locale())} = $object->{$field->name};
+                                    }
                                     foreach ($database->locales() as $locale)
                                     {
                                         $set .= $this->name($field,$locale)."='".string($object->{field(null,$field->name,$locale)})."', ";
@@ -1374,12 +1378,18 @@
                     return $result;
                 }
             }
-            public function reset ($query)
+            public function reset ($query=null)
             {
                 if (is_object($query))
                 {
                     $database = $this->database();
                     $database->set ($this, $query, false);
+                }
+                else
+                {
+                    $this->columns = null;
+                    $this->tables = null;
+                    $this->hash = null;
                 }
             }
             public function delete ($object)
@@ -1600,6 +1610,7 @@
                 {
                     $this->table($object)->save ($object, $event);
                 }
+                return $object;                
             }
             public function scan ($prefix)
             {
@@ -1910,6 +1921,7 @@
                                 {
                                     $link->query($query);
                                 }
+                                $columns[field($table->prefix,$field->column,$field->ignore)] = &$columns[field($table->prefix,$field->column)];
                             }
                         }
                         //debug ($update);
@@ -1964,6 +1976,10 @@
                                         }
                                     }
                                 }
+                                //i cant really tell you what is going down there
+                                //but its really working : D
+                                //just as an advice dont code complex parts of frameworks midnights 
+                                //if you want to remember how it is working
                                 foreach ($locales as $locale)
                                 {
                                     if ((!isset($field->ignore) && !$locale) || ($field->ignore->name!=$locale->name && !isset($columns[field($table->prefix,$field->column,$locale)])))
@@ -2027,6 +2043,10 @@
                 if ($locales!==null)
                 {
                     $this->context->locales = $locales;
+                    foreach ($this->context->tables as &$table)
+                    {
+                        $table->reset();
+                    }
                 }
                 else
                 {
@@ -2270,14 +2290,14 @@
                 {
                     return $this->limit->result ($table);
                 }
-                if ($from===null)
+                if ($count===null)
                 {
                     $this->limit->count = $table;
                 }
                 else
                 {
                     $this->limit->from = $table;
-                    $this->limit->count = $from;
+                    $this->limit->count = $count;
                 }
 
             }
@@ -2582,16 +2602,24 @@
 
         function string ($input)
         {
-            return $input;
+            return addslashes($input);
         }
 
         function id (&$object,$field='id')
         {
             if (is_object($object))
             {
-                if ($object->{$field})
+                if (is_object($field))
                 {
-                    $id = $object->{$field};
+                    $from = $field->primary->name;
+                }
+                else
+                {
+                    $from = $field;
+                }
+                if ($object->{$from})
+                {
+                    $id = $object->{$from};
                 }
             }
             else
