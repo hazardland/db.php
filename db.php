@@ -1413,7 +1413,7 @@
                     $result = $database->link($this->link)->query ($request);
                     if ($result)
                     {
-                        $database->set ($this, string($object), false);
+                        $database->set ($this, id($object,$this->primary->name), false);
                     }
                 }
             }
