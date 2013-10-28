@@ -291,7 +291,7 @@
              * basic type of field
              * @var int
              */
-            public $type = type::string;
+            public $type;
 
             /**
              * foreign field table id
@@ -511,7 +511,10 @@
                                     {
                                         if (!$this->enum)
                                         {
-                                            $this->type = type::integer;
+                                            if ($this->type==null)
+                                            {
+                                                $this->type = type::integer;
+                                            }
                                             if ($this->data===null)
                                             {
                                                 $this->data = 'int';
@@ -634,6 +637,10 @@
                 {
                     $this->primary();
                 }
+                if ($this->type==null)
+                {
+                    $this->type = type::string;
+                }
             }
             public function type ()
             {
@@ -650,15 +657,15 @@
             }
             public function primary ()
             {
-                $this->primary = true;
                 $this->default = null;
                 $this->null = false;
-                if ($this->name=='id' && $this->type!=type::integer)
+                if (!$this->primary && $this->name=='id')
                 {
                     $this->type = type::integer;
                     $this->data = 'int';
                     $this->length = 10;
                 }
+                $this->primary = true;                
             }
             public function extra ()
             {
@@ -1040,10 +1047,17 @@
                                 {
                                     if ($table->link==$this->link)
                                     {
-                                        $result->{$field->name} = $table->create($row,$cell+1);
-                                        if ($result->{$field->name}->{$table->primary->name}===null && $row[$cell]!==null)//***
+                                        if ($row[$cell+1]===null)
                                         {
-                                            $result->{$field->name}->{$table->primary->name} = $row[$cell];//***
+                                            $result->{$field->name} = $row[$cell];
+                                        }
+                                        else
+                                        {
+                                            $result->{$field->name} = $table->create($row,$cell+1);
+                                            if ($result->{$field->name}->{$table->primary->name}===null && $row[$cell]!==null)//***
+                                            {
+                                                $result->{$field->name}->{$table->primary->name} = $row[$cell];//***
+                                            }                                            
                                         }
                                         foreach ($table->fields as $foreign)
                                         {
@@ -1351,7 +1365,10 @@
                                 $query = "insert into ".$this->name()." set ".$set;
                                 if ($database->link($this->link)->query ($query))
                                 {
-                                    $object->{$this->primary->name} = $database->link($this->link)->id();
+                                    if ($object->{$this->primary->name}===null)
+                                    {
+                                        $object->{$this->primary->name} = $database->link($this->link)->id();
+                                    }
                                     $database->set ($this,$object->{$this->primary->name},false);
                                     if ($clear===null)
                                     {
@@ -1608,6 +1625,7 @@
                 }
                 else
                 {
+                    //debug ($object);
                     $this->table($object)->save ($object, $event);
                 }
                 return $object;                
