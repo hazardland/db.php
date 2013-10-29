@@ -529,7 +529,7 @@
 //                                            }
                                         }
                                         $this->foreign = type ($flag->value);
-                                    }                                    
+                                    }
                                     // else
                                     // {
                                     //     throw new \Exception ('field not needed');
@@ -665,7 +665,7 @@
                     $this->data = 'int';
                     $this->length = 10;
                 }
-                $this->primary = true;                
+                $this->primary = true;
             }
             public function extra ()
             {
@@ -1056,8 +1056,11 @@
                                             $result->{$field->name} = $table->create($row,$cell+1);
                                             if ($result->{$field->name}->{$table->primary->name}===null && $row[$cell]!==null)//***
                                             {
-                                                $result->{$field->name}->{$table->primary->name} = $row[$cell];//***
-                                            }                                            
+                                                //creating default object from empty warrning error
+                                                //raises when using private fields and __set __get
+                                                //until now it does not cause malfunction
+                                                @$result->{$field->name}->{$table->primary->name} = $row[$cell];//***
+                                            }
                                         }
                                         foreach ($table->fields as $foreign)
                                         {
@@ -1628,7 +1631,7 @@
                     //debug ($object);
                     $this->table($object)->save ($object, $event);
                 }
-                return $object;                
+                return $object;
             }
             public function scan ($prefix)
             {
@@ -1996,7 +1999,7 @@
                                 }
                                 //i cant really tell you what is going down there
                                 //but its really working : D
-                                //just as an advice dont code complex parts of frameworks midnights 
+                                //just as an advice dont code complex parts of frameworks midnights
                                 //if you want to remember how it is working
                                 foreach ($locales as $locale)
                                 {
