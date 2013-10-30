@@ -610,11 +610,11 @@
                         {
                             $this->zero = true;
                         }
+                        if ($flag->name=='type' && $this->data==null)
+                        {
+                            $this->data = strtolower($flag->value);
+                        }
                     }
-                }
-                if ($flag->name=='type' && $this->data==null)
-                {
-                    $this->data = strtolower($flag->value);
                 }
                 if ($this->data===null)
                 {
@@ -1148,7 +1148,7 @@
                         }
                         else
                         {
-                            if (type($step['class']=='.db.table') && $step['function']=='load')
+                            if (isset($step['class']) && type($step['class']=='.db.table') && $step['function']=='load')
                             {
                                 if ($step['object']->id==$this->id)
                                 {
@@ -1167,7 +1167,10 @@
                 if (is_object($query) && type($query)=='.db.by')
                 {
                     $where = $query->result ($this);
-                    $query = clone $this->query;
+                    $query = new query();
+                    $query->where = clone $this->query->where;
+                    $query->order = clone $this->query->order;
+                    $query->limit = clone $this->query->limit;
                     $query->where ($where);
                 }
                 if ($query===null)
@@ -1373,7 +1376,7 @@
                                         $object->{$this->primary->name} = $database->link($this->link)->id();
                                     }
                                     $database->set ($this,$object->{$this->primary->name},false);
-                                    if ($clear===null)
+                                    if (!isset($clear) || $clear===null)
                                     {
                                         $clear = new query();
                                     }
@@ -2676,6 +2679,10 @@
             else
             {
                 $class = $input;
+            }
+            if ($class==null)
+            {
+                return null;
             }
             $class = str_replace ("\\", ".", $class);
             if ($class[0]!='.')
