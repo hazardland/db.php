@@ -1426,6 +1426,18 @@
                     }
                     return $result;
                 }
+                if (is_object($object) && type($object)=='.db.by')
+                {
+                    $query = new query();
+                    $query->where ($object->result($this));
+                    $database = $this->database();
+                    $request = "delete from ".$this->name()." where ".$query->where->result($this);
+                    $result = $database->link($this->link)->query ($request);
+                    if ($result)
+                    {
+
+                    }
+                }
                 else
                 {
                     $database = $this->database();
