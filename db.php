@@ -2653,9 +2653,17 @@
                 {
                     $from = $field;
                 }
-                if ($object->{$from})
+                if (isset($object->{$from}))
                 {
                     $id = $object->{$from};
+                }
+                else
+                {
+                    foreach ($object as $value)
+                    {
+                        $id = $value;
+                        break;
+                    }
                 }
             }
             else
