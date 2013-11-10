@@ -2615,12 +2615,13 @@
             }
             public function result (&$table)
             {
+                global $database;
                 if (is_object($table) && $this->items)
                 {
                     $result = '';
                     foreach ($this->items as $field=>$value)
                     {
-                        $result .= $table->name($field)."='".id($value,$table->primary->name)."' and ";
+                        $result .= $table->name($field,$database->locale())."='".id($value,$table->primary->name)."' and ";
                     }
                     if ($result!=='')
                     {
