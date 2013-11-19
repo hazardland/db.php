@@ -388,13 +388,13 @@
              * @var \ReflectionClass
              */
             public $class = null;
+            public $value = false;
             public function __construct (\ReflectionProperty $value)
             {
                 if ($value==null)
                 {
                     throw new \Exception();
                 }
-                $this->value = $value;
                 $this->event = new event ();
                 $this->config = new config ();
                 $this->name = $value->getName();
@@ -506,6 +506,7 @@
                                     if ($this->class->isSubclassOf('\db\value'))
                                     {
                                         $this->type = type::string;
+                                        $this->value = true;
                                     }
                                     else// ($this->class->isSubclassOf('\db\entity'))
                                     {
@@ -1033,6 +1034,12 @@
                                 }
                             }
                         }
+                        else if ($field->value && is_object($field->class))
+                        {
+                            $result->{$field->name} = @$field->class->newInstance();
+                            $result->{$field->name}->set ($row[$cell]);
+                            $cell++;
+                        }
                         else if ($field->enum && $field->foreign)
                         {
                             $result->{$field->name} = $this->enum($row[$cell],$database->table($field->foreign));
@@ -1279,6 +1286,10 @@
                                     {
                                         $set .= $this->name($field,$locale)."='".string($object->{field(null,$field->name,$locale)})."', ";
                                     }
+                                }
+                                else if ($field->value)
+                                {
+                                    $set .= $this->name($field)."='".string($object->{$field->name}->get())."', ";
                                 }
                                 else if ($field->foreign && $field->enum)
                                 {
@@ -2187,7 +2198,7 @@
 
         abstract class value
         {
-            public function set ()
+            public function set ($value)
             {
             }
             public function get ()
