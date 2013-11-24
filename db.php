@@ -1585,6 +1585,7 @@
                 $this->context->usage = new \stdClass();
                 $this->context->usage->query = 0;
                 $this->context->usage->cache = 0;
+                $this->context->readonly = false;
                 if ($link)
                 {
                     $this->context->links[$link->name] = $link;
@@ -1593,6 +1594,13 @@
                 $this->context->caches[cache::long] = new long ();
                 $this->context->caches[cache::user] = new user ();
                 self::$object = $this;
+            }
+            public function __destruct ()
+            {
+                if ($this->link()->debug)
+                {
+                    debug ($this->context->usage);
+                }
             }
             /**
              * @param \db\table $table
@@ -1703,8 +1711,16 @@
                     return $this->context->links[$link];
                 }
             }
+            public function readonly ($value=true)
+            {
+                $this->context->readonly = $value;
+            }
             public function update ($log=null)
             {
+                if ($this->context->readonly)
+                {
+                    return;
+                }
                 if ($log)
                 {
                     $file = $log;
@@ -2650,6 +2666,7 @@
 
         function string ($input)
         {
+            //if (is_array($input)) debug ($input);
             return addslashes($input);
         }
 
@@ -2805,13 +2822,20 @@
         function debug ($input)
         {
             $backtrace = debug_backtrace();
-            $result = "<div style=\"font-family:'dejavu sans mono','consolas','monospaced','monospace';font-size:10pt;width:600px;margin-bottom:20px\"><div style='background:#f0f0f0'>";
+            $result = "<div style=\"font-family:'dejavu sans mono','consolas','monospaced','monospace';font-size:10pt;width:600px;margin-bottom:20px;margin-left:20px;background:#fafafa\"><div style='background:#f0f0f0'>";
             foreach ($backtrace as $key => $value)
             {
                 $result .= $value['file']." [".$value['line']."] <font color=red>".$value['function']."</font><br>";
             }
             $result .= '</div>';
-            $result .= str_replace (array("\\'","\n"," ","var","array","class","=&gt;","&nbsp;&nbsp;&nbsp;'","'&nbsp;&nbsp;<b><font color=green>="),array("'","<br>\n",'&nbsp;&nbsp;',"<b><font color=blue>var</font></b>","<b><font color=red>array</font></b>","<b><font color=green>class</font></b>","<b><font color=green>=</font></b>","&nbsp;&nbsp;&nbsp;<font color=green>'","'</font>&nbsp;&nbsp;<b><font color=green>="), htmlspecialchars (var_export($input,true),ENT_NOQUOTES,'UTF-8'));
+            if (is_string($input))
+            {
+                $result .= color ($input);
+            }
+            else
+            {
+                $result .= str_replace (array("\\'","\n"," ","var","array","class","=&gt;","&nbsp;&nbsp;&nbsp;'","'&nbsp;&nbsp;<b><font color=green>="),array("'","<br>\n",'&nbsp;&nbsp;',"<b><font color=blue>var</font></b>","<b><font color=red>array</font></b>","<b><font color=green>class</font></b>","<b><font color=green>=</font></b>","&nbsp;&nbsp;&nbsp;<font color=green>'","'</font>&nbsp;&nbsp;<b><font color=green>="), htmlspecialchars (var_export($input,true),ENT_NOQUOTES,'UTF-8'));
+            }
             $result .= "</div>";
             echo $result;
         }
@@ -2854,6 +2878,54 @@
                     }
                 }
             }
+        }
+
+        function color ($query)
+        {
+            return str_replace(
+            array(
+            '`',
+            '.',
+            'show ',
+            'describe ',
+            'select ',
+            'from ',
+            'left join',
+            'insert ',
+            'update ',
+            'delete ',
+            'where ',
+            'order by ',
+            'like ',
+            'limit ',
+            'group by ',
+            'and ',
+            'or ',
+            ' asc',
+            ' desc',
+            ' on '),
+            array(
+            '<b>`</b>',
+            '<b>.</b>',
+            '<span style="color:green;font-weight:bold">SHOW </span>',
+            '<span style="color:green;font-weight:bold">DESCRIBE </span>',
+            '<span style="color:green;font-weight:bold">SELECT </span>',
+            '<span style="color:brown;font-weight:bold"><br>FROM </span>',
+            '<span style="color:brown;font-weight:bold"><br>LEFT JOIN</span>',
+            '<span style="color:green;font-weight:bold">INSERT </span>',
+            '<span style="color:green;font-weight:bold">UPDATE </span>',
+            '<span style="color:green;font-weight:bold">DELETE </span>',
+            '<span style="color:blue;font-weight:bold"><br>WHERE </span>',
+            '<span style="color:red;font-weight:bold"><br>ORDER BY </span>',
+            '<span style="color:brown;font-weight:bold">LIKE </span>',
+            '<span style="color:red;font-weight:bold"><br>LIMIT </span>',
+            '<span style="color:red;font-weight:bold"><br>GROUP BY </span>',
+            '<b>AND </b>',
+            '</b>OR </b>',
+            '<b>ASC</b>',
+            '<b>DESC</b>',
+            '<span style="color:brown;font-weight:bold"> ON </span>',
+            ),$query);
         }
     }
 
