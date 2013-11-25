@@ -2666,8 +2666,11 @@
 
         function string ($input)
         {
-            //if (is_array($input)) debug ($input);
-            return addslashes($input);
+            if (!get_magic_quotes_gpc())
+            {
+                return addslashes($input);
+            }
+            return $input;
         }
 
         function id (&$object,$field='id')
