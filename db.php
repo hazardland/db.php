@@ -2094,12 +2094,21 @@
                     file_put_contents($file, $log);
                 }
             }
-            function debug ($name, $field, $table=null)
+            function debug ($value=true)
             {
-                return;
-                echo "<span style='font-family:\"dejavu sans mono\";font-size:11pt;font-weight:bold;'>"
-                .$table->name." ".$name." on field ".$field->name."(".$field->column.")</span>";
-                debug ($field);
+                if ($name=true)
+                {
+                    $this->link()->debug = true;
+                }
+                else
+                {
+                    $this->link()->debug = false;
+                }
+                // else if ($nam)
+                // return;
+                // echo "<span style='font-family:\"dejavu sans mono\";font-size:11pt;font-weight:bold;'>"
+                // .$table->name." ".$name." on field ".$field->name."(".$field->column.")</span>";
+                // debug ($field);
             }
             public function locales ($locales=null)
             {
