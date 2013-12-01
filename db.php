@@ -913,6 +913,15 @@
                     }
                 }
             }
+            public function value ($field, $value)
+            {
+                return $this->field($field)."='".id($value)."'";
+            }
+            public function field ($name)
+            {
+                global $database;
+                return $this->name($name,$database->locale());
+            }
             public function name ($field=null, $locale=false, $short=false)
             {
                 if ($field===null)
@@ -997,10 +1006,6 @@
                     return array ();
                 }
                 return $set;
-            }
-            public function field ($name)
-            {
-                return $this->fields[$name];
             }
             public function create ($row, $from=0)
             {
