@@ -41,7 +41,7 @@
          * deny insert|select|update|delete
          */
 
-        class foo extends entity
+        class foo
         {
             /**
              *required
@@ -68,7 +68,7 @@
 
         }
 
-        class bar extends entity
+        class bar
         {
 
         }
@@ -1310,6 +1310,7 @@
                                 }
                                 else
                                 {
+
                                     if ($object->{$field->name}!==null)
                                     {
                                         if ($field->type==type::string)
@@ -2230,25 +2231,10 @@
         {
             public function set ($value)
             {
+
             }
             public function get ()
             {
-            }
-        }
-
-        abstract class entity
-        {
-            /**
-             * primary
-             * @var int
-             */
-            public $id;
-            /**
-             * @return int
-             */
-            public function id ()
-            {
-                return $this->id;
             }
         }
 
