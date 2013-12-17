@@ -1221,6 +1221,10 @@
                     $rows = $database->get ($this, $query);
                     if (!$rows)
                     {
+                        if (type($query)!='.db.query')
+                        {
+                            @debug ($query);
+                        }
                         $database->context->usage->query ++;
                         $rows = array ();
                         $request = "select ".$this->fields()." from ".$this->tables()." ".$query->where($this)." ".$query->order($this)." ".$query->limit($this);
