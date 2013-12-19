@@ -391,7 +391,7 @@
             public $value = false;
             public function __construct (\ReflectionProperty $value)
             {
-                if ($value==null)
+                if ($value==null || $value->isStatic())
                 {
                     throw new \Exception();
                 }
