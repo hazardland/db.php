@@ -1583,8 +1583,15 @@
              * @param string $default default database name
              * @param \db\link $link default connection to database
              */
-            public function __construct ($default=null, link $link=null)
+            public function __construct ($default=null, $link=null, $username=null, $password=null)
             {
+                if (!is_object($link) && $link!=null && $username!==null)
+                {
+                    $database = $link;
+                    $hostname = $default;
+                    $default = $database;
+                    $link = new link ('default', $hostname, $username, $password);
+                }
                 $this->context = new \stdClass();
                 $this->context->links = array ();
                 $this->context->tables = array ();
