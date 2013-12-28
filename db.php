@@ -2113,7 +2113,7 @@
             }
             function debug ($value=true)
             {
-                if ($name=true)
+                if ($value==true)
                 {
                     $this->link()->debug = true;
                 }
@@ -2659,7 +2659,16 @@
                     $result = '';
                     foreach ($this->items as $field=>$value)
                     {
-                        $result .= $table->name($field,$database->locale())."='".id($value,$table->primary->name)."' and ";
+                        $primary = null;
+                        if (is_object($value))
+                        {
+                            $parent = $database->table(\db\type($value));
+                            if ($parent)
+                            {
+                                $primary = $parent->primary->name;
+                            }
+                        }
+                        $result .= $table->name($field,$database->locale())."='".id($value,$primary)."' and ";
                     }
                     if ($result!=='')
                     {

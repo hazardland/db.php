@@ -42,7 +42,7 @@
      * engine myisam
      * table user_group
      */
-    class group extends \db\entity
+    class group
     {
         /**
          * primary
@@ -60,7 +60,7 @@
         }
     }
 
-    class option extends \db\entity
+    class option
     {
         public $id;
         /**

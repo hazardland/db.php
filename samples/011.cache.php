@@ -19,7 +19,7 @@
 
     include '../db.php';
 
-//    class solution extends \db\entity
+//    class solution
 //    {
 //        public $id;
 //        public $name;
@@ -42,7 +42,7 @@
 //        }
 //    }
 //
-//    class project extends \db\entity
+//    class project
 //    {
 //        public $id;
 //        public $name;
@@ -79,7 +79,7 @@
     /**
      * cache long
      */
-    class widget extends \db\entity
+    class widget
     {
         public $id;
         public $name;

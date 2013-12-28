@@ -40,11 +40,7 @@
 
     //take a look how user.group relates to group by adding in public $group comment directive '@var group'
 
-    //important! - if you want class to be master extend it from \db\entity because \db\entity always has public $id
-    //in this case group extends \db\entity
-    //this gives db engine a clue that group will always have id property
-    //therefore it can be used for relation
-    class group extends \db\entity
+    class group
     {
         public $id;
         public $name;

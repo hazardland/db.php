@@ -2,7 +2,7 @@
 
     namespace core
     {
-        class solution extends \db\entity
+        class solution
         {
             public $id;
             public $name;
@@ -18,16 +18,11 @@
             {
                 $this->name = $name;
             }
-            public function create ()
-            {
-                global $database;
-                $this->projects = $database->core->project->load(null,$this);
-            }
         }
 
         //the directive 'locale' specifies that the field is localized
         //if locales are defined
-        class project extends \db\entity
+        class project
         {
             public $id;
             public $name;
@@ -70,7 +65,7 @@
         /**
          * cache long
          */
-        class widget extends \db\entity
+        class widget
         {
             public $id;
             public $name;

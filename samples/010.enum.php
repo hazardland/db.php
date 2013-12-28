@@ -24,7 +24,7 @@
 
     //take a note we specified in public $girl comment 'enum' and also master class 'girl' as @var
 
-    class girl extends \db\entity
+    class girl
     {
         public $id;
         public $name;

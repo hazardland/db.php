@@ -63,7 +63,7 @@
         public $worker;
     }
 
-    class client extends \db\entity
+    class client
     {
         public $id;
         public $name;
