@@ -21,48 +21,50 @@
          * cultures - your instance of cultures
          * cache - your instance of cache
          * link - your database connection
+         * solution
+         * project
          */
 
         /*
-         * table sample_foo
-         * database site_blank
-         * link default
-         * prefix foo
-         * order field [asc|desc]
-         * charset utf8
+         * table sample_foo (use table named sample_foo for this class)
+         * database simple_db (table is located in simple_db)
+         * link mysql_simpl4 (table is using link mysql_simpl4)
+         * prefix foo_ (table field prefix is foo_)
+         * order field [asc|desc] (table default order field/method is)
+         * charset utf8 (table default charset)
          * engine myisam
-         * rename oldname
-         * cache none|load|user|long
-         * scope project|solution
-         * unique name
-         * unique search id,name
-         * index fast id,name
-         * ignore
-         * deny insert|select|update|delete
+         * rename oldname (rename table 'oldname' to this current name if exists)
+         * cache none|load|user|long (select your cache type)
+         * scope project|solution (select your cache scope)
+         * unique name (define simple unique index)
+         * unique search id, name (define compound unique index)
+         * index fast id, name (define compound index)
+         * ignore (ignore this t)
+         * deny insert|select|update|delete (deny some for this table)
          */
 
         class foo
         {
             /**
-             *required
-             * field/column users_bio
+             * required (this field is requrired)
+             * field/column some_field (use field named 'some_field' for this property)
              * type integer|boolean|float|text|binary|date|time
-             * length 32
-             * locale
-             * enum
-             * unsigned
-             * zerofill
-             * default 3
-             * primary
-             * rename users
-             * first
-             * after id
-             * ignore
-             * foreign \db\bar
-             * deny insert
-             * allow update
-             * deny insert for user biohazard
-             * @var \test\master
+             * length 32 (column length)
+             * locale (specify if this field is localized)
+             * enum (if this field stores same type object list)
+             * unsigned (if column unsigned)
+             * zerofill (if zerofill for column)
+             * default 3 (default value)
+             * primary (if this field is primary)
+             * rename 'name_old' (rename field 'name_old' to 'name' if exists)
+             * first (this column is first)
+             * after id (this column goes after property 'id' column)
+             * ignore (ignore this field)
+             * foreign \db\bar (set up relation to different class object)
+             * deny insert|select|update (allow this field in insert qeuery)
+             * allow insert|select|update (allow this field in update qeuery)
+             * deny insert for user biohazard (coming soon)
+             * @var \test\master (define basic type of field or setup relation)
              */
             public $name;
 
