@@ -1347,13 +1347,13 @@
                                         }
                                         else if ($field->type==type::date)
                                         {
-                                            $object->{$field->name} = date(null,date($object->{$field->name}));
-                                            $set .= $this->name($field)."='".date($object->{$field->name})."', ";
+                                            $object->{$field->name} = date($object->{$field->name});
+                                            $set .= $this->name($field)."='".$object->{$field->name}."', ";
                                         }
                                         else if ($field->type==type::time)
                                         {
-                                            $object->{$field->name} = time(null,time($object->{$field->name}));
-                                            $set .= $this->name($field)."='".time($object->{$field->name})."', ";
+                                            $object->{$field->name} = time($object->{$field->name});
+                                            $set .= $this->name($field)."='".$object->{$field->name}."', ";
                                         }
                                         else if ($field->type==type::binary)
                                         {
@@ -2769,11 +2769,13 @@
 
         function date ($destroy=null, $restore=null)
         {
+            //debug ("des ".$destroy." res ".$restore);
             $user = 0;
-            $zone = intval(\date('Z'));
-            if (isset($GLOBALS['user']->zone))
+            //$zone = intval(\date('Z'));
+            $zone = 0;
+            if (isset($GLOBALS['system']->user->zone))
             {
-                $user = intval(strval($GLOBALS['user']->zone));
+                $user = intval(strval($GLOBALS['system']->user->zone));
             }
             if ($restore!==null)
             {
@@ -2811,9 +2813,9 @@
         {
             $user = 0;
             $zone = intval(\date('Z'));
-            if (isset($GLOBALS['user']->zone))
+            if (isset($GLOBALS['system']->user->zone))
             {
-                $user = intval(strval($GLOBALS['user']->zone));
+                $user = intval(strval($GLOBALS['system']->user->zone));
             }
             if ($restore!==null)
             {
