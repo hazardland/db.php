@@ -2,6 +2,10 @@
 
     namespace db
     {
+        const title = 'Db';
+        const build = 1;
+        const label = 0.9;
+
         /**
          * goals:
          * 1. code first (generate database tables, maintain class property changes, alter field alter field properties)
@@ -2115,13 +2119,16 @@
             }
             function debug ($value=true)
             {
-                if ($value==true)
+                if (is_bool($value))
                 {
-                    $this->link()->debug = true;
-                }
-                else
-                {
-                    $this->link()->debug = false;
+                    if ($value==true)
+                    {
+                        $this->link()->debug = true;
+                    }
+                    else
+                    {
+                        $this->link()->debug = false;
+                    }
                 }
                 // else if ($nam)
                 // return;
