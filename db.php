@@ -1575,6 +1575,10 @@
                 }
                 return $this->hash;
             }
+            public function next ()
+            {
+                return intval($this->database()->link($this->link)->value("select max(".$this->name($this->primary).") from ".$this->name()))+1;
+            }
             public function database ()
             {
                 return database::$object;
