@@ -34,7 +34,7 @@
          * database simple_db (table is located in simple_db)
          * link mysql_simpl4 (table is using link mysql_simpl4)
          * prefix foo_ (table field prefix is foo_)
-         * order field [asc|desc] (table default order field/method is)
+         * order field:[asc|desc] (order name:asc,date,count:desc please avoid space)
          * charset utf8 (table default charset)
          * engine myisam
          * rename oldname (rename table 'oldname' to this current name if exists)
@@ -68,6 +68,8 @@
              * deny insert|select|update (allow this field in insert qeuery)
              * allow insert|select|update (allow this field in update qeuery)
              * deny insert for user biohazard (coming soon)
+             * on insert set date
+             * on update set date
              * @var \test\master (define basic type of field or setup relation)
              */
             public $name;
@@ -235,13 +237,18 @@
                         $set = explode(" ", $crop);
                         if (is_array($set) && count($set))
                         {
-                            if (count($set)==1)
+                            $count = count ($set);
+                            if ($count===1)
                             {
                                 return new flag($set[0]);
                             }
-                            else
+                            else if ($count===2)
                             {
                                 return new flag($set[0],$set[1]);
+                            }
+                            else if ($count>2)
+                            {
+                                return new flag($set[0],$set);
                             }
                         }
                     }
@@ -544,6 +551,31 @@
                                 }
                             }
                         }
+                        elseif ($flag->name=='on')
+                        {
+                            if ($flag->value[1]=='insert')
+                            {
+                                if ($flag->value[3]=='date')
+                                {
+                                    $this->event->insert->action = action::date;
+                                }
+                                else if ($flag->value[2]=='user')
+                                {
+                                    $this->event->insert->action = action::user;
+                                }
+                            }
+                            else if ($flag->value[1]=='update')
+                            {
+                                if ($flag->value[3]=='date')
+                                {
+                                    $this->event->update->action = action::date;
+                                }
+                                else if ($flag->value[3]=='user')
+                                {
+                                    $this->event->update->action = action::user;
+                                }
+                            }
+                        }
                         elseif ($flag->name=='required')
                         {
                             $this->required = true;
@@ -794,6 +826,7 @@
                 {
                     $this->name = $this->id;
                 }
+                $input = new \stdClass();
                 $this->class = new \ReflectionClass (str_replace (".", "\\", $this->id));
                 $flags = flag::set($this->class);
                 if (is_array($flags))
@@ -834,7 +867,7 @@
                         }
                         else if ($flag->name=='order')
                         {
-                            debug ($flag->value);
+                            $input->order = explode(',', $flag->value);
                         }
                         else if ($flag->name=='limit')
                         {
@@ -916,6 +949,54 @@
                     {
                         $this->primary = &$this->fields['id'];
                         $this->primary->primary();
+                    }
+                }
+                if (is_array($input->order))
+                {
+                    if (count($input->order)==1)
+                    {
+                        if (strpos($input->order[0],':'))
+                        {
+                            $input->order = explode(':',$input->order[0]);
+                            if (isset($this->fields[$input->order[0]]))
+                            {
+                                $this->query->order->field($input->order[0]);
+                                if ($input->order[1]=='asc' || $input->order[1]=='desc')
+                                {
+                                    $this->query->order->method ($input->order[1]);
+                                }
+                            }
+                            // debug ($this->query->order);
+                            // exit;
+                        }
+                        else if (isset($this->fields[$input->order[0]]))
+                        {
+                            $this->query->order->field($input->order[0]);
+                        }
+                    }
+                    else
+                    {
+                        foreach ($input->order as $data)
+                        {
+                            if (strpos($input->order[0],':'))
+                            {
+                                $data = explode(':',$data);
+                                if (isset($this->fields[$data[0]]))
+                                {
+                                    $this->query->order->add($data[0], $data[1]);
+                                }
+                            }
+                            else
+                            {
+                                if (isset($this->fields[$data]))
+                                {
+                                    $this->query->order->add($data);
+                                }
+                            }
+                        }
+                        // debug ($this->query->order);
+                        // debug ($this->query->order->result($this));
+                        // exit;
                     }
                 }
             }
@@ -1288,6 +1369,12 @@
                                 //debug ($event);
                                 if (($event==query::update && $field->primary) || ($field->primary && !$object->{$this->primary->name}))
                                 {
+                                    continue;
+                                }
+                                if (($event==query::update && $field->event->update->action==action::date) || ($event==query::insert && $field->event->insert->action==action::date))
+                                {
+                                    $object->{$field->name} = date(now());
+                                    $set .= $this->name($field)."='".$object->{$field->name}."', ";
                                     continue;
                                 }
                                 //echo $field->name;
@@ -2855,6 +2942,11 @@
                 $zone = $user;
             }
             return \date('Y-m-d H:i:s',$destroy-$zone);
+        }
+
+        function now ($date=null)
+        {
+            return date ('Y-m-d H:i:s',$date);
         }
 
         function debug ($input)
