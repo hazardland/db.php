@@ -2833,8 +2833,9 @@
         {
             if (is_object($input))
             {
-                $reflection = new \ReflectionClass ($input);
-                $class = $reflection->getName();
+                // $reflection = new \ReflectionClass ($input);
+                // $class = $reflection->getName();
+                $class = get_class ($input);
             }
             else
             {
