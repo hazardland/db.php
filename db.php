@@ -1776,8 +1776,13 @@
                 }
                 else
                 {
-                    //debug ($object);
-                    $this->table($object)->save ($object, $event);
+                    $table = $this->table($object);
+                    if (!$table)
+                    {
+                        debug ($object);
+                        exit;
+                    }
+                    $table->save ($object, $event);
                 }
                 return $object;
             }
