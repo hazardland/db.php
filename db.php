@@ -1373,7 +1373,7 @@
                                 }
                                 if (($event==query::update && $field->event->update->action==action::date) || ($event==query::insert && $field->event->insert->action==action::date))
                                 {
-                                    $object->{$field->name} = date(now());
+                                    $object->{$field->name} = time(now());
                                     $set .= $this->name($field)."='".$object->{$field->name}."', ";
                                     continue;
                                 }
@@ -1633,6 +1633,10 @@
                     }
                 }
                 return $this->columns;
+            }
+            public function table ()
+            {
+                return $this->name();
             }
             public function tables ()
             {
@@ -2952,7 +2956,11 @@
 
         function now ($date=null)
         {
-            return date ('Y-m-d H:i:s',$date);
+            if ($date!==null)
+            {
+                return \date ('Y-m-d H:i:s',$date);
+            }
+            return \date ('Y-m-d H:i:s');
         }
 
         function debug ($input)
