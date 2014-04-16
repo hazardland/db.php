@@ -329,6 +329,10 @@
             /**
              * @var bool
              */
+            public $lazy = false;
+            /**
+             * @var bool
+             */
             public $required = false;
 
             /**
@@ -609,6 +613,10 @@
                                 $this->length = 32;
                             }
                             $this->enum = true;
+                        }
+                        elseif ($flag->name=='lazy')
+                        {
+                            $this->lazy = true;
                         }
                         elseif ($flag->name=='first')
                         {
@@ -1053,7 +1061,7 @@
                     }
                 }
             }
-            public function enum ($set,$table=null)
+            public static function enum ($set,$table=null)
             {
                 if (is_array($set))
                 {
@@ -1083,6 +1091,7 @@
                             {
                                 if ($key)
                                 {
+                                    //debug ($table->name);
                                     $object = $table->load ($key);
                                     $result[$object->{$table->primary->name}] = $object;
                                 }
@@ -1134,7 +1143,21 @@
                         }
                         else if ($field->enum && $field->foreign)
                         {
-                            $result->{$field->name} = $this->enum($row[$cell],$database->table($field->foreign));
+                            if ($field->lazy)
+                            {
+                                if (strlen(($row[$cell]))>2)
+                                {
+                                    $result->{$field->name} = explode ('|',substr($row[$cell],1,-1));;
+                                }
+                                else
+                                {
+                                    $result->{$field->name} = array ();
+                                }
+                            }
+                            else
+                            {
+                                $result->{$field->name} = self::enum($row[$cell],$database->table($field->foreign));
+                            }
                             $cell++;
                         }
                         else if ($field->foreign)
@@ -1152,6 +1175,7 @@
                                         }
                                         else
                                         {
+                                            //debug ($this->name);
                                             $result->{$field->name} = $table->create($row,$cell+1);
                                             if ($result->{$field->name}->{$table->primary->name}===null && $row[$cell]!==null)//***
                                             {
@@ -1399,7 +1423,7 @@
                                     {
                                         $object->{$field->name} = array ();
                                     }
-                                    $set .= $this->name($field)."='".$this->enum($object->{$field->name},$database->table($field->foreign))."', ";
+                                    $set .= $this->name($field)."='".self::enum($object->{$field->name},$database->table($field->foreign))."', ";
                                 }
                                 else if ($field->foreign)
                                 {
