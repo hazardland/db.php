@@ -1145,7 +1145,7 @@
                         {
                             if ($field->lazy)
                             {
-                                if (strlen(($row[$cell]))>2)
+                                if (strlen($row[$cell])>2)
                                 {
                                     $result->{$field->name} = explode ('|',substr($row[$cell],1,-1));;
                                 }
