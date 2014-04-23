@@ -2298,10 +2298,6 @@
                     return $this->context->locale;
                 }
             }
-            public function cache ($type, $table, $field, $id)
-            {
-
-            }
             public function set (table &$table, $query, $value)
             {
                 $scope = null;
@@ -2368,6 +2364,14 @@
                     return $this->context->caches[$cache]->get ($scope, $table, $query);
                 }
                 return false;
+            }
+            public function base (&$object)
+            {
+                if (is_string($object))
+                {
+                    return $this->{before('\\',$object)};
+                }
+                return $this->{before('\\',get_class($object))};
             }
         }
 
