@@ -2819,6 +2819,10 @@
 
         function string ($input)
         {
+            if (is_object($input) || is_array($input))
+            {
+                debug ($input);
+            }
             if (!get_magic_quotes_gpc())
             {
                 return addslashes($input);
@@ -3046,6 +3050,32 @@
                     }
                 }
             }
+        }
+
+        function cache ($table, $id, $flush=false)
+        {
+            $id = id ($id);
+            if (!$id)
+            {
+                return;
+            }
+            $key = 'db:'.$table->class->getName().':'.$id;
+            if ($flush || !apc_exists($key))
+            {
+                $result = $table->load($id);
+                if (!$result)
+                {
+                    apc_delete ($key);
+                    return $id;
+                }
+                apc_store ($key, $result);
+                return $result;
+            }
+            else if (apc_exists($key))
+            {
+                return apc_fetch ($key);
+            }
+            return $id;
         }
 
         function color ($query)
