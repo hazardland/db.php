@@ -2681,29 +2681,52 @@
             }
             function set ($scope, &$table, $query, $value)
             {
+                $path = 'database|'.scope($scope).$table->hash();
                 if (is_object($query))
                 {
                     if (is_array($value))
                     {
+                        $hash = $query->hash($table);
                         foreach ($value as $item)
                         {
-                            $this->store ('database|'.scope($scope).$table->hash().'|'.$item[field($table->prefix,$table->primary->name)], $item);
+                            $this->store ($path.'|entry|'.$item[$table->primary->position], $item);
+                            $about = $this->fetch ($path.'|about|'.$item[$table->primary->position]);
+                            if (!is_array($about))
+                            {
+                                $about = array ();
+                            }
+                            $about[$path.'|query|'.$hash] = true;
+                            $this->store ($path.'|about|'.$item[$table->primary->position], $about);
                         }
-                        $this->store ('database|'.scope($scope).$table->hash().'|'.$query->hash($table), $value);
+                        $this->store ($path.'|query|'.$hash, $value);
                     }
                 }
                 else
                 {
-                    $this->store ('database|'.scope($scope).$table->hash().'|'.$query, $value);
+                    if (is_bool($value))
+                    {
+                        $about = $this->fetch ($path.'|about|'.$query);
+                        if (is_array($about))
+                        {
+                            foreach ($about as $key => $temp)
+                            {
+                                $this->store ($key, false);
+                                unset ($about[$key]);
+                            }
+                            $this->store($path.'|about|'.$query, $about);
+                        }
+                    }
+                    $this->store ($path.'|entry|'.$query, $value);
                 }
             }
             function get ($scope, &$table, $query)
             {
+                $path = 'database|'.scope($scope).$table->hash();
                 if (is_object($query))
                 {
-                    return $this->fetch ('database|'.scope($scope).$table->hash().'|'.$query->hash($table));
+                    return $this->fetch ($path.'|query|'.$query->hash($table));
                 }
-                return $this->fetch ('database|'.scope($scope).$table->hash().'|'.$query);
+                return $this->fetch ($path.'|entry|'.$query);
             }
             function count ()
             {
@@ -2755,11 +2778,21 @@
         {
             function store ($name, $value)
             {
-                apc_store ($name, $value);
+                if (is_bool($value))
+                {
+                    apc_delete ($name);
+                }
+                else
+                {
+                    apc_store ($name, $value);
+                }
+                // debug ($name);
+                // debug ($value);
+                //exit;
             }
             function fetch ($name)
             {
-                return apc_fetch ($name, $value);
+                return apc_fetch ($name);
             }
             function clear ()
             {
@@ -3019,51 +3052,51 @@
         function scope ($scope)
         {
             global $system;
-            if (!is_object($scope))
+            if ($scope==scope::project)
             {
-                if ($scope==scope::project)
+                if (isset($system->solution->path) && isset($system->project->name))
                 {
-                    if (isset($system->solution->name) && isset($system->project->name))
-                    {
-                        return $system->solution->name.'.'.$system->project->name."|";
-                    }
-                }
-                if ($scope==scope::solution)
-                {
-                    if (isset($system->solution->name))
-                    {
-                        return $system->solution->name."|";
-                    }
+                    return md5($system->solution->path.'|'.$system->project->name)."|";
                 }
             }
-            else
+            if ($scope==scope::solution)
             {
-                $class = type ($scope);
-                if ($class=='.core.project')
+                if (isset($system->solution->name))
                 {
-                    if (isset($scope->solution->name) && isset($scope->name))
-                    {
-                        return $scope->solution->name.'.'.$scope->name."|";
-                    }
-                }
-                if ($class=='.core.solution')
-                {
-                    if (isset($scope->name))
-                    {
-                        return $scope->name."|";
-                    }
+                    return md5($system->solution->path.'|')."|";
                 }
             }
         }
 
-        function cache ($table, $id, $flush=false)
+        function cache ($table, $object, $delete=false)
         {
-            $id = id ($id);
+            global $database;
+            if (is_object($object))
+            {
+                if (!$database->save ($object))
+                {
+                    return;
+                }
+                $id = \db\id($object,$table);
+                $flush = true;
+            }
+            else if ($clean)
+            {
+                if ($table->delete($object))
+                {
+                    apc_delete (id($object,$table));
+                }
+                return;
+            }
+            else
+            {
+                $id = id ($object,$table);
+            }
             if (!$id)
             {
                 return;
             }
-            $key = 'db:'.$table->class->getName().':'.$id;
+            $key = 'database|'.$table->class->getName().'|'.$id;
             if ($flush || !apc_exists($key))
             {
                 $result = $table->load($id);
