@@ -1147,7 +1147,17 @@
                             {
                                 if (strlen($row[$cell])>2)
                                 {
-                                    $result->{$field->name} = explode ('|',substr($row[$cell],1,-1));;
+                                    $keys = explode ('|',substr($row[$cell],1,-1));
+                                    if ($keys && is_array($keys))
+                                    {
+                                        foreach ($keys as $key)
+                                        {
+                                            if ($key)
+                                            {
+                                                $result->{$field->name}[$key] = $key;
+                                            }
+                                        }
+                                    }
                                 }
                                 else
                                 {
@@ -2699,6 +2709,13 @@
                             $this->store ($path.'|about|'.$item[$table->primary->position], $about);
                         }
                         $this->store ($path.'|query|'.$hash, $value);
+                        $about = $this->fetch ($path.'|about|');
+                        if (!is_array($about))
+                        {
+                            $about = array ();
+                        }
+                        $about[$path.'|query|'.$hash] = true;
+                        $this->store($path.'|about|', $about);
                     }
                 }
                 else
@@ -2714,6 +2731,20 @@
                                 unset ($about[$key]);
                             }
                             $this->store($path.'|about|'.$query, $about);
+                        }
+                        else
+                        {
+                            $about = $this->fetch ($path.'|about|');
+                            if (is_array($about))
+                            {
+                                foreach ($about as $key => $temp)
+                                {
+                                    $this->store ($key, false);
+                                    debug ('deleted '.$key);
+                                    unset ($about[$key]);
+                                }
+                                $this->store($path.'|about|', $about);
+                            }
                         }
                     }
                     $this->store ($path.'|entry|'.$query, $value);
@@ -2818,7 +2849,12 @@
             private $items = array();
             public function by ($field, $value)
             {
-                $this->items[$field] = $value;
+                $this->items['by:'.$field] = $value;
+                return $this;
+            }
+            public function in ($field, $value)
+            {
+                $this->items['in:'.$field] = $value;
                 return $this;
             }
             public function result (&$table)
@@ -2829,6 +2865,7 @@
                     $result = '';
                     foreach ($this->items as $field=>$value)
                     {
+                        $field = explode(':', $field);
                         $primary = null;
                         if (is_object($value))
                         {
@@ -2838,7 +2875,14 @@
                                 $primary = $parent->primary->name;
                             }
                         }
-                        $result .= $table->name($field,$database->locale())."='".id($value,$primary)."' and ";
+                        if ($field[0]=='by')
+                        {
+                            $result .= $table->name($field[1],$database->locale())."='".id($value,$primary)."' and ";
+                        }
+                        else if ($field[0]=='in')
+                        {
+                            $result .= $table->name($field[1],$database->locale())." like '%|".id($value,$primary)."|%' and ";
+                        }
                     }
                     if ($result!=='')
                     {
@@ -2852,6 +2896,12 @@
         {
             $object = new by ();
             return $object->by ($field,$value);
+        }
+
+        function in ($field, $value)
+        {
+            $object = new by ();
+            return $object->in ($field,$value);
         }
 
         function string ($input)
