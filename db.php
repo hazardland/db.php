@@ -2716,6 +2716,7 @@
                         }
                         $about[$path.'|query|'.$hash] = true;
                         $this->store($path.'|about|', $about);
+                        //debug ($about);
                     }
                 }
                 else
@@ -2728,23 +2729,21 @@
                             foreach ($about as $key => $temp)
                             {
                                 $this->store ($key, false);
+                                //debug ('deleting '.$key);
                                 unset ($about[$key]);
                             }
                             $this->store($path.'|about|'.$query, $about);
                         }
-                        else
+                        $about = $this->fetch ($path.'|about|');
+                        if (is_array($about))
                         {
-                            $about = $this->fetch ($path.'|about|');
-                            if (is_array($about))
+                            foreach ($about as $key => $temp)
                             {
-                                foreach ($about as $key => $temp)
-                                {
-                                    $this->store ($key, false);
-                                    debug ('deleted '.$key);
-                                    unset ($about[$key]);
-                                }
-                                $this->store($path.'|about|', $about);
+                                $this->store ($key, false);
+                                //debug ('deleted '.$key);
+                                unset ($about[$key]);
                             }
+                            $this->store($path.'|about|', $about);
                         }
                     }
                     $this->store ($path.'|entry|'.$query, $value);
