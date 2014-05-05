@@ -1843,11 +1843,7 @@
             }
             public function table ($id)
             {
-                if (is_object($id))
-                {
-                    return $this->context->tables[type($id)];
-                }
-                return $this->context->tables[$id];
+                return $this->context->tables[type($id)];
             }
             /**
              * @param link $link
