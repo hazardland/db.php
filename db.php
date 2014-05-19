@@ -1166,6 +1166,7 @@
                             }
                             else
                             {
+                                //debug ($this->name.'.'.$field->name);
                                 $result->{$field->name} = self::enum($row[$cell],$database->table($field->foreign));
                             }
                             $cell++;
