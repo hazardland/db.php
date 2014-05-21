@@ -1349,7 +1349,7 @@
                         }
                         $database->context->usage->query ++;
                         $rows = array ();
-                        $request = "select ".$this->fields()." from ".$this->tables()." ".$query->where($this)." ".$query->order($this)." ".$query->limit($this);
+                        $request = "select ".$this->fields()." from ".$this->tables()." ".$query->join($this)." ".$query->where($this)." ".$query->group($this)." ".$query->order($this)." ".$query->limit($this);
                         $result = $database->link($this->link)->query ($request);
                         if ($result)
                         {
@@ -2486,44 +2486,90 @@
                 }
                 if (is_object($this->where))
                 {
-                    $this->where->string = $table;
+                    $this->where->string ($table);
                 }
                 else
                 {
                     $this->where = $table;
                 }
             }
+            public function join ($table)
+            {
+                if (is_object($table))
+                {
+                    if (is_object($this->join))
+                    {
+                        return $this->join->result ($table);
+                    }
+                    return $this->join;
+                }
+                if (is_object($this->join))
+                {
+                    $this->join->string ($table);
+                }
+                else
+                {
+                    $this->join = $table;
+                }
+            }
+            public function group ($table)
+            {
+                if (is_object($table))
+                {
+                    if (is_object($this->group))
+                    {
+                        return $this->group->result ($table);
+                    }
+                    return $this->group;
+                }
+                if (is_object($this->group))
+                {
+                    $this->group->string ($table);
+                }
+                else
+                {
+                    $this->group = $table;
+                }
+            }
             public function order ($table, $method=null)
             {
                 if (is_object($table))
                 {
-                    return $this->order->result ($table);
+                    if (is_object($this->order))
+                    {
+                        return $this->order->result ($table);
+                    }
+                    return $this->order;
                 }
-                $this->order->method($method);
+                $this->order->method ($method);
                 $this->order->field ($table);
             }
             public function limit ($table, $count=null)
             {
                 if (is_object($table))
                 {
-                    return $this->limit->result ($table);
+                    if (is_object($this->limit))
+                    {
+                        return $this->limit->result ($table);
+                    }
+                    return $this->limit;
                 }
                 if ($count===null)
                 {
-                    $this->limit->count = $table;
+                    $this->limit->count ($table);
                 }
                 else
                 {
-                    $this->limit->from = $table;
-                    $this->limit->count = $count;
+                    $this->limit->from ($table);
+                    $this->limit->count ($count);
                 }
 
             }
             public function hash ($table)
             {
                 $result = array ();
-                $result[] = $this->where->result($table);
-                $result[] = $this->limit->result($table);
+                $result[] = $this->where->result ($table);
+                $result[] = $this->limit->result ($table);
                 $source = '';
                 foreach ($result as $item)
                 {
@@ -2554,6 +2600,50 @@
                 }
                 return "";
             }
+            public function string ($string)
+            {
+                $this->string = $string;
+            }
+        }
+
+        class group
+        {
+            /**
+             * @var string
+             */
+            public $string;
+            public function result ($table)
+            {
+                if ($this->string!='')
+                {
+                    return " group ".$this->string." ";
+                }
+                return "";
+            }
+            public function string ($string)
+            {
+                $this->string = $string;
+            }
+        }
+
+        class join
+        {
+            /**
+             * @var string
+             */
+            public $string;
+            public function result ($table)
+            {
+                if ($this->string!='')
+                {
+                    return " join ".$this->string." ";
+                }
+                return "";
+            }
+            public function string ($string)
+            {
+                $this->string = $string;
+            }
         }
 
         class order
@@ -2566,7 +2656,7 @@
                 $this->field = $field;
                 if (!is_object($method))
                 {
-                    $method = new method($method);
+                    $method = new method ($method);
                 }
                 $this->method = $method;
             }
@@ -2587,7 +2677,7 @@
             }
             public function method ($method)
             {
-                $this->method->name = $method;
+                $this->method->mode ($method);
             }
             public function result (table &$table)
             {
@@ -2605,7 +2695,6 @@
                     $database = $table->database();
                     return " order by ".$table->name($this->field,$database->locale())." ".$this->method->result($table)." ";
                 }
-                //return " order by ".(is_object($database->locale()) ? $table->name($this->field,$database->locale()) : $table->name($this->field))." ".$this->method->result($table)." ";
             }
         }
 
@@ -2613,29 +2702,46 @@
         {
             const asc = "asc";
             const desc = "desc";
-            public $name = self::asc;
-            public function __construct ($name=self::asc)
+            public $mode = self::asc;
+            public function __construct ($mode=self::asc)
             {
-                if ($name==self::asc || $name==self::desc)
+                $mode = strtolower ($mode);
+                if ($mode==self::asc || $mode==self::desc)
                 {
-                    $this->name = $name;
+                    $this->mode = $mode;
                 }
             }
             public function swap ()
             {
-                if ($this->name==self::asc)
+                if ($this->mode==self::asc)
                 {
-                    $this->name = self::desc;
+                    $this->mode = self::desc;
                 }
                 else
                 {
-                    $this->name = self::asc;
+                    $this->mode = self::asc;
                 }
-                return $this->name;
+                return $this->mode;
             }
             public function result (table &$table)
             {
-                return $this->name;
+                return $this->mode;
+            }
+            public function asc ()
+            {
+                $this->mode = self::asc;
+            }
+            public function desc ()
+            {
+                $this->mode = self::desc;
+            }
+            public function mode ($mode)
+            {
+                $mode = strtolower ($mode);
+                if ($mode==self::asc || $mode==self::desc)
+                {
+                    $this->mode = $mode;
+                }
             }
         }
 
@@ -2653,12 +2759,12 @@
             {
                 if ($count==null)
                 {
-                    $this->count = $from;
+                    $this->count = intval(from);
                 }
                 else if ($from!=null)
                 {
-                    $this->from = $from;
-                    $this->count = $count;
+                    $this->from = intval ($from);
+                    $this->count = intval ($count);
                 }
             }
             public function result (table &$table)
@@ -2672,6 +2778,14 @@
                     return " limit ".intval($this->count)." ";
                 }
                 return " limit ".intval($this->from).",".intval($this->count)." ";
+            }
+            public function from ($from)
+            {
+                $this->from = intval ($from);
+            }
+            public function count ($count)
+            {
+                $this->count = intval ($count);
             }
         }
 
@@ -2942,7 +3056,7 @@
             {
                 $id = $object;
             }
-            return string ($id);
+            return string($id);
         }
 
         /**
