@@ -1103,7 +1103,7 @@
                 }
                 return $set;
             }
-            public function create ($row, $from=0)
+            public function create ($row, $from=0, $create=true)
             {
                 $database = $this->database();
                 $cell = 0;
@@ -1260,13 +1260,13 @@
 
                     }
                 }
-                if (method_exists ($result,'create'))
+                if ($create && method_exists($result,'create'))
                 {
                     $result->create ();
                 }
                 return $result;
             }
-            public function load ($query=null, &$sender=null)
+            public function load ($query=null, $single=false)
             {
                 $debug = debug_backtrace();
 //                debug ($this->id);
@@ -1370,6 +1370,10 @@
                         foreach ($rows as $row)
                         {
                             $result[$row[$this->primary->position]] = $this->create ($row);
+                        }
+                        if ($single)
+                        {
+                            return reset($result);
                         }
                         return $result;
                     }
