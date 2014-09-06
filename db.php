@@ -1034,6 +1034,10 @@
             {
                 return $this->field($field)."='".id($value)."'";
             }
+            public function with ($field, $value)
+            {
+                return $this->field($field)." like '%|".id($value)."|%'";
+            }
             public function field ($name)
             {
                 global $database;
