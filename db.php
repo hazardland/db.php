@@ -52,47 +52,47 @@
          */
 
         /*
-         * table sample_foo (use table named sample_foo for this class)
-         * database simple_db (table is located in simple_db)
-         * link mysql_simpl4 (table is using link mysql_simpl4)
-         * prefix foo_ (table field prefix is foo_)
-         * order field:[asc|desc] (order name:asc,date,count:desc please avoid space)
-         * charset utf8 (table default charset)
-         * engine myisam
-         * rename oldname (rename table 'oldname' to this current name if exists)
-         * cache none|load|user|long (select your cache type)
-         * scope project|solution (select your cache scope)
-         * unique name (define simple unique index)
-         * unique search id, name (define compound unique index)
-         * index fast id, name (define compound index)
-         * ignore (ignore this t)
-         * deny insert|select|update|delete (deny some for this table)
+         * table [original_name] (use table named 'original_name' for this class)
+         * database [database_name] (specify database of table)
+         * link [link_name] (table is using link 'link_name', i.e: 'mysql_link_1')
+         * prefix [foo_] (table field prefix is 'foo_', we ignore it in property names, but maintain when addressing tables)
+         * order [field_name:[asc|desc]] (order name:asc,date,count:desc please avoid space)
+         * charset [utf8] (table default charset)
+         * engine [myisam]
+         * rename [original_name] (rename table 'original_name' to the class current name)
+         * cache [none|load|user|long] (select your cache type, long=apc_cache by default, user=session, load=per_scrip_life)
+         * scope [project|solution] (select your cache scope, used by system.php framework)
+         * unique [name] (under developement, define simple unique index)
+         * unique [search id, name] (under developement, define compound unique index)
+         * index [fast id, name] (under developement, define compound index)
+         * ignore (ignore this table in model)
+         * deny [insert|select|update|delete] (deny some for this table)
          */
 
         class foo
         {
             /**
              * required (this field is requrired)
-             * field/column some_field (use field named 'some_field' for this property)
-             * type integer|boolean|float|text|binary|date|time
-             * length 32 (column length)
-             * locale (specify if this field is localized)
-             * enum (if this field stores same type object list)
-             * unsigned (if column unsigned)
-             * zerofill (if zerofill for column)
-             * default 3 (default value)
-             * primary (if this field is primary)
-             * rename 'name_old' (rename field 'name_old' to 'name' if exists)
-             * first (this column is first)
-             * after id (this column goes after property 'id' column)
-             * ignore (ignore this field)
-             * foreign \db\bar (set up relation to different class object)
-             * deny insert|select|update (allow this field in insert qeuery)
-             * allow insert|select|update (allow this field in update qeuery)
-             * deny insert for user biohazard (coming soon)
-             * on insert set date
-             * on update set date
-             * @var \test\master (define basic type of field or setup relation)
+             * field/column [field_name] (use field named 'field_name' from this table for this property)
+             * type [integer|boolean|float|text|binary|date|time]
+             * length [length] (length value for field i.e. 8)
+             * locale (flag this property as localized to automatically create fields for each locale)
+             * enum (flag this property as enumeration of same type objecs specified in @var flag)
+             * unsigned (flag propertty field as unsigned)
+             * zerofill (enable zerofill for this property field)
+             * default [value] (specify default value)
+             * primary (flag property field as pripmary)
+             * rename [field_name] (rename property field 'field_name' to current field name)
+             * first (make this field first if just creating)
+             * after [property_name] (alter this property field after 'property_name' field if just creating)
+             * ignore (ignore this property in mapping)
+             * foreign [\name\of\class] (set up relation to different class object, one to one if no enum, else one to many)
+             * deny [insert|select|update] (allow this field in insert qeuery)
+             * allow [insert|select|update] (allow this field in update qeuery)
+             * deny [insert for user [username]] (coming soon)
+             * on insert set [date|user]
+             * on update set [date|user]
+             * @var [\name\of\class|integer|boolean|float|text|binary|date|time] (define basic type of field or setup relation also and define property class)
              */
             public $name;
 
@@ -3055,6 +3055,15 @@
                 return addslashes($input);
             }
             return $input;
+        }
+
+        function round ($float) //for display purposes
+        {
+            if ($float<0)
+            {
+                return 0;
+            }
+            return \number_format(\round ($float,2),2);
         }
 
         function id (&$object,$field='id')
