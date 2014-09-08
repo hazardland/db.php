@@ -1333,6 +1333,15 @@
                     $query->limit = clone $this->query->limit;
                     $query->where ($where);
                 }
+                if (is_object($query) && type($query)=='.db.pager')
+                {
+                    $pager = $query;
+                    $query = new query();
+                    $query->where = clone $this->query->where;
+                    $query->order = clone $this->query->order;
+                    $query->limit = clone $this->query->limit;
+                    $query->pager = $pager;
+                }
                 if ($query===null)
                 {
                     $query = $this->query;
@@ -1366,6 +1375,10 @@
                 }
                 else
                 {
+                    if (is_object($query->pager))
+                    {
+                        $query->pager->total = $database->link($this->link)->value ("select count(*) from ".$this->tables()." ".$query->join($this)." ".$query->where($this));
+                    }
                     $rows = $database->get ($this, $query);
                     if (!$rows)
                     {
@@ -2497,6 +2510,18 @@
              * @var limit
              */
             public $limit;
+            /**
+             * @var pager
+             */
+            public $pager;
+            /**
+             * @var group
+             */
+            public $group;
+            /**
+             * @var join
+             */
+            public $join;
             public $debug = false;
             public function __construct ()
             {
@@ -2578,6 +2603,10 @@
             {
                 if (is_object($table))
                 {
+                    if (is_object($this->pager))
+                    {
+                        $this->limit = &$this->pager;
+                    }
                     if (is_object($this->limit))
                     {
                         return $this->limit->result ($table);
@@ -2593,7 +2622,11 @@
                     $this->limit->from ($table);
                     $this->limit->count ($count);
                 }
-
+            }
+            public function pager ($page, $count=50)
+            {
+                $this->pager = new pager ($page, $count);
+                $this->limit = &$this->pager;
             }
             public function hash ($table)
             {
@@ -2816,6 +2849,157 @@
             public function count ($count)
             {
                 $this->count = intval ($count);
+            }
+        }
+
+        class pager
+        {
+            /**
+            * current page
+            */
+            private $page;
+            /**
+            * total pages count
+            */
+            private $pages;
+            /**
+            * total items count
+            */
+            private $total;
+            /**
+            * items per page
+            */
+            private $count;
+            /**
+            * from item position on current page
+            */
+            private $from;
+            public function __construct ($page=null, $count=50)
+            {
+                $this->count = $count;
+                $this->page = 1;
+                $this->build ();
+                $this->page ($page);
+            }
+            public function __set ($name, $value)
+            {
+                if (method_exists($this,$name))
+                {
+                    $this->{$name}($value);
+                }
+            }
+            public function __get ($name)
+            {
+                if (method_exists($this,$name))
+                {
+                    return $this->{$name}();
+                }
+            }
+            private function valid ()
+            {
+                if ($this->total!==null && $this->count!==null)
+                {
+                    return true;
+                }
+                return false;
+            }
+            public function build () //build pages
+            {
+                if (!$this->valid())
+                {
+                    return;
+                }
+                //set current page
+                if ($this->count)
+                {
+                    $this->pages = intval ($this->total/$this->count);
+                    if ($this->total % $this->count)
+                    {
+                        $this->pages++;
+                    }
+                    if (!$this->pages)
+                    {
+                        $this->pages = 1;
+                    }
+                }
+                else
+                {
+                    $this->pages = 1;
+                }
+                //fix page
+                if ($this->page>$this->pages)
+                {
+                    $this->page = $this->pages;
+                }
+                elseif ($this->page<=0)
+                {
+                    $this->page = 1;
+                }
+                //set from item
+                if ($this->count)
+                {
+                    $this->from = ($this->page - 1) * $this->count;
+                }
+                else
+                {
+                    $this->from = 0;
+                }
+            }
+            public function page ($value=null) //set current page
+            {
+                if ($value!==null)
+                {
+                    $this->page = intval ($value);
+                    $this->build ();
+                }
+                else
+                {
+                    return $this->page;
+                }
+            }
+            public function pages ()
+            {
+                return $this->pages;
+            }
+            public function total ($value=null)
+            {
+                if ($value!==null)
+                {
+                    $this->total = $value;
+                    $this->build ();
+                }
+                else
+                {
+                    return $this->total;
+                }
+            }
+            public function count ($value=null)
+            {
+                if ($value!==null)
+                {
+                    $this->count = $value;
+                    $this->build ();
+                }
+                else
+                {
+                    return $this->count;
+                }
+            }
+            public function from ()
+            {
+                return $this->from;
+            }
+            public function result (table &$table)
+            {
+                if (!$this->count)
+                {
+                    return "";
+                }
+                if (!$this->from)
+                {
+                    return " limit ".intval($this->count)." ";
+                }
+                return " limit ".intval($this->from()).",".intval($this->count())." ";
             }
         }
 
