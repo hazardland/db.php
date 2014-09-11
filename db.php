@@ -428,7 +428,7 @@
              */
             public $class = null;
             public $value = false;
-            public function __construct (\ReflectionProperty $value)
+            public function __construct (\db\table $table, \ReflectionProperty $value)
             {
                 if ($value==null || $value->isStatic())
                 {
@@ -538,7 +538,9 @@
                                 }
                                 catch (\Exception $error)
                                 {
-
+                                    //class not found for this field but thats ok
+                                    //because it will load later if found
+                                    //debug ("class not found for ".$table->class->getName().".".$this->name);
                                 }
                                 if ($this->class!=null)
                                 {
@@ -574,6 +576,12 @@
                                     // {
                                     //     throw new \Exception ('field not needed');
                                     // }
+                                }
+                                else
+                                {
+                                    $this->foreign = type ($flag->value);
+                                    $this->class = $flag->value;
+                                    $this->type = type::integer;
                                 }
                             }
                         }
@@ -769,6 +777,31 @@
                 }
                 return $result;
             }
+            // public function handler ()
+            // {
+            //     if (!is_object($this->class))
+            //     {
+            //         \debug ('still no object');
+            //     }
+            //     return $this->class;
+            //     if ($this->class!=null)
+            //     {
+            //         if (is_object($this->class))
+            //         {
+            //             return $this->class;
+            //         }
+            //         try
+            //         {
+            //             $this->class = new \ReflectionClass($this->class);
+            //             debug ("class found for ".$this->name);
+            //         }
+            //         catch (\Exception $error)
+            //         {
+            //             $this->class = null;
+            //         }
+            //     }
+            //     return $this->class;
+            // }
         }
 
         class table
@@ -959,7 +992,7 @@
                     /* @var $value \ReflectionProperty */
                     try
                     {
-                        $field = new field($value);
+                        $field = new field($this, $value);
                         $this->fields[$field->name] = $field;
                         if ($field->primary)
                         {
