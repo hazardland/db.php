@@ -3531,6 +3531,21 @@
             return $id;
         }
 
+        function enum ()
+        {
+            if (func_num_args()==0)
+            {
+                return array ();
+            }
+            $input = func_get_args();
+            $result = array ();
+            foreach ($input as $item)
+            {
+                $result[\db\id($item)] = $item;
+            }
+            return $result;
+        }
+
         function color ($query)
         {
             return str_replace(
