@@ -1777,9 +1777,13 @@
                 }
                 return $this->hash;
             }
-            public function next ()
+            public function next ($field=null)
             {
-                return intval($this->database()->link($this->link)->value("select max(".$this->name($this->primary).") from ".$this->name()))+1;
+                if ($field===null)
+                {
+                    $field = $this->primary;
+                }
+                return intval($this->database()->link($this->link)->value("select max(".$this->name($field).") from ".$this->name()))+1;
             }
             public function database ()
             {
@@ -2664,8 +2668,22 @@
             public function hash ($table)
             {
                 $result = array ();
-                $result[] = $this->where->result ($table);
-                $result[] = $this->limit->result ($table);
+                if (is_object($this->where))
+                {
+                    $result[] = $this->where->result ($table);
+                }
+                else if ($this->where)
+                {
+                    $result[] = $this->where;
+                }
+                if (is_object($this->limit))
+                {
+                    $result[] = $this->limit->result ($table);
+                }
+                else if ($this->limit)
+                {
+                    $result[] = $this->limit->result;
+                }
                 $source = '';
                 foreach ($result as $item)
                 {
