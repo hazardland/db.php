@@ -546,7 +546,10 @@
                                 {
                                     if ($this->class->isSubclassOf('\db\value'))
                                     {
-                                        $this->type = type::string;
+                                        if ($this->type===null)
+                                        {
+                                           $this->type = type::string;
+                                        }
                                         $this->value = true;
                                     }
                                     else// ($this->class->isSubclassOf('\db\entity'))
@@ -1159,6 +1162,25 @@
                         return $result;
                     }
                     return array ();
+                }
+                else
+                {
+                    if (strlen($set)>2)
+                    {
+                        $result = array();
+                        $keys = explode ('|',substr($set,1,-1));
+                        if ($keys && is_array($keys))
+                        {
+                            foreach ($keys as $key)
+                            {
+                                if ($key)
+                                {
+                                    $result[$key] = $key;
+                                }
+                            }
+                        }
+                        return $result;
+                    }
                 }
                 return $set;
             }
@@ -3555,11 +3577,28 @@
             {
                 return array ();
             }
+            if (func_num_args()==1 && is_array(func_get_arg(0)))
+            {
+                $input = func_get_arg(0);
+                $result = "|";
+                if ($input)
+                {
+                    foreach ($input as $key => $value)
+                    {
+                        $result .= $key."|";
+                    }
+                    return $result;
+                }
+                return '';
+            }
             $input = func_get_args();
             $result = array ();
             foreach ($input as $item)
             {
-                $result[\db\id($item)] = $item;
+                if ($item!='')
+                {
+                    $result[\db\id($item)] = $item;
+                }
             }
             return $result;
         }
