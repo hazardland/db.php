@@ -60,7 +60,7 @@
          * charset [utf8] (table default charset)
          * engine [myisam]
          * rename [original_name] (rename table 'original_name' to the class current name)
-         * cache [none|load|user|long] (select your cache type, long=apc_cache by default, user=session, load=per_scrip_life)
+         * cache [none|load|user|long] (select your cache type, long=\apc_cache by default, user=session, load=per_scrip_life)
          * scope [project|solution] (select your cache scope, used by system.php framework)
          * unique [name] (under developement, define simple unique index)
          * unique [search id, name] (under developement, define compound unique index)
@@ -3208,11 +3208,11 @@
             {
                 if (is_bool($value))
                 {
-                    apc_delete ($name);
+                    \apc_delete ($name);
                 }
                 else
                 {
-                    apc_store ($name, $value);
+                    \apc_store ($name, $value);
                 }
                 // debug ($name);
                 // debug ($value);
@@ -3220,11 +3220,11 @@
             }
             function fetch ($name)
             {
-                return apc_fetch ($name);
+                return \apc_fetch ($name);
             }
             function clear ()
             {
-                apc_clear_cache ('user');
+                \apc_clear_cache ('user');
             }
         }
 
@@ -3540,7 +3540,7 @@
             {
                 if ($table->delete($object))
                 {
-                    apc_delete (id($object,$table));
+                    \apc_delete (id($object,$table));
                 }
                 return;
             }
@@ -3553,20 +3553,20 @@
                 return;
             }
             $key = 'database|'.$table->class->getName().'|'.$id;
-            if ($flush || !apc_exists($key))
+            if ($flush || !\apc_exists($key))
             {
                 $result = $table->load($id);
                 if (!$result)
                 {
-                    apc_delete ($key);
+                    \apc_delete ($key);
                     return $id;
                 }
-                apc_store ($key, $result);
+                \apc_store ($key, $result);
                 return $result;
             }
-            else if (apc_exists($key))
+            else if (\apc_exists($key))
             {
-                return apc_fetch ($key);
+                return \apc_fetch ($key);
             }
             return $id;
         }
