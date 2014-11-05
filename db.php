@@ -478,12 +478,13 @@
                                     $this->length = 128;
                                 }
                             }
-                            else if ($flag->value=='text')
+                            else if ($flag->value=='tinytext' || $flag->value=='text' || $flag->value=='mediumtext' || $flag->value=='longtext')
                             {
                                 $this->type = type::string;
-                                if ($this->data==null)
+                                if ($this->data==null || $this->data=='char') //why data==null ?
                                 {
-                                    $this->data = 'text';
+                                    $this->data = $flag->value;
+                                    $this->length = null;
                                 }
                             }
                             else if ($flag->value=='date')
@@ -640,8 +641,11 @@
                         elseif ($flag->name=='enum')
                         {
                             $this->type = type::string;
-                            $this->data = 'char';
-                            if ($this->length===null)
+                            if ($this->data!='char' && $this->data!='text' && $this->data!='shorttext')
+                            {
+                                $this->data = 'char';
+                            }
+                            if ($this->data=='char' && $this->length===null)
                             {
                                 $this->length = 32;
                             }
@@ -780,31 +784,6 @@
                 }
                 return $result;
             }
-            // public function handler ()
-            // {
-            //     if (!is_object($this->class))
-            //     {
-            //         \debug ('still no object');
-            //     }
-            //     return $this->class;
-            //     if ($this->class!=null)
-            //     {
-            //         if (is_object($this->class))
-            //         {
-            //             return $this->class;
-            //         }
-            //         try
-            //         {
-            //             $this->class = new \ReflectionClass($this->class);
-            //             debug ("class found for ".$this->name);
-            //         }
-            //         catch (\Exception $error)
-            //         {
-            //             $this->class = null;
-            //         }
-            //     }
-            //     return $this->class;
-            // }
         }
 
         class table
