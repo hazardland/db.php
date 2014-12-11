@@ -1301,6 +1301,7 @@
                             }
                             else if ($row[$cell]!==null && $field->type==type::date)
                             {
+                                \debug ($row[$cell], $field->name.' load');
                                 $result->{$field->name} = date (null, $row[$cell]);
                             }
                             else if ($row[$cell]!==null && $field->type==type::time)
@@ -1485,8 +1486,8 @@
                                 }
                                 if (($event==query::update && $field->event->update->action==action::date) || ($event==query::insert && $field->event->insert->action==action::date))
                                 {
-                                    $object->{$field->name} = time(now());
-                                    $set .= $this->name($field)."='".$object->{$field->name}."', ";
+                                    $object->{$field->name} = now();
+                                    $set .= $this->name($field)."='".time($object->{$field->name})."', ";
                                     continue;
                                 }
                                 //echo $field->name;
@@ -1552,11 +1553,13 @@
                                         {
                                             $object->{$field->name} = date($object->{$field->name});
                                             $set .= $this->name($field)."='".$object->{$field->name}."', ";
+                                            $object->{$field->name} = date(null,$object->{$field->name});
                                         }
                                         else if ($field->type==type::time)
                                         {
                                             $object->{$field->name} = time($object->{$field->name});
                                             $set .= $this->name($field)."='".$object->{$field->name}."', ";
+                                            $object->{$field->name} = time(null,$object->{$field->name});
                                         }
                                         else if ($field->type==type::binary)
                                         {
@@ -3379,11 +3382,11 @@
         {
             //debug ("des ".$destroy." res ".$restore);
             $user = 0;
-            //$zone = intval(\date('Z'));
-            $zone = 0;
-            if (isset($GLOBALS['system']->user->zone))
+            //$timezone = intval(\date('Z'));
+            $timezone = 0;
+            if (isset($GLOBALS['system']->user->timezone))
             {
-                $user = intval(strval($GLOBALS['system']->user->zone));
+                $user = intval(strval($GLOBALS['system']->user->timezone));
             }
             if ($restore!==null)
             {
@@ -3394,13 +3397,13 @@
                 }
                 if ($user)
                 {
-                    $zone = $user;
+                    $timezone = $user;
                 }
-                return \date('Y-m-d',$restore+$zone);
+                return \date('Y-m-d',$restore+$timezone);
             }
             if ($destroy===null)
             {
-                return \date('Y-m-d H:i:s',\time()-$zone);
+                return \date('Y-m-d H:i:s',\time()-$timezone);
             }
             $destroy = strtotime ($destroy);
             if (!$destroy)
@@ -3409,9 +3412,9 @@
             }
             if ($user)
             {
-                $zone = $user;
+                $timezone = $user;
             }
-            return \date('Y-m-d',$destroy-$zone);
+            return \date('Y-m-d',$destroy-$timezone);
         }
 
         //პარამეტრის გარეშე აბრუნებს მიმდინარე უნვერსალური დროს
@@ -3420,10 +3423,10 @@
         function time ($destroy=null, $restore=null)
         {
             $user = 0;
-            $zone = intval(\date('Z'));
-            if (isset($GLOBALS['system']->user->zone))
+            $timezone = intval(\date('Z'));
+            if (isset($GLOBALS['system']->user->timezone))
             {
-                $user = intval(strval($GLOBALS['system']->user->zone));
+                $user = intval(strval($GLOBALS['system']->user->timezone));
             }
             if ($restore!==null)
             {
@@ -3434,13 +3437,13 @@
                 }
                 if ($user)
                 {
-                    $zone = $user;
+                    $timezone = $user;
                 }
-                return \date('Y-m-d H:i:s',$restore+$zone);
+                return \date('Y-m-d H:i:s',$restore+$timezone);
             }
             if ($destroy===null)
             {
-                return \date('Y-m-d H:i:s',\time()-$zone);
+                return \date('Y-m-d H:i:s',\time()-$timezone);
             }
             $destroy = strtotime ($destroy);
             if (!$destroy)
@@ -3449,9 +3452,9 @@
             }
             if ($user)
             {
-                $zone = $user;
+                $timezone = $user;
             }
-            return \date('Y-m-d H:i:s',$destroy-$zone);
+            return \date('Y-m-d H:i:s',$destroy-$timezone);
         }
 
         function now ($date=null)
