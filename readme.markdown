@@ -1,4 +1,4 @@
-db.php - represents Code First style ORM database framework
+db.php - represents Code First style ORM
 ================
 
 Visit http://dbphp.net for more info as readme.md update is in progress.

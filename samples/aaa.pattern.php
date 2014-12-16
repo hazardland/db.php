@@ -1,12 +1,12 @@
-Well let us make some ORM framework on the fly. As you marked php tag let us code it in PHP.
+Well let us make some ORM on the fly. As you marked php tag let us code it in PHP.
 
 But before we write it we must know some basic concepts or some basic terminology
 about orm related subjects. In this example we will have:
 
-1. ORM framework - ORM framework takes responsibility to take care about server connections and server connection abstractions. (Full orm frameworks also support automatic class to table mappings).
+1. ORM - ORM takes responsibility to take care about server connections and server connection abstractions. (Full ORMs also support automatic class to table mappings).
 
-2. Data layer - This part is responsible for mapping classes to tables. 
-For example data access layer knows how to save specific class object to actual table and how to load specific table to specific class object. (NOTE: Almost any recent ORM framework can avoid you from this layer. For example http://dbphp.net or Doctrine will support every aspect of this layer plus relations and even auto table generation).
+2. Data layer - This part is responsible for mapping classes to tables.
+For example data access layer knows how to save specific class object to actual table and how to load specific table to specific class object. (NOTE: Almost any recent ORM can avoid you from this layer. For example http://dbphp.net or Doctrine will support every aspect of this layer plus relations and even auto table generation).
 
 3. Business layer - This layer contains your actual working classes business layer often stands for model or model includes business layer
 
@@ -26,10 +26,10 @@ Let us begin our example from Business layer or model. Our very very simple proj
 
 As you see your business layer or model knows nothing about where and how it is saved or loaded. It just does only handle project related business. That's the point the layer name comes from.
 
-Second, let us make a simple ORM framework:
+Second, let us make a simple ORM:
 
     <?php
-    
+
     //The connection link which can be changed any time
     class link
     {
@@ -52,7 +52,7 @@ Second, let us make a simple ORM framework:
     		return $this->link->errorInfo();
     	}
     }
-    
+
     //A structure which collects all link(s) and table/class handlers togather
     class database
     {
@@ -64,22 +64,22 @@ Second, let us make a simple ORM framework:
     		table::$database = $this;
     	}
     }
-    
+
     //A basic table handler class
-    //In recent ORM frameworks they do all the default mappings
+    //In recent ORMs they do all the default mappings
     class table
     {
     	public static $database;
     }
     ?>
 
-As you noticed our table class in our ORM framework seems very poor. But if this framework was a
+As you noticed our table class in our ORM seems very poor. But if this framework was a
 complex framework it would support also data layer and had all functionality to work with any table.
 
-But because you need to know how ORM frameworks work in this case we will make data layer
+But because you need to know how ORMs work in this case we will make data layer
 handlers for every class in our business layer.
 
-So this is your data layer. It is so self descriptive that I think it does not 
+So this is your data layer. It is so self descriptive that I think it does not
 need any documentation:
 
     <?php
@@ -155,15 +155,15 @@ Here is it in work:
     <?
     $database = new database (new link('127.0.0.1', 'system_db', 'root', '1234'));
     $database->tables['users'] = new users();
-    
+
     if (!$database->tables['users']->save (new user('Admin')))
     {
     	var_export($database->link->error());
     }
-    
+
     var_export($database->tables['users']->load(2));
     ?>
 
-If you need to dive in other concepts of php ORM's feel free to visit 
-  1. Doctrine - http://www.doctrine-project.org/ - Full functional complex php ORM framework
-  2. db.php - http://dbphp.net/ - Full functional but very easy php ORM framework.
+If you need to dive in other concepts of php ORM's feel free to visit
+  1. Doctrine - http://www.doctrine-project.org/ - Full functional complex php ORM
+  2. db.php - http://dbphp.net/ - Full functional but very easy php ORM.

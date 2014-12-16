@@ -12,7 +12,7 @@
     // \db\scope:project - cache data in solution.project so data will not mess
     //                     if there are other projects and solutions with simillar names
     // \db\scope:solution - cache data in solution scope
-    // project and solution concepts are base concepts of blackhole framework
+    // project and solution concepts are base concepts of system.php framework
     // wich is indipendet framework from db framework
 
     include './000.config.php';
@@ -66,20 +66,20 @@
         public $name;
         /**
          * enum
-         * @var widget
+         * @var part
          */
-        public $widget;
-        public function __construct ($name,$widget=array())
+        public $part;
+        public function __construct ($name,$part=array())
         {
             $this->name = $name;
-            $this->widget = $widget;
+            $this->part = $part;
         }
     }
 
     /**
      * cache long
      */
-    class widget
+    class part
     {
         public $id;
         public $name;
@@ -94,28 +94,28 @@
     $database->link('default')->debug = true;
 
     $database->add('page');
-    $database->add('widget');
+    $database->add('part');
 
     $database->update();
 
-    $widgets = $database->widget->load ();
-    if (!$widgets)
+    $parts = $database->part->load ();
+    if (!$parts)
     {
-        $widgets = array (new widget('register'),new widget('profile'),new widget('menu'),new widget('password'),new widget('news'),new widget('gallery'));
-        $database->widget->save ($widgets);
+        $parts = array (new part('register'),new part('profile'),new part('menu'),new part('password'),new part('news'),new part('gallery'));
+        $database->part->save ($parts);
     }
 
     $pages = $database->page->load ();
     if (!$pages)
     {
-        $database->page->save (new page ('home',array($widgets[0],$widgets[3],$widgets[2])));
-        $database->page->save (new page ('account',array($widgets[1],$widgets[4],$widgets[5])));
-        $database->page->save (new page ('service',array($widgets[3],$widgets[2],$widgets[1])));
-        $database->page->save (new page ('about',array($widgets[2],$widgets[4],$widgets[0])));
+        $database->page->save (new page ('home',array($parts[0],$parts[3],$parts[2])));
+        $database->page->save (new page ('account',array($parts[1],$parts[4],$parts[5])));
+        $database->page->save (new page ('service',array($parts[3],$parts[2],$parts[1])));
+        $database->page->save (new page ('about',array($parts[2],$parts[4],$parts[0])));
     }
 
     //after first populate session this code will never run select queries
-    //once it selects it caches for long pages and widgets
+    //once it selects it caches for long pages and parts
 
     \db\debug ($pages);
     \db\debug ($database->context->usage);
