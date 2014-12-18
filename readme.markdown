@@ -69,7 +69,7 @@ class group
 	$database->scan ('\user');
 
 	//update database means in this case:
-	//1. create database test if not exists
+	//1. create database 'test' if not exists
 	//2. create table for class \user\user and class \user\group if not exists
 	//   or if they exists update its structure if developer changed something
 	//	 in class definition
