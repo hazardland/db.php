@@ -58,7 +58,8 @@ class group
 
 	include './db.php';
 
-	//init database with simple db connection link (multi links and multi databases are also possible)
+	//init database with simple db connection link (multi links and multi databases
+	//are also possible)
 	$database = new \db\database ('mysql:host=127.0.0.1', 'test', 'root', '1234');
 
 	//add single class to database to handle
