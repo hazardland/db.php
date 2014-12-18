@@ -71,7 +71,7 @@ class user
 	public $id;
 	public $name;
 	public $birth;
-	public function ___construct ($name=null, $birth=null)
+	public function __construct ($name=null, $birth=null)
 	{
 		$this->name = $name;
 		$this->birth = $birth;
