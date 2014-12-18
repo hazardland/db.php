@@ -28,7 +28,7 @@
 საშუალო დონის PHP პროგრამისტი ამ ამოცანის გადასაწყვეტად შემდეგ ღონისძიებებს გაატარებს:
 
 1. phpMyAdmin-ის საშუალებით, შექმნის მონაცემთა ბაზას, შექმნის ცხრილს:
-image(./samples/images/phpmyadmin1.png)
+![](./samples/images/phpmyadmin1.png)
 2. მისი 'insert.php' ფაილი დაახლოებით ასეთი სახით იქნება წარმოდგენილი:
 ```php
 include './config.php';
