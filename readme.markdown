@@ -110,4 +110,4 @@ class group
 
 ```
 
-Dont think this few functionality was that db.php could do. It can do as far as everithing you might remember you need to do with data including queries and caching and multi server multi database connections and including localisation and so on. You should see examples in examples dir for further information.
+Dont think this few functionality was that db.php can do. It can do as far as everithing you might remember you need to do with data including queries and caching and multi server multi database connections and including localisation and so on. You should see examples in examples dir for further information.
