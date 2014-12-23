@@ -144,11 +144,11 @@
                     {
                         $error = $this->error();
                         $debug = $query.($error[2]?"\n".$error[2]:"");
-                        debug ($debug);
+                        debug ($debug,$this);
                     }
                     else
                     {
-                        debug($query);
+                        debug($query,$this);
                     }
                     return $result;
                 }
@@ -164,11 +164,11 @@
                     {
                         $error = $this->error();
                         $debug = $query.($error[2]?"\n".$error[2]:"");
-                        debug ($debug);
+                        debug ($debug,$this);
                     }
                     else
                     {
-                        debug($query);
+                        debug($query,$this);
                     }
                     return $result;
                 }
@@ -184,11 +184,11 @@
                     {
                         $error = $this->error();
                         $debug = $query.($error[2]?"\n".$error[2]:"");
-                        debug ($debug);
+                        debug ($debug,$this);
                     }
                     else
                     {
-                        debug($query);
+                        debug($query,$this);
                     }
                 }
                 if ($result)
@@ -206,11 +206,11 @@
                     {
                         $error = $this->error();
                         $debug = $query.($error[2]?"\n".$error[2]:"");
-                        debug ($debug);
+                        debug ($debug,$this);
                     }
                     else
                     {
-                        debug($query);
+                        debug($query,$this);
                     }
                 }
                 if ($result)
@@ -3471,7 +3471,39 @@
             return \date ('Y-m-d H:i:s');
         }
 
-        function debug ($input)
+        function debug ($input, $title=null)
+        {
+            $backtrace = debug_backtrace();
+            $result = "<div style=\"font-family:'dejavu sans mono','consolas','monospaced','monospace';font-size:10pt;width:600px;margin-bottom:20px;margin-left:20px;\"><div style='background:#f0f0f0'>";
+            foreach ($backtrace as $key => $value)
+            {
+                $result .= "<a href='file://localhost/".str_replace('\\','/',$value['file'])."' onclick=\"window.open('".addslashes($value['file'])."')\" target='_blank' style='color:black;text-decoration:none;'>".$value['file']."</a> [".$value['line']."] <font color=red>".$value['function']."</font><br>";
+            }
+            $result .= '</div>';
+            if ($title!==null)
+            {
+                if (is_object($title))
+                {
+                    $result .= "<div style='background:#669999;color:white;'>QUERY ".$title->count."</div>";
+                }
+                else
+                {
+                    $result .= "<div style='background:black;color:white'>".$title."</div>";
+                }
+            }
+            if (is_string($input))
+            {
+                $result .= color ($input);
+            }
+            else
+            {
+                $result .= str_replace (array("\\'","\n"," ","var","array","class","=&gt;","&nbsp;&nbsp;&nbsp;'","'&nbsp;&nbsp;<b><font color=green>="),array("'","<br>\n",'&nbsp;&nbsp;',"<b><font color=blue>var</font></b>","<b><font color=red>array</font></b>","<b><font color=green>class</font></b>","<b><font color=green>=</font></b>","&nbsp;&nbsp;&nbsp;<font color=green>'","'</font>&nbsp;&nbsp;<b><font color=green>="), htmlspecialchars (@var_export($input,true),ENT_NOQUOTES,'UTF-8'));
+            }
+            $result .= "</div>";
+            echo $result;
+        }
+
+/*        function debug ($input)
         {
             $backtrace = debug_backtrace();
             $result = "<div style=\"font-family:'dejavu sans mono','consolas','monospaced','monospace';font-size:10pt;width:600px;margin-bottom:20px;margin-left:20px;background:#fafafa\"><div style='background:#f0f0f0'>";
@@ -3491,7 +3523,7 @@
             $result .= "</div>";
             echo $result;
         }
-
+*/
         function scope ($scope)
         {
             global $system;
