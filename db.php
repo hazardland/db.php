@@ -112,18 +112,18 @@
              * @var PDO
              */
             public $link;
-            public $config = array (\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'");
+            public $config = array (\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'", \PDO::ATTR_PERSISTENT => true);
             public $count = 0;
-            public function __construct ($name=null, $database='mysql:host=127.0.0.1', $username='root', $password='1234', $settings=null)
+            public function __construct ($name=null, $database='mysql:host=127.0.0.1', $username='root', $password='1234', $config=null)
             {
                 if (strpos($database,'mysql:')===0)
                 {
                     $this->engine = 'myisam';
                 }
                 $this->name = $name;
-                if ($settings)
+                if (false && $config)
                 {
-                    $this->settings = $settings;
+                    $this->config = $config;
                 }
                 try
                 {
