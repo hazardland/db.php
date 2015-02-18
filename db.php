@@ -2727,6 +2727,10 @@
             {
                 $this->string = $string;
             }
+            public function append ()
+            {
+                $this->string .= " ".$string;
+            }
         }
 
         class group
