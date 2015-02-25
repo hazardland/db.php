@@ -1306,7 +1306,7 @@
                             }
                             else if ($row[$cell]!==null && $field->type==type::date)
                             {
-                                \debug ($row[$cell], $field->name.' load');
+                                //\debug ($row[$cell], $field->name.' load');
                                 $result->{$field->name} = date (null, $row[$cell]);
                             }
                             else if ($row[$cell]!==null && $field->type==type::time)
