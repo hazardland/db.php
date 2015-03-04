@@ -3389,7 +3389,29 @@
 
         function date ($destroy=null, $restore=null)
         {
-            //debug ("des ".$destroy." res ".$restore);
+            if ($restore!==null)
+            {
+                $restore = strtotime ($restore);
+                if ($restore===false)
+                {
+                    return '0000-00-00';
+                }
+                return \date('Y-m-d', $restore);
+            }
+
+            if ($destroy===null)
+            {
+                return \date('Y-m-d',\time());
+            }
+
+            $destroy = strtotime ($destroy);
+            if ($destroy===false)
+            {
+                return '0000-00-00';
+            }
+            return \date('Y-m-d', $destroy);
+
+/*            //debug ("des ".$destroy." res ".$restore);
             $user = 0;
             //$timezone = intval(\date('Z'));
             $timezone = 0;
@@ -3408,10 +3430,12 @@
                 {
                     $timezone = $user;
                 }
+                $timezone = 0; //NEW
                 return \date('Y-m-d',$restore+$timezone);
             }
             if ($destroy===null)
             {
+                $timezone = 0; //NEW
                 return \date('Y-m-d H:i:s',\time()-$timezone);
             }
             $destroy = strtotime ($destroy);
@@ -3423,8 +3447,9 @@
             {
                 $timezone = $user;
             }
+            $timezone = 0; //NEW
             return \date('Y-m-d',$destroy-$timezone);
-        }
+*/        }
 
         //პარამეტრის გარეშე აბრუნებს მიმდინარე უნვერსალური დროს
         //პირველი პარამეტრის შემთხვევაში აკონვერტირებს მითითებულ დროს უნვერსალური დროში
