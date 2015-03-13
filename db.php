@@ -3021,6 +3021,15 @@
                     return $this->page;
                 }
             }
+            public function next ()
+            {
+                if ($this->page+1>$this->pages)
+                {
+                    return false;
+                }
+                $this->page ($this->page+1);
+                return true;
+            }
             public function pages ()
             {
                 return $this->pages;
