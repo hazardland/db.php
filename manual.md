@@ -3,11 +3,13 @@
 
 ##What is MVC ? What is model view controller pattern ?
 
-**MVC** stands for **Model View Controller**. If you heard it before but still dont know what it is you might be afraid of it.
+**MVC** stands for **Model View Controller**. If you about heard it before but still dont know what it is you might be afraid of it.
 
-But it is nothing than bunch of terms describing best practices how big projects should be organized for not getting lost in them.
+But MVC is nothing than bunch of terms describing best practices how code in big projects should be organized for not getting lost in them.
 
 If you have developed at least some kind of web application you already have used **MVC** concepts withought knowing it. I could tell you that **Controller** is a portion of code which displays **Views** to user and also receives **input** from user, **processes** it using **Model** and than decides in what **View** to parse **output** data but nobody understands sentences like that.
+
+Therefore I ll show you an example. (*Note that while using **db.php** our goal is knowing how to architect **Model***)
 
 Business model is the only way not to get lost in big projects. Simply talking it describes your project logic in classes. The porition of a project is called
 
