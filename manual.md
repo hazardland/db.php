@@ -32,7 +32,7 @@ This are two stupid static html files and we can totally consider them as **view
 
 But how to use that views in actual task ? Here we need a controller. Let us assume we are so stupid we build our entire site php script in only index.php?
 
-####index.php
+#####index.php
 ```php
 if ($_REQUEST['page']=='product')
 {
