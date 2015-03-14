@@ -1,4 +1,4 @@
-Things to know before using orm
+	Things to know before using orm
 
 . What is business model ? and also what is MVC ?
   seriously who pays you if you dont know that. business model is the only way not to get lost in big project. simply talking it describes your project logic in classes dont get the project logic term wrong there is also a portion of project which interacts with user and offers user interface. folks call it view. and what delivers views to user? a part of project which is called controller. controller controls user interaction to your model using views. first it gives a user to view an interface. than receives input from user and passes properly to model. model thinks and rerturns data. controller parses that data into result view.
