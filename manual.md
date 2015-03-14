@@ -1,7 +1,17 @@
 #Things to know before using orm
+================
 
-##What is business model ? and also what is MVC ?
-  seriously who pays you if you dont know that. business model is the only way not to get lost in big project. simply talking it describes your project logic in classes dont get the project logic term wrong there is also a portion of project which interacts with user and offers user interface. folks call it view. and what delivers views to user? a part of project which is called controller. controller controls user interaction to your model using views. first it gives a user to view an interface. than receives input from user and passes properly to model. model thinks and rerturns data. controller parses that data into result view.
+##What is MVC ? What is model view controller pattern ?
+
+**MVC** stands for **Model View Controller**. If you heard it before but still dont know what it is you might be afraid of it.
+
+But it is nothing than bunch of terms describing best practices how big projects should be organized for not getting lost in them.
+
+If you have developed at least some kind of web application you already have used **MVC** concepts withought knowing it. I could tell you that **Controller** is a portion of code which displays **Views** to user and also receives **input** from user, **processes** it using **Model** and than decides in what **View** to parse **output** data but nobody understands sentences like that.
+
+Business model is the only way not to get lost in big projects. Simply talking it describes your project logic in classes. The porition of a project is called
+
+  Business model is the only way not to get lost in big project. Simply talking it describes your project logic in classes. Do not get the project logic term wrong, there is also a portion of project which interacts with user and offers user interface. Folks call it view. And what delivers views to user? a part of project which is called controller. controller controls user interaction to your model using views. first it gives a user to view an interface. than receives input from user and passes properly to model. model thinks and rerturns data. controller parses that data into result view.
 
 or what takes input and passes to model which by itself processes input and passes back output ready to represented in view ?
 
