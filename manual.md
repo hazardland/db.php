@@ -1,6 +1,4 @@
-#Things to know before using orm
-================
-
+#Things to know before using ORM
 ##What is MVC ? What is model view controller pattern ?
 
 **MVC** stands for **Model View Controller**. If you about heard it before but still dont know what it is you might be afraid of it.
