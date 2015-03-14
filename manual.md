@@ -284,7 +284,9 @@ Nothing great can be done without it.
 #Intermediate level
 
 ##Installation
-The only file you need is **db.php** iself. just include db.php in your project and you are ready to go.
+
+#####Include
+The only file you need is **db.php** iself. Just include db.php in your project and you are ready to go. Other files in this repo are just samples and documents.
 
 ```php
 include './db.php';
