@@ -15,7 +15,7 @@ Imagine a task. We must build a product page where user will purchase product.
 
 We have two html files: product.html and success.html
 
-#####product.html
+####product.html
 ```html
 <h1>{product_name}</h1>
 <a href="{project_link}?page=purchase&product={product_id}">
@@ -23,7 +23,7 @@ We have two html files: product.html and success.html
 </a>
 ```
 
-#####purchase.html
+####purchase.html
 ```html
 You have successfuly purchased {product_name}
 ```
@@ -32,7 +32,7 @@ This are two stupid static html files and we can totally consider them as **view
 
 But how to use that views in actual task ? Here we need a controller. Let us assume we are so stupid we build our entire site php script in only index.php?
 
-#####index.php
+####index.php
 ```php
 if ($_REQUEST['page']=='product')
 {
@@ -76,7 +76,7 @@ else if ($_REQUEST['page']=='purchase')
 
 So this is **Controller**. If you look closer it containts two sections. They are almost identical. One parses page "product" and another parses page "purchase". That sections are almost identicall except in section "purchase" user buys a product while in section "product" user views product page. View variables like {product_name} and {product_id} are replaced using simple str_replace function. Views files are loaded simply by file_get_contents. And line $product->buy() actually does what it says. But where is that method code called **buy** ?
 
-#####shop.php
+####shop.php
 ```
 namespace shop
 {
@@ -285,14 +285,14 @@ Nothing great can be done without it.
 
 ##Installation
 
-#####Include
+####Include
 The only file you need is **db.php** iself. Just include db.php in your project and you are ready to go. Other files in this repo are just samples and documents.
 
 ```php
 include './db.php';
 ```
 
-#####apc_cache
+####apc_cache
 **db.php** requires **apc_cache** because it is default caching engine for it. You can also override default caching engine but it is subject for further reading. A link for apc_cache installation instructions is here http://php.net/manual/en/apc.installation.php. On windows you just need to download proper php_apc.dll and enable it in php.ini by uncommenting line extension=php_apc.dll
 
 In linux it is a bit difficult but usually you will and up with this commands:
@@ -306,7 +306,7 @@ make test
 make install
 ```
 
-#####php notices
+####php notices
 For some real reasons **db.php** generates notice level errors. If you have not set restricted notices in error reporting section in your php.ini file you can set it manually on runtime like:
 
 ```php
@@ -400,33 +400,40 @@ First link is considered as default link. Default link can be accessed without p
 $database->link();
 ```
 
+####Overriding default link class
 You can override link and develop your own. Just look at code of class \db\link and make same methods. It is done without interface. db.php even does not check where comes your links it just needs that your class had following methods:
 
+#####query
 Executes query and returns result array or resource iteratable as array if any. Returns null if resultless query or false if query has no results.
 ```php
 [array] public function query (string $query)
 ```
 
+#####select
 Returns result array or resource iteratable as array or false if no records. Array must contain values with numerical keys begining with 0 in natural select field order. Like if we select field1,field2 from table, result record array must contain $row[0] = 'field 1 value', $row[1] = 'field 2 value'
 ```php
 array public function select (string $query)
 ```
 
+#####fetch
 Fetches first record of result. Result must contain values with numerical keys begining with 0 in natural select field order.
 ```php
 array public function fetch (string $query)
 ```
 
+#####value
 Fetches first value of first record of result.
 ```php
 string public function value (string $query)
 ```
 
+#####error
 Must return true or false if passed $code patarmeter and $code parameter equals actual error code that had place. Or must return error information if no $code parameter passed. Comparing passed $code and returning true or false is important part of link class while autmaticaly generating database structure.
 ```php
 boolean/mixed public function error (integer $code=null)
 ```
 
+#####id
 Returns last inserted id for that connection
 ```php
 integer public function id ()
