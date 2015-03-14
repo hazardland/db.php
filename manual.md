@@ -214,11 +214,74 @@ Spaces tabs and other things does not matter. Only matters PHPDoc comment openin
 
 db.php uses PHPDoc comments to fetch additional informations about properties and classes.
 
-##What is ORM ? What is Object Relational Mapper
+##What is ORM ? What is Object Relational Mapper ?
+In previous chapter we described classes in your model. Here we will copy only property declaration part of it:
 
-##why do i have low sallary as a php programmer ?
+```php
+namespace user;
+class user
+{
+    public $id;
+    public $login;
+    public $password;
+    public $email;
+    public $first;
+    public $last;
+    public $birth;
+    /**
+    * @var \user\group
+    */
+    public $group;
+    ...
+    ...
+    ...
+}
 
-#intermediate level
+class group
+{
+    public $id;
+    public $name;
+    public function __construct ($name=null)
+    {
+        $this->name = $name;
+    }
+    ...
+    ...
+    ...
+}
+```
+
+Now if you want to use objects of this classes in your everyday code some of this objects need to be saved in database for later usage. Some of them need to be loaded some of them need to be deleted.
+
+And these tasks are handled by ORM. ORM maps your objects directly table records literally speaking.
+
+To be clear ORM's do things like this (Assuming we have some ORM in variable $database):
+
+```php
+$group = new \user\group('Administrators');
+
+$database->save ($group);
+
+$user = new \user\user ('admin', 'John', 'Smith');
+$user->group = $group;
+
+$database->save ($user);
+
+$john = $database->user->user->load ($user->id);
+echo $john->name().' is in group '.$john->group->name;
+# user->user because of class path \user\user
+
+$database->user->group->delete ($group);
+```
+
+Instance of \user\user was just saved,loaded and deleted for example in mysql database table but you dont see any queries here. This is ORM.
+
+##Why do i have low sallary as a php programmer ?
+Because you dont use classes in your model or you dont have model in your projects at all.
+
+Nothing great can be done without it.
+
+#Intermediate level
 
 ##installation
   the only file you need is db.php iself. just include db.php in your project and you are ready to go. for some reasons disable php notice level messages.
