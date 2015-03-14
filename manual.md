@@ -9,7 +9,7 @@ But MVC is nothing than bunch of terms describing best practices how code in big
 
 If you have developed at least some kind of web application you already have used **MVC** concepts withought knowing it. I could tell you that **Controller** is a portion of code which displays **Views** to user and also receives **input** from user, **processes** it using **Model** and than decides in what **View** to parse **output** data but nobody understands sentences like that.
 
-Therefore I ll show you an example. (*Note that while using **db.php** our goal is knowing how to architect **Model***)
+Therefore I ll show you an example. (*Note that while using db.php our goal is knowing how to architect **Model***)
 
 Business model is the only way not to get lost in big projects. Simply talking it describes your project logic in classes. The porition of a project is called
 
