@@ -253,7 +253,7 @@ class group
 
 Now if you want to use objects of this classes in your everyday code some of this objects need to be saved in database for later usage. Some of them need to be loaded some of them need to be deleted.
 
-And these tasks are handled by ORM. ORM maps your objects directly table records literally speaking.
+And these tasks are handled by ORM. ORM maps your objects directly to table records and field values almost literally speaking.
 
 To be clear ORM's do things like this (Assuming we have some ORM in variable $database):
 
