@@ -439,17 +439,223 @@ Returns last inserted id for that connection
 integer public function id ()
 ```
 
-##map class to table
-##map namespace classes to tables
-##map classes by pattern to tables
+For further reading see sample codes using only \db\link https://github.com/hazardland/db.php/blob/master/samples/002.link.php
 
-##get table by class
-##get table by object
+#Connect using many links
+First init database
+```php
+$database = new \db\database ();
+```
+Or first init database with default database name:
+```php
+$database = new \db\database ('my_default_db_name');
+```
+It is assumed that this database is located on first connection link you ever establish (Or even located on any link for tables without database name specification).
 
-##create databases for mapped classes
-##create tables for mapped classes
 
-##synch changes to table structures
+Than add links as many as you wish:
+```php
+$database->link (new \db\link ('my_mysql_link', 'mysql:host=127.0.0.1', 'my_user', 'my_pass'));
+$database->link (new \db\link ('my_odbc_link', 'odbc:my_odbc_alias', 'my_user', 'my_pass'));
+```
+
+**Note that you can specify custom links to tables also custom databases to tables. By default table without link specification is located on default link. Table without database specification is located in default database.
+
+Additional link usage samples https://github.com/hazardland/db.php/blob/master/samples/002.link.php 
+
+##Map class to table
+Here begins most interesting part of db.php as we have setted up desired connection(s) we now need to make database know about our class(es).
+
+To add single class to table you have to:
+
+```php
+$database->add('\path\to\class');
+```
+
+Or
+```php
+$database->add('\\path\\to\\class');
+```
+
+Also you can specify class path by dots:
+
+```php
+$database->add('path.to.class');
+```
+
+First dot makes no sense but you also can:
+
+```php
+$database->add('.path.to.class');
+```
+
+For example if we have:
+
+```php
+namespace shop;
+
+class product
+{
+    ....
+}
+```
+
+We can:
+
+```php
+$database->add ('shop.product');
+```
+
+After adding class to database we can access class table handler by 
+```php
+$database->path->to->class
+```
+
+In \shop\product class case:
+
+```php
+$database->shop->product
+```
+
+*Note*: The only reserved namespace name is 'context' it means you must not have namespace named 'context'. $database->context is used by database object.
+
+##Map namespace classes to tables
+
+If we have many classes in namespace we can add in one line:
+
+```php
+namespace shop;
+
+class product
+{
+    ....
+}
+class cart
+{
+    ....
+}
+class cost
+{
+    ....
+}
+```
+
+```php
+$database->scan ('\namespace');
+```
+
+Or
+
+```php
+$database->scan ('\\namespace');
+```
+
+Or
+
+```php
+$database->scan ('.namespace');
+```
+
+In this case if we scan:
+
+```php
+$database->scan ('.shop');
+```
+
+We will have following table handlers:
+
+```php
+$database->shop->product
+$database->shop->cart
+$database->shop->cost
+```
+
+Table handler is an instance of \db\table it containts information for mapping class to actual database table. For further exploring table handlers see sample:
+
+https://github.com/hazardland/db.php/blob/master/samples/003.class.php
+
+##Map classes by pattern to tables
+
+```php
+$database->scan (string $string);
+```
+
+$database->scan also adds any class which full name (\path\to\class) begins on $string
+
+If we have:
+```php
+\animals\wolf
+\ant
+\animation
+```
+Than 
+```php
+$database->scan ('.ani');
+```
+
+Will add \animals\wolf and \animation classes
+
+##Get table handler for class
+
+By path to class
+```php
+$database->path->to->class;
+```
+
+By string
+```php
+$database->table('.path.to.class');
+```
+
+By object
+```php
+$object = new \path\to\class();
+$database->table($object);
+```
+
+Example:
+
+```php
+$product = new \shop\product();
+$database->add ($product);
+
+$database->shop->product;
+$database->table('.shop.product');
+$database->table($product);
+```
+
+##Create databases for mapped classes
+Any databases specified to tables or \db\database constructor which do not exist will be created by following function:
+```php
+$database->update();
+```
+
+*$database->update() creates or updates any changes to databases, tables or fields*
+
+##Create tables for mapped classes
+Any tables added to $database object which do not exist will be created on their specified databases on their connection links by following function:
+```php
+$database->update();
+```
+
+*$database->update() creates or updates any changes to databases, tables or fields*
+
+##Synch changes to table structures
+Any recent changes in tables or in fields settings (i.e. field type change) will be affected to databases by following function:
+```php
+$database->update();
+```
+
+*$database->update() creates or updates any changes to databases, tables or fields*
+
+##Generate sql dump for database changes and save to file
+Instead of running alter queries when using $database->update you can save that queries to file for further testing and usage:
+
+```php
+$database->update('\path\to\database_changes.sql');
+```
+
+*Note: In case of dump file in case of multi server architecture you will not be able to distinguish which query belongs to which connection*
 
 ##use custom name table for class
 ##use custom name field of table for class property
