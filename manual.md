@@ -65,7 +65,7 @@ else if ($_REQUEST['page']=='purchase')
     $output['product_name'] = $product->name;
     $output['product_id'] = $product->id;
 
-    $view = file_get_contents ('./product.html');
+    $view = file_get_contents ('./purchase.html');
     foreach ($output as $field = > $value)
     {
         $view = str_replace ('{'.$field.'}', $value);
@@ -76,15 +76,27 @@ else if ($_REQUEST['page']=='purchase')
 }
 ```
 
-Business model is the only way not to get lost in big projects. Simply talking it describes your project logic in classes. The porition of a project is called
+So this is **Controller**. If you look closer it containts two sections. They are almost identical. One parses page "product" and another parses page "purchase". That sections are almost identicall except in section "purchase" user buys a product while in section "product" user views product page. View variables like {product_name} and {product_id} are replaced using simple str_replace function. Views files are loaded simply by file_get_contents. And line $product->buy() actually does what it says. But where is that method code called **buy** ?
 
-  Business model is the only way not to get lost in big project. Simply talking it describes your project logic in classes. Do not get the project logic term wrong, there is also a portion of project which interacts with user and offers user interface. Folks call it view. And what delivers views to user? a part of project which is called controller. controller controls user interaction to your model using views. first it gives a user to view an interface. than receives input from user and passes properly to model. model thinks and rerturns data. controller parses that data into result view.
+####shop.php####
+```
+namespace shop
+{
+    class proudct
+    {
+        public $id;
+        public $name;
+        public function buy ()
+        {
+            /*
+            Here you should imagine the code where actual happens buy
+            */
+        }
+    }
+}
+```
 
-or what takes input and passes to model which by itself processes input and passes back output ready to represented in view ?
-
- and also a portion which takes input data from view passes properly to model. model thinks gives back data and that portion passes back model given data as output in view. an intermediate part between view and model which offers comunication between those to is called controler.
-
-therefore they named that kind of project arcitechure model view controller pattern. than they got tired pronouncing such long three word and called it mvc and there you go. no matter how you solve your developement tasks you always have this three subjects in your code. sometimes messed in each other sometimes separated without knowing names that enterprise developers gave them. but if you cant recall what part in your recent project is what than that is because you dont use model. i even feel sorry for your brain cause you make him to deal with huge unorganized thougts and concepts. show some manners think gently with nice thoughts and write organized code. and well formed code in big solutions begins with model. as we mentioned in the begining model is nothing than classes in namespaces. the only thing you need to manage therefore is how to bind your tasks in classes, methods and fields.
+This file is **Model**. If that does not make sense for you we strongly recommend you to sell burgers.
 
 
 ##how can i develop my projcect with classes ?
