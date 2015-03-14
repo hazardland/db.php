@@ -753,6 +753,83 @@ echo count ($products);
 Outputs 8 if items in products table are not less than 8
 
 
+To load items from page 2:
+```php
+$pager = new \db\pager (3, 8);
+$products = $database->shop->product->load ($pager);
+
+\db\debug($pager);
+```
+
+Pager object will look like this if we have total 30 products in table:
+
+```php
+db\pager::__set_state(array(
+      'page'  =  3,
+      'pages'  =  4,
+      'total'  =  30,
+      'count'  =  8,
+      'from'  =  16,
+))
+```
+
+Current page
+```php
+$pager->page
+```
+
+Number of pages available
+```php
+$pager->pages
+```
+
+Total items in table
+```php
+$pager->total
+```
+
+Item count per page
+```php
+$pager->count
+```
+
+First item number of result
+```php
+$pager->from
+```
+
+Table handler simply uses
+```php
+... limit $pager->from, $pager->count
+```
+To generate query
+
+To be simple you can do pager loading in one line:
+```php
+$database->shop->product->load(new \db\pager($_REQUEST['page'], 10));
+```
+
+Where $_REQUEST['page'] holds current page number. If you pass greater number in page parameter than available pages than current page will be set to last page. If you pass page number less than 1 or null or not integer than current page will be set to 1.
+
+Pager also has method next it is rarely usefull but allows to load items from table by small chunks not to overfill memory and iterate through them:
+```php
+$pager = new \db\pager (null, 10);
+
+do
+{
+    $result = $database->shop->product->load ($pager);
+    if ($result)
+    {
+        foreach ($result as $product)
+        {
+
+        }
+    }
+}
+while ($pager->next());
+```
+This will iterate throgh every product and will load them 10 by 10. Sometimes if you have 99999 records in table and you have to affect them all it is extremly important not to load them all because objects in result might overload memory if they are large.
+
 ##load using custom query from table
 ##load using custom query with pager
 
