@@ -284,7 +284,21 @@ Nothing great can be done without it.
 #Intermediate level
 
 ##installation
-  the only file you need is db.php iself. just include db.php in your project and you are ready to go. for some reasons disable php notice level messages.
+  the only file you need is **db.php** iself. just include db.php in your project and you are ready to go. for some reasons disable php notice level messages.
+
+```php
+include './db.php';
+```
+
+If you have not set restricted notices in error reporting section in your php.ini file you can set it manually on runtime like:
+
+```php
+// Report all errors except E_NOTICE
+error_reporting(E_ALL & ~E_NOTICE);
+```
+
+For additional information read http://php.net/manual/en/function.error-reporting.php
+
 ##setup connection
   simple way to start is to specify server username password and database name to db.database constructor. but remember you can connect to many servers same time and you can use many databases
 
