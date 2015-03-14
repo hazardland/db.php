@@ -657,13 +657,102 @@ $database->update('\path\to\database_changes.sql');
 
 *Note: In case of dump file in case of multi server architecture you will not be able to distinguish which query belongs to which connection*
 
-##use custom name table for class
-##use custom name field of table for class property
 
-##load all from table
+##load all from table iterate throught the result
+To load all records for table which in case of ORM means to load all objects for class use:
+```php
+$result = $database->path->to->class->load ();
+```
+
+Example:
+```php
+$products = $database->shop->product->load ();
+
+if ($products)
+{
+    foreach ($products as $product)
+    {
+        echo $product->name;
+    }
+}
+```
+
+Result represents regular array, keys of array represents ids of objects. If we know that we have product with id 2 we can access it by following code:
+
+```php
+echo $products[2]->name;
+```
+
 ##load by id from table
+To load single object by it for class from table use following:
+```php
+$database->path->to->class->load (mixed $id);
+```
+
+Example:
+```
+$product = $database->shop->product->load (2);
+echo $product->name;
+```
+
+If primary field is string like $currency->code:
+```php
+$currency = $database->cashier->currency->load ('USD');
+echo $currency->name;
+```
+
+##load by field equals value or field like value
+To load object by custom field value:
+```php
+$database->path->to->class->load (\db\by(string $field1, string $value1)->by(string $field2, string $value2)->in(string $field3, string $pattern));
+```
+
+\db\by and \db\in create instance of \db\by class which has to methods \db\by:by and \db\by::in each method returns instance of itself therefore you can add another criteria by calling again method 'in' or method 'by'. Table handler than generates a query with cross criterias with 'AND'.
+
+For example:
+```php
+$database->user->user->load (\db\by('login','administrator')->by('password','1234')->in('group','%|1|%'));
+```
+
+Will generate query something like this:
+```
+... where login='administrator' and password='1234' and group like '%|1|%'
+```
+
+Each string is escaped and protected from injection
+
+Dont get confused because of \db\ prefix in \db\by function call followed by simply ->by in \db\by()->by. \db\ is namespace prefix and it is necessary because by function resides in db namespace.
+
 ##load using pager from table
-##load by field equals value field like value
+db.php has nice pager. When using \db\pager table handler automaticaly calculates total count of results and paginates to specified size of chunks.
+
+```php
+$pager = new \db\pager(integer $page, integer $count);
+```
+
+**page** is current page
+
+**count** is count of items per page
+
+To use pager simply pass it to load function:
+
+```php
+$database->path->to->class->load (\db\pager $pager);
+```
+
+Example:
+
+```php
+$pager = new \db\pager (null, 8);
+
+$products = $database->shop->product->load ($pager);
+
+echo count ($products); 
+```
+
+Outputs 8 if items in products table are not less than 8
+
+
 ##load using custom query from table
 ##load using custom query with pager
 
@@ -686,8 +775,10 @@ $database->update('\path\to\database_changes.sql');
 
 ##universal time handling
 
-##table modifiers
+#table modifiers
+##use custom name table for class
+##use custom name field of table for class property
 
-##field modifiers
+#field modifiers
 
 ##field locaization
