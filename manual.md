@@ -401,7 +401,7 @@ $database->link();
 ```
 
 ####Overriding default link class
-You can override link and develop your own. Just look at code of class \db\link and make same methods. It is done without interface. db.php even does not check where comes your links it just needs that your class had following methods:
+You can override link and develop your own. Just look at code of class \db\link and make same methods. It is done without interface. db.php even does not check where do your link objects come it just requires that that they had following methods:
 
 #####query
 Executes query and returns result array or resource iteratable as array if any. Returns null if resultless query or false if query has no results.
