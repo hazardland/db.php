@@ -15,7 +15,7 @@ Imagine a task. We must build a product page where user will purchase product.
 
 We have two html files: product.html and success.html
 
-####product.html####
+#####product.html
 ```html
 <h1>{product_name}</h1>
 <a href="{project_link}?page=purchase&product={product_id}">
@@ -23,7 +23,7 @@ We have two html files: product.html and success.html
 </a>
 ```
 
-####purchase.html####
+#####purchase.html
 ```html
 You have successfuly purchased {product_name}
 ```
@@ -32,7 +32,7 @@ This are two stupid static html files and we can totally consider them as **view
 
 But how to use that views in actual task ? Here we need a controller. Let us assume we are so stupid we build our entire site php script in only index.php?
 
-####index.php####
+####index.php
 ```php
 if ($_REQUEST['page']=='product')
 {
@@ -76,7 +76,7 @@ else if ($_REQUEST['page']=='purchase')
 
 So this is **Controller**. If you look closer it containts two sections. They are almost identical. One parses page "product" and another parses page "purchase". That sections are almost identicall except in section "purchase" user buys a product while in section "product" user views product page. View variables like {product_name} and {product_id} are replaced using simple str_replace function. Views files are loaded simply by file_get_contents. And line $product->buy() actually does what it says. But where is that method code called **buy** ?
 
-####shop.php####
+#####shop.php
 ```
 namespace shop
 {
