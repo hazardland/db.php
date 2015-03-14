@@ -9,7 +9,72 @@ But MVC is nothing than bunch of terms describing best practices how code in big
 
 If you have developed at least some kind of web application you already have used **MVC** concepts withought knowing it. I could tell you that **Controller** is a portion of code which displays **Views** to user and also receives **input** from user, **processes** it using **Model** and than decides in what **View** to parse **output** data but nobody understands sentences like that.
 
-Therefore I ll show you an example. (*Note that while using db.php our goal is knowing how to architect **Model***)
+Therefore I ll show you an example. (*Note that while using db.php our goal is only knowing how to architect **Model***)
+
+View is very simple thing. Dont get anything what you read here literally I m trieng to come out with the simpliest examples. 
+
+Imagine a task. We must build a product page where user will purchase product.
+
+We have two html files: product.html and success.html
+
+####product.html####
+```html
+<h1>{product_name}</h1>
+<a href="{project_link}?page=purchase&product={product_id}">
+    Buy product
+</a>
+```
+
+####purchase.html####
+```html
+You have successfuly purchased {product_name}
+```
+
+This are two stupid static html files and we can totally consider them as **views**. In {product_name} there goes actual product name. When user clicks "Buy product" we will have page and product variables incoming in our script. Congratulations you know what views are !
+
+But how to use that views in actual task ? Here we need a controller. Let us assume we are so stupid we build our entire site php script in only index.php?
+
+####index.php####
+```php
+if ($_REQUEST['page']=='product')
+{
+    $product = $database->product->load ($_REQUEST['product']);
+    
+    $output = array ();
+    $output['project_link'] = $_SERVER['REMOTE_ADDR'];
+    $output['product_name'] = $product->name;
+    $output['product_id'] = $product->id;
+
+    $view = file_get_contents ('./product.html');
+    foreach ($output as $field = > $value)
+    {
+        $view = str_replace ('{'.$field.'}', $value);
+    }
+    echo $view;
+    exit;
+}
+else if ($_REQUEST['page']=='purchase')
+{
+    $product = $database->product->load ($_REQUEST['product']);
+
+    ### MAGIC HAPPENS HERE !
+    $product->buy();
+
+    $output = array ();
+    $output['project_link'] = $_SERVER['REMOTE_ADDR'];
+    $output['product_name'] = $product->name;
+    $output['product_id'] = $product->id;
+
+    $view = file_get_contents ('./product.html');
+    foreach ($output as $field = > $value)
+    {
+        $view = str_replace ('{'.$field.'}', $value);
+    }
+    echo $view;
+    exit;
+
+}
+```
 
 Business model is the only way not to get lost in big projects. Simply talking it describes your project logic in classes. The porition of a project is called
 
