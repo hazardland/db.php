@@ -190,7 +190,7 @@ What I try here is to give you an idea what and why can be placed in model. In e
 
 I assume you now know what is **model** and how to make it with **classes** and **namespaces**.
 
-#What is PHPDoc ?
+##What is PHPDoc ?
 It is official documentation form supported by native PHP API. With PHPDoc you can document your classes, properties and methods and other things not related to classes. For example:
 ```php
 /**
