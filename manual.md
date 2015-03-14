@@ -316,8 +316,121 @@ error_reporting(E_ALL & ~E_NOTICE);
 
 For additional information read http://php.net/manual/en/function.error-reporting.php
 
-##setup connection
-  simple way to start is to specify server username password and database name to db.database constructor. but remember you can connect to many servers same time and you can use many databases
+##Connect simply
+Simple way to start is to specify server, database, username and password to database constructor.
+
+```php
+$database = new \db\database(string $hostname, string $database, string $username, string $password);
+```
+
+```php
+$database = new \db\database('mysql:host=127.0.0.1', 'my_db', 'root', '1234');
+```
+
+**hostname**
+Is first parameter confusing ? It is actually a data source name. db.php uses **PDO** as default link provider so first parameter is actually PDO data source name string. 
+
+**database**
+Second parameter is **database name** and used by **db.php** to locate your tables on this connection.
+
+**username**
+This is what you think.
+
+**password**
+Same applies here.
+
+This was the simpliest connection ever db.php can handle but remember you can have multiple connections to multiple servers and multiple databases same time.
+
+##Connect using custom link
+```
+$database = new \db\database (string $database, \db\link $link);
+```
+
+But befure discussing it let me introduce \db\link to you.
+
+By default db.php establishes connections using \db\link class which by itself is wrapper of php built in PDO class.
+```php
+$link = new \db\link (string $name, string $hostname, string $username, string $password, array $config);
+```
+
+**name**
+It is unique name of the link and you will use it later. For example it might be named like 'my_mysql_link'.
+
+**hostname**
+It is actually a data source name. db.php uses **PDO** as default link provider so first parameter is PDO data source name string. 
+
+**username**
+This is what you think.
+
+**password**
+Same applies here.
+
+**config**
+By default \db\link is PDO wrapper and here you can pass PDO configuration options. Default value of config is 
+```php
+array (\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'", \PDO::ATTR_PERSISTENT => true)
+```
+You can also first init $link = new \db\link(...) and than set custom configuration option like:
+```php
+$link->config[\PDO::MYSQL_ATTR_READ_DEFAULT_FILE] = '/etc/my.cnf'
+```
+
+Link goes as a second parameter of \db\database constructor. If you are passing link than first parameter is default database name for your tables.
+
+```
+$database = new \db\database (string $database, \db\link $link);
+```
+
+**database**
+Default database name for your tables
+
+Usage:
+```php
+$database = new \db\database ('my_db', new \db\link ('my_mysql_link', 'mysql:host=127.0.0.1', 'my_user', 'my_pass'));
+```
+
+After creating you can access your link by name:
+```php
+$database->link($name);
+```
+
+First link is considered as default link. Default link can be accessed without parameter:
+
+```php
+$database->link();
+```
+
+You can override link and develop your own. Just look at code of class \db\link and make same methods. It is done without interface. db.php even does not check where comes your links it just needs that your class had following methods:
+
+Executes query and returns result array or resource iteratable as array if any. Returns null if resultless query or false if query has no results.
+```php
+[array] public function query (string $query)
+```
+
+Returns result array or resource iteratable as array or false if no records. Array must contain values with numerical keys begining with 0 in natural select field order. Like if we select field1,field2 from table, result record array must contain $row[0] = 'field 1 value', $row[1] = 'field 2 value'
+```php
+array public function select (string $query)
+```
+
+Fetches first record of result. Result must contain values with numerical keys begining with 0 in natural select field order.
+```php
+array public function fetch (string $query)
+```
+
+Fetches first value of first record of result.
+```php
+string public function value (string $query)
+```
+
+Must return true or false if passed $code patarmeter and $code parameter equals actual error code that had place. Or must return error information if no $code parameter passed. Comparing passed $code and returning true or false is important part of link class while autmaticaly generating database structure.
+```php
+boolean/mixed public function error (integer $code=null)
+```
+
+Returns last inserted id for that connection
+```php
+integer public function id ()
+```
 
 ##map class to table
 ##map namespace classes to tables
