@@ -283,13 +283,14 @@ Nothing great can be done without it.
 
 #Intermediate level
 
-##installation
+##Installation
 The only file you need is **db.php** iself. just include db.php in your project and you are ready to go.
 
 ```php
 include './db.php';
 ```
 
+####apc_cache
 **db.php** requires **apc_cache** because it is default caching engine for it. You can also override default caching engine but it is subject for further reading. A link for apc_cache installation instructions is here http://php.net/manual/en/apc.installation.php. On windows you just need to download proper php_apc.dll and enable it in php.ini by uncommenting line extension=php_apc.dll
 
 In linux it is a bit difficult but usually you will and up with this commands:
@@ -303,6 +304,7 @@ make test
 make install
 ```
 
+###php notices
 For some real reasons **db.php** generates notice level errors. If you have not set restricted notices in error reporting section in your php.ini file you can set it manually on runtime like:
 
 ```php
