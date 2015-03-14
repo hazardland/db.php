@@ -7,7 +7,7 @@ But MVC is nothing than bunch of terms describing best practices how code in big
 
 If you have developed at least some kind of web application you already have used **MVC** concepts withought knowing it. I could tell you that **Controller** is a portion of code which displays **Views** to user and also receives **input** from user, **processes** it using **Model** and than decides in what **View** to parse **output** data but nobody understands sentences like that.
 
-Therefore I ll show you an example. (*Note that while using db.php our goal is only knowing how to architect **Model***)
+Therefore I ll show you an example. (*Note that while using db.php our goal is only knowing how to architect Model*)
 
 View is very simple thing. Dont get anything what you read here literally I m trieng to come out with the simpliest examples. 
 
@@ -94,10 +94,127 @@ namespace shop
 }
 ```
 
-This file is **Model**. If that does not make sense for you we strongly recommend you to sell burgers.
+This file is **Model**. If that does not make sense for you I strongly recommend you to sell burgers.
 
+##How can I develop my projcect model with classes ?
 
-##how can i develop my projcect with classes ?
+I assume that you will handle your controllers and views by yourself but what you need for using db.php is to have model in classes. First you must understand what is core of your project than you must describe it in classes.
+
+Somewhere in your model you can meet lines like this:
+
+```php
+namespace user;
+class user
+{
+    public $id;
+    public $login;
+    public $password;
+    public $email;
+    public $first;
+    public $last;
+    public $birth;
+    /**
+    * @var \user\group
+    */
+    public $group;
+    public function __construct ($login=null, $email=null, $first=null, $last=null)
+    {
+        $this->login = $loginl
+        $this->email = $email;
+        $this->first = $first;
+        $this->last = $last;
+    }
+    public function name ()
+    {
+        if ($this->first && $this->last)
+        {
+            return $this->first.' '.$this->last.
+        }
+        else if ($this->first)
+        {
+            return $this->first; 
+        }
+        else if ($this->last)
+        {
+            return $this->last;
+        }
+        else if ($this->email)
+        {
+            return $this->email
+        }
+        else
+        {
+            return $this->login;
+        }
+    }
+    public function age ()
+    {
+        return intval((time()-strtotime($this->birth))/(3600*24*365));
+    }    
+    public function password ($value=null)
+    {
+        $this->password = md5 ($value);
+    }
+}
+
+class group
+{
+    public $id;
+    public $name;
+    public function __construct ($name=null)
+    {
+        $this->name = $name;
+    }
+}
+```
+
+So we did a user class in namespace user. Address of class is \user\user. This code is portion of model. User class has interesting method $user->name(). If you look closer it returns first name and last name if they are given. Or returns only first name if only first name given or returns email adress if it is given or at least returns user login. Model is nice place for such functionality.
+
+Also we have another class 'group' in 'user' namespace. Adress of a class is \user\group. Notice that user->group has comment @var \user\group above pointing PHP that it represents instance of class \user\group.
+
+Let me show you **usage of that classes** in your actual work probably at some point in your controller portion of code:
+
+```php
+$user = new \user\user ('administrator', 'John', 'Smith', 'john@company.com');
+$user->birth = '1985-07-17';
+
+echo $user->name()." is ".$user->age(); //Assume you are reading this in 2015
+```
+
+Outputs:
+```php
+John Smith is 30
+```
+
+What I try here is to give you an idea what and why can be placed in model. In everday code I use for example $user->name() and $user->age(). But functionality of it resides back in my model code and used for example in my other projects also.
+
+I assume you now know what is **model** and how to make it with **classes** and **namespaces**.
+
+#What is PHPDoc ?
+It is official documentation form supported by native PHP API. With PHPDoc you can document your classes, properties and methods and other things not related to classes. For example:
+```php
+/**
+* @var \user\group
+*/
+public $group;
+```
+
+@var tells PHP that following property is type of class located in namespace user and called group (\user\group). Unlike regular comments in PHP, PHPDoc comments first line must begin with 
+```php
+/**
+```
+Must be followed with next lines containing special keywords which describe your subject to be documented. Line must begin with *.
+
+And PHPDoc comments section must be closed like regular comments section:
+```php
+*/
+```
+
+Spaces tabs and other things does not matter. Only matters PHPDoc comment opening.
+
+db.php uses PHPDoc comments to fetch additional informations about properties and classes.
+
+##What is ORM ? What is Object Relational Mapper
 
 ##why do i have low sallary as a php programmer ?
 
