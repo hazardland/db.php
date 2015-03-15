@@ -2,7 +2,7 @@
 
 <!-- MarkdownTOC -->
 
-- Things to know before using ORM [](#orm)
+- Things to know before using ORM
     - What is MVC ? What is model view controller pattern ?
     - [How can I develop my projcect model with classes][model]
     - What is PHPDoc ?
@@ -55,7 +55,7 @@
 <!-- /MarkdownTOC -->
 
 
-# Things to know before using ORM [](#orm)
+# [Things to know before using ORM](#orm)
 ## What is MVC ? What is model view controller pattern ?
 
 **MVC** stands for **Model View Controller**. If you heard about it before but still dont know what it is you might be afraid of it.
@@ -66,7 +66,7 @@ If you have developed at least some kind of web application you already have use
 
 Therefore I ll show you an example. (*Note that while using db.php our goal is only knowing how to architect Model*)
 
-View is very simple thing. Dont get anything what you read here literally I m trieng to come out with the simpliest examples. 
+View is very simple thing. Dont get anything what you read here literally I m trieng to come out with the simpliest examples.
 
 Imagine a task. We must build a product page where user will purchase product.
 
@@ -94,7 +94,7 @@ But how to use that views in actual task ? Here we need a controller. Let us ass
 if ($_REQUEST['page']=='product')
 {
     $product = $database->product->load ($_REQUEST['product']);
-    
+
     $output = array ();
     $output['project_link'] = $_SERVER['REMOTE_ADDR'];
     $output['product_name'] = $product->name;
@@ -189,7 +189,7 @@ class user
         }
         else if ($this->first)
         {
-            return $this->first; 
+            return $this->first;
         }
         else if ($this->last)
         {
@@ -207,7 +207,7 @@ class user
     public function age ()
     {
         return intval((time()-strtotime($this->birth))/(3600*24*365));
-    }    
+    }
     public function password ($value=null)
     {
         $this->password = md5 ($value);
@@ -256,7 +256,7 @@ It is official documentation form supported by native PHP API. With PHPDoc you c
 public $group;
 ```
 
-@var tells PHP that following property is type of class located in namespace user and called group (\user\group). Unlike regular comments in PHP, PHPDoc comments first line must begin with 
+@var tells PHP that following property is type of class located in namespace user and called group (\user\group). Unlike regular comments in PHP, PHPDoc comments first line must begin with
 ```php
 /**
 ```
@@ -358,8 +358,8 @@ wget http://pecl.php.net/get/APC-3.1.9.tgz
 tar -xvf APC-3.1.9.tgz
 cd APC-3.1.9
 ./configure -enable-apc -enable-apc-mmap -with-apxs2=/usr/sbin/apxs
-make 
-make test 
+make
+make test
 make install
 ```
 
@@ -385,7 +385,7 @@ $database = new \db\database('mysql:host=127.0.0.1', 'my_db', 'root', '1234');
 ```
 
 **hostname**
-Is first parameter confusing ? It is actually a data source name. db.php uses **PDO** as default link provider so first parameter is actually PDO data source name string. 
+Is first parameter confusing ? It is actually a data source name. db.php uses **PDO** as default link provider so first parameter is actually PDO data source name string.
 
 **database**
 Second parameter is **database name** and used by **db.php** to locate your tables on this connection.
@@ -414,7 +414,7 @@ $link = new \db\link (string $name, string $hostname, string $username, string $
 It is unique name of the link and you will use it later. For example it might be named like 'my_mysql_link'.
 
 **hostname**
-It is actually a data source name. db.php uses **PDO** as default link provider so first parameter is PDO data source name string. 
+It is actually a data source name. db.php uses **PDO** as default link provider so first parameter is PDO data source name string.
 
 **username**
 This is what you think.
@@ -423,7 +423,7 @@ This is what you think.
 Same applies here.
 
 **config**
-By default \db\link is PDO wrapper and here you can pass PDO configuration options. Default value of config is 
+By default \db\link is PDO wrapper and here you can pass PDO configuration options. Default value of config is
 ```php
 array (\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'", \PDO::ATTR_PERSISTENT => true)
 ```
@@ -518,7 +518,7 @@ $database->link (new \db\link ('my_odbc_link', 'odbc:my_odbc_alias', 'my_user', 
 
 **Note that you can specify custom links to tables also custom databases to tables. By default table without link specification is located on default link. Table without database specification is located in default database.
 
-Additional link usage samples https://github.com/hazardland/db.php/blob/master/samples/002.link.php 
+Additional link usage samples https://github.com/hazardland/db.php/blob/master/samples/002.link.php
 
 ## Map class to table
 Here begins most interesting part of db.php as we have setted up desired connection(s) we now need to make database know about our class(es).
@@ -563,7 +563,7 @@ We can:
 $database->add ('shop.product');
 ```
 
-After adding class to database we can access class table handler by 
+After adding class to database we can access class table handler by
 ```php
 $database->path->to->class
 ```
@@ -645,7 +645,7 @@ If we have:
 \ant
 \animation
 ```
-Than 
+Than
 ```php
 $database->scan ('.ani');
 ```
@@ -812,7 +812,7 @@ $pager = new \db\pager (null, 8);
 
 $products = $database->shop->product->load ($pager);
 
-echo count ($products); 
+echo count ($products);
 ```
 
 Outputs 8 if items in products table are not less than 8
@@ -912,7 +912,7 @@ namespace shop
     {
         public $id;
         public $name;
-    }    
+    }
 }
 $database->add ('shop.product');
 $database->update ();
@@ -936,7 +936,7 @@ $database->shop->product->name();
 ##### \db\table::field
 To get **field name** use:
 ```php
-$database->shop->product->field('name'); 
+$database->shop->product->field('name');
 //Outputs something like `my_db`.`shop_product`.`name`
 ```
 
@@ -945,7 +945,7 @@ The **name** parameter for 'field' function must be property name, this means if
 ##### \db\table::value
 **value** function gerenates something useful also:
 ```php
-$database->shop->product->value('name','Milk'); 
+$database->shop->product->value('name','Milk');
 //`my_db`.`shop_product`.`name`='Milk'
 ```
 
@@ -1056,7 +1056,7 @@ Have a look at \db\order class and \db\method class for further details.
 ```
 \db\method::mode - here method stores \db\method::asc or \db\method::desc
 \db\method::mode($mode) - set mode
-\db\method:swap() - swap modes 
+\db\method:swap() - swap modes
 \db\method::asc() - set mode asc
 \db\method::desc() - set mode desc
 ```
