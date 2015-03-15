@@ -884,6 +884,7 @@ $database->shop->product->value('name','Milk');
 To **escape string** use function \db\string. Anything that does not go through the db.php functions like custom strings and comes from user input and used in queries must be escaped.
 ```php
 $database->shop->product->field('cost').">".\db\string($_REQUEST['cost']);
+//`my_db`.`shop_product`.`name`>5.1
 ```
 
 ##load using custom query from table
@@ -893,7 +894,8 @@ $query = new \db\query ();
 ```
 Than let us add custom select criteria:
 ```php
-$query->where($database->hero->field('damage').">".\db\string($_REQUES['damage'])." or ".$database->hero->value('race',$_REQUEST['race']));
+$query->where($database->hero->field('damage').">".\db\string($_REQUES['damage'])
+." or ".$database->hero->value('race',$_REQUEST['race']));
 ```
 
 ##load using custom query with pager
