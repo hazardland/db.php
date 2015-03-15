@@ -1100,7 +1100,26 @@ This will create pager object at $query->pager and you can later access it. To k
 
 
 ## load using query and return single object instead of object array
+When using \db\query or \db\by by default \db\table returns array of objects. If you want to get only first object than call:
+```php
+$database->path->to->table->load ($query, true);
+```
+Second parameter of load notifies \db\table if user wants single object as result or array. True means single false means array. Default is false.
+
 ## load affecting default load behavior or changing table default query
+Every table handler has built in query object. When you call it without passing query handler uses built in query to process your request. For example if you want to change default behavior of load without creating query object:
+```php
+$database->shop->product->load ();
+```
+Let us say you want to chane default order field for all load calls of products, than you should:
+```php
+$database->shop->product->query->order('name');
+```
+After this where ever you call load result will be ordered by name, default query is active even when you are using \db\by
+```php
+$database->shop->product->load (\db\by('type',$type));
+```
+For more information about queries see: [Query where](#query-where), [Query order](#query-order), [Query limit](#query-limit)
 
 ## save single object to table
 ## save with boolean result
