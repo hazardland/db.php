@@ -2,9 +2,9 @@
 
 <!-- MarkdownTOC -->
 
-- Things to know before using ORM
+- Things to know before using ORM [](#orm)
     - What is MVC ? What is model view controller pattern ?
-    - [How can I develop my projcect model with classes ?][model]
+    - [How can I develop my projcect model with classes][model]
     - What is PHPDoc ?
     - What is ORM ? What is Object Relational Mapper ?
     - Why do i have low sallary as a php programmer ?
@@ -55,7 +55,7 @@
 <!-- /MarkdownTOC -->
 
 
-# Things to know before using ORM
+# Things to know before using ORM [](#orm)
 ## What is MVC ? What is model view controller pattern ?
 
 **MVC** stands for **Model View Controller**. If you heard about it before but still dont know what it is you might be afraid of it.
@@ -153,7 +153,7 @@ namespace shop
 
 This file is **Model**. If that does not make sense for you I strongly recommend you to sell burgers.
 
-## How can I develop my projcect model with classes ?[model]
+## How can I develop my projcect model with classes [model]
 
 I assume that you will handle your controllers and views by yourself but what you need for using db.php is to have model in classes. First you must understand what is core of your project than you must describe it in classes.
 
