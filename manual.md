@@ -2,7 +2,7 @@
 
 <!-- MarkdownTOC -->
 
-- Things to know before using ORM
+- Things to know before using ORM[](#orm)
     - What is MVC ? What is model view controller pattern ?
     - [How can I develop my projcect model with classes][model]
     - What is PHPDoc ?
@@ -55,7 +55,7 @@
 <!-- /MarkdownTOC -->
 
 
-# [Things to know before using ORM](#orm)
+# Things to know before using ORM[](#orm)
 ## What is MVC ? What is model view controller pattern ?
 
 **MVC** stands for **Model View Controller**. If you heard about it before but still dont know what it is you might be afraid of it.
