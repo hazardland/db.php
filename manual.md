@@ -838,7 +838,15 @@ while ($pager->next());
 ```
 This will iterate throgh every product and will load them 10 by 10. Sometimes if you have 99999 records in table and you have to affect them all it is extremly important not to load them all because objects in result might overload memory if they are large.
 
-##load using custom query helper functions for field and table names
+####load using custom query
+```php
+$query = new \db\query();
+$result = $database->path->to->table->load($query);
+```
+
+Next chapters will discuss how to adjust query order, specify custom select criteria in where, group using custom field, specify limit or even attach pager to custom query.
+
+####query helper functions
 Before using queries whe need to now about few helper functions:
 ```php
 namespace shop
@@ -856,6 +864,7 @@ In this case table with name 'shop_product' will be created with fields 'id' and
 
 In custum queries you will need to use full table and field names to avoid ambigous field name errors.
 
+#####\db\table::name
 To get **table name** use:
 ```php
 $database->shop->product->table();
@@ -867,6 +876,7 @@ $database->shop->product->name();
 //Outputs something like `my_db`.`shop_product`
 ```
 
+#####\db\table::field
 To get **field name** use:
 ```php
 $database->shop->product->field('name'); 
@@ -875,19 +885,21 @@ $database->shop->product->field('name');
 
 The **name** parameter for 'field' function must be property name, this means if you have public $login than property name is 'login' and to get full field name for login use $database->path->to->table->field('login')
 
+#####\db\table::value
 **value** function gerenates something useful also:
 ```php
 $database->shop->product->value('name','Milk'); 
 //`my_db`.`shop_product`.`name`='Milk'
 ```
 
+#####\db\string
 To **escape string** use function \db\string. Anything that does not go through the db.php functions like custom strings and comes from user input and used in queries must be escaped.
 ```php
 $database->shop->product->field('cost').">".\db\string($_REQUEST['cost']);
 //`my_db`.`shop_product`.`name`>5.1
 ```
 
-##load using custom query from table
+##query where
 First initialize query object:
 ```php
 $query = new \db\query ();
@@ -897,6 +909,78 @@ Than let us add custom select criteria:
 $query->where($database->hero->field('damage').">".\db\string($_REQUES['damage'])
 ." or ".$database->hero->value('race',$_REQUEST['race']));
 ```
+Run query:
+```php
+$heroes = $database->hero->load ($query);
+```
+
+With queries you can adjust order, limit, group, join, cache type, pager usage and debug option. Next chapters will show you these tricks. But make sure you have read previous chapter about query helper functions like \db\table::name and \db\table::field or \db\string or \db\id.
+
+##query order
+In previous chapters we talked about query initialization and simle usage. Now let us list step by step query object features.
+
+Example class:
+```
+public product
+{
+    public $name;
+    public $type;
+    public $color;
+}
+```
+
+The very simple and not recomended usage
+```php
+$query->order->field = 'color';
+$query->order->method = 'desc';
+```
+
+Some still simple usage
+```php
+$query->order->field ('color');
+$query->order->method ('asc');
+```
+Some little usefull trick
+```php
+$query->order->method->swap();
+```
+Now order method is 'desc'
+
+Order with multi fields
+```php
+$query->order->add ('color','desc');
+$query->order->add ('name', 'asc');
+$query->order->add ('type');
+```
+No we have color desc, name asc, type asc as order
+
+Well this is also possible
+```php
+$query->order->add (new \db\order('color','desc'));
+$query->order->add (new \db\order('name'));
+```
+
+But that is not all if you are not still confused
+You can also try:
+```php
+$query->order ('color','asc');
+```
+Order method parameter is required here
+
+If you want to use method->swap
+Instead of passing method (desc or asc) by string
+Pass them as:
+```php
+new \db\method('asc')
+new \db\method('desc')
+```
+Or
+```php
+\db\method(\db\method::asc)
+\db\method(\db\method::desc)
+```
+Thats almost all with order
+Have a nice day
 
 ##load using custom query with pager
 ##load using query and return single object instead of object array
