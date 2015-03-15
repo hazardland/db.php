@@ -1,5 +1,62 @@
-#Things to know before using ORM
-##What is MVC ? What is model view controller pattern ?
+# Table of contents
+
+<!-- MarkdownTOC -->
+
+- Things to know before using ORM
+    - What is MVC ? What is model view controller pattern ?
+    - How can I develop my projcect model with classes ?
+    - What is PHPDoc ?
+    - What is ORM ? What is Object Relational Mapper ?
+    - Why do i have low sallary as a php programmer ?
+- Intermediate level
+    - Installation
+    - Connect simply
+    - Connect using custom link
+    - Connect using many links
+    - Map class to table
+    - Map namespace classes to tables
+    - Map classes by pattern to tables
+    - Get table handler for class
+    - Create databases for mapped classes
+    - Create tables for mapped classes
+    - Synch changes to table structures
+    - Generate sql dump for database changes and save to file
+    - Load all from table iterate throught the result
+    - Load by id from table
+    - Load by field equals value or field like value
+    - Load using pager from table
+    - Query where
+    - Query order
+    - Query limit
+    - load using custom query with pager
+    - load using query and return single object instead of object array
+    - load affecting default load behavior or changing table default query
+    - save single object to table
+    - save with boolean result
+    - save with saved object result
+    - save without knowing object table
+    - save objects to table
+    - delete single object
+    - delete by id
+    - delete table objects
+    - delete varius type of object same time
+    - delete by query from table
+    - cache user - cache table records on user level (default session)
+    - cache long - table records on server level (default apc_cache)
+    - cache temp - table records for script runtime (default memory)
+    - develop and plug custom cache engine for desired cache level
+    - universal time handling
+- table modifiers
+    - use custom name table for class
+    - use custom name field of table for class property
+- field modifiers
+    - field locaization
+
+<!-- /MarkdownTOC -->
+
+
+# Things to know before using ORM
+## What is MVC ? What is model view controller pattern ?
 
 **MVC** stands for **Model View Controller**. If you heard about it before but still dont know what it is you might be afraid of it.
 
@@ -15,7 +72,7 @@ Imagine a task. We must build a product page where user will purchase product.
 
 We have two html files: product.html and success.html
 
-####product.html
+#### product.html
 ```html
 <h1>{product_name}</h1>
 <a href="{project_link}?page=purchase&product={product_id}">
@@ -23,7 +80,7 @@ We have two html files: product.html and success.html
 </a>
 ```
 
-####purchase.html
+#### purchase.html
 ```html
 You have successfuly purchased {product_name}
 ```
@@ -32,7 +89,7 @@ This are two stupid static html files and we can totally consider them as **view
 
 But how to use that views in actual task ? Here we need a controller. Let us assume we are so stupid we build our entire site php script in only index.php?
 
-####index.php
+#### index.php
 ```php
 if ($_REQUEST['page']=='product')
 {
@@ -76,7 +133,7 @@ else if ($_REQUEST['page']=='purchase')
 
 So this is **Controller**. If you look closer it containts two sections. They are almost identical. One parses page "product" and another parses page "purchase". That sections are almost identicall except in section "purchase" user buys a product while in section "product" user views product page. View variables like {product_name} and {product_id} are replaced using simple str_replace function. Views files are loaded simply by file_get_contents. And line $product->buy() actually does what it says. But where is that method code called **buy** ?
 
-####shop.php
+#### shop.php
 ```
 namespace shop
 {
@@ -96,7 +153,7 @@ namespace shop
 
 This file is **Model**. If that does not make sense for you I strongly recommend you to sell burgers.
 
-##How can I develop my projcect model with classes ?
+## How can I develop my projcect model with classes ?
 
 I assume that you will handle your controllers and views by yourself but what you need for using db.php is to have model in classes. First you must understand what is core of your project than you must describe it in classes.
 
@@ -190,7 +247,7 @@ What I try here is to give you an idea what and why can be placed in model. In e
 
 I assume you now know what is **model** and how to make it with **classes** and **namespaces**.
 
-##What is PHPDoc ?
+## What is PHPDoc ?
 It is official documentation form supported by native PHP API. With PHPDoc you can document your classes, properties and methods and other things not related to classes. For example:
 ```php
 /**
@@ -214,7 +271,7 @@ Spaces tabs and other things does not matter. Only matters PHPDoc comment openin
 
 db.php uses PHPDoc comments to fetch additional informations about properties and classes.
 
-##What is ORM ? What is Object Relational Mapper ?
+## What is ORM ? What is Object Relational Mapper ?
 In previous chapter we described classes in your model. Here we will copy only property declaration part of it:
 
 ```php
@@ -276,23 +333,23 @@ $database->user->group->delete ($group);
 
 Instance of \user\user was just saved,loaded and deleted for example in mysql database table but you dont see any queries here. This is ORM.
 
-##Why do i have low sallary as a php programmer ?
+## Why do i have low sallary as a php programmer ?
 Because you dont use classes in your model or you dont have model in your projects at all.
 
 Nothing great can be done without it.
 
-#Intermediate level
+# Intermediate level
 
-##Installation
+## Installation
 
-####Include
+#### Include
 The only file you need is **db.php** iself. Just include db.php in your project and you are ready to go. Other files in this repo are just samples and documents.
 
 ```php
 include './db.php';
 ```
 
-####apc_cache
+#### apc_cache
 **db.php** requires **apc_cache** because it is default caching engine for it. You can also override default caching engine but it is subject for further reading. A link for apc_cache installation instructions is here http://php.net/manual/en/apc.installation.php. On windows you just need to download proper php_apc.dll and enable it in php.ini by uncommenting line extension=php_apc.dll
 
 In linux it is a bit difficult but usually you will and up with this commands:
@@ -306,7 +363,7 @@ make test
 make install
 ```
 
-####php notices
+#### php notices
 For some real reasons **db.php** generates notice level errors. If you have not set restricted notices in error reporting section in your php.ini file you can set it manually on runtime like:
 
 ```php
@@ -316,7 +373,7 @@ error_reporting(E_ALL & ~E_NOTICE);
 
 For additional information read http://php.net/manual/en/function.error-reporting.php
 
-##Connect simply
+## Connect simply
 Simple way to start is to specify server, database, username and password to database constructor.
 
 ```php
@@ -341,7 +398,7 @@ Same applies here.
 
 This was the simpliest connection ever db.php can handle but remember you can have multiple connections to multiple servers and multiple databases same time.
 
-##Connect using custom link
+## Connect using custom link
 ```
 $database = new \db\database (string $database, \db\link $link);
 ```
@@ -400,40 +457,40 @@ First link is considered as default link. Default link can be accessed without p
 $database->link();
 ```
 
-####Overriding default link class
+#### Overriding default link class
 You can override link and develop your own. Just look at code of class \db\link and make same methods. It is done without interface. db.php even does not check where do your link objects come it just requires that that they had following methods:
 
-#####query
+##### query
 Executes query and returns result array or resource iteratable as array if any. Returns null if resultless query or false if query has no results.
 ```php
 [array] public function query (string $query)
 ```
 
-#####select
+##### select
 Returns result array or resource iteratable as array or false if no records. Array must contain values with numerical keys begining with 0 in natural select field order. Like if we select field1,field2 from table, result record array must contain $row[0] = 'field 1 value', $row[1] = 'field 2 value'
 ```php
 array public function select (string $query)
 ```
 
-#####fetch
+##### fetch
 Fetches first record of result. Result must contain values with numerical keys begining with 0 in natural select field order.
 ```php
 array public function fetch (string $query)
 ```
 
-#####value
+##### value
 Fetches first value of first record of result.
 ```php
 string public function value (string $query)
 ```
 
-#####error
+##### error
 Must return true or false if passed $code patarmeter and $code parameter equals actual error code that had place. Or must return error information if no $code parameter passed. Comparing passed $code and returning true or false is important part of link class while autmaticaly generating database structure.
 ```php
 boolean/mixed public function error (integer $code=null)
 ```
 
-#####id
+##### id
 Returns last inserted id for that connection
 ```php
 integer public function id ()
@@ -441,7 +498,7 @@ integer public function id ()
 
 For further reading see sample codes using only \db\link https://github.com/hazardland/db.php/blob/master/samples/002.link.php
 
-#Connect using many links
+## Connect using many links
 First init database
 ```php
 $database = new \db\database ();
@@ -463,7 +520,7 @@ $database->link (new \db\link ('my_odbc_link', 'odbc:my_odbc_alias', 'my_user', 
 
 Additional link usage samples https://github.com/hazardland/db.php/blob/master/samples/002.link.php 
 
-##Map class to table
+## Map class to table
 Here begins most interesting part of db.php as we have setted up desired connection(s) we now need to make database know about our class(es).
 
 To add single class to table you have to:
@@ -519,7 +576,7 @@ $database->shop->product
 
 *Note*: The only reserved namespace name is 'context' it means you must not have namespace named 'context'. $database->context is used by database object.
 
-##Map namespace classes to tables
+## Map namespace classes to tables
 
 If we have many classes in namespace we can add in one line:
 
@@ -574,7 +631,7 @@ Table handler is an instance of \db\table it containts information for mapping c
 
 https://github.com/hazardland/db.php/blob/master/samples/003.class.php
 
-##Map classes by pattern to tables
+## Map classes by pattern to tables
 
 ```php
 $database->scan (string $string);
@@ -595,7 +652,7 @@ $database->scan ('.ani');
 
 Will add \animals\wolf and \animation classes
 
-##Get table handler for class
+## Get table handler for class
 
 By path to class
 ```php
@@ -624,7 +681,7 @@ $database->table('.shop.product');
 $database->table($product);
 ```
 
-##Create databases for mapped classes
+## Create databases for mapped classes
 Any databases specified to tables or \db\database constructor which do not exist will be created by following function:
 ```php
 $database->update();
@@ -632,7 +689,7 @@ $database->update();
 
 *$database->update() creates or updates any changes to databases, tables or fields*
 
-##Create tables for mapped classes
+## Create tables for mapped classes
 Any tables added to $database object which do not exist will be created on their specified databases on their connection links by following function:
 ```php
 $database->update();
@@ -640,7 +697,7 @@ $database->update();
 
 *$database->update() creates or updates any changes to databases, tables or fields*
 
-##Synch changes to table structures
+## Synch changes to table structures
 Any recent changes in tables or in fields settings (i.e. field type change) will be affected to databases by following function:
 ```php
 $database->update();
@@ -648,7 +705,7 @@ $database->update();
 
 *$database->update() creates or updates any changes to databases, tables or fields*
 
-##Generate sql dump for database changes and save to file
+## Generate sql dump for database changes and save to file
 Instead of running alter queries when using $database->update you can save that queries to file for further testing and usage:
 
 ```php
@@ -658,7 +715,7 @@ $database->update('\path\to\database_changes.sql');
 *Note: In case of dump file in case of multi server architecture you will not be able to distinguish which query belongs to which connection*
 
 
-##load all from table iterate throught the result
+## Load all from table iterate throught the result
 To load all records for table which in case of ORM means to load all objects for class use:
 ```php
 $result = $database->path->to->class->load ();
@@ -683,7 +740,7 @@ Result represents regular array, keys of array represents ids of objects. If we 
 echo $products[2]->name;
 ```
 
-##load by id from table
+## Load by id from table
 To load single object by it for class from table use following:
 ```php
 $database->path->to->class->load (mixed $id);
@@ -701,7 +758,7 @@ $currency = $database->cashier->currency->load ('USD');
 echo $currency->name;
 ```
 
-##load by field equals value or field like value
+## Load by field equals value or field like value
 To load object by custom field value:
 ```php
 $database->path->to->class->load (\db\by(string $field1, mixed $value1)->by(string $field2, mixed $value2)->in(string $field3, mixed $value));
@@ -731,7 +788,7 @@ Each string is escaped and protected from injection.
 
 Dont get confused because of \db\ prefix in \db\by function call followed by simply ->by in \db\by()->by. \db\ is namespace prefix and it is necessary because by function resides in db namespace.
 
-##load using pager from table
+## Load using pager from table
 db.php has nice pager. When using \db\pager table handler automaticaly calculates total count of results and paginates to specified size of chunks.
 
 ```php
@@ -838,7 +895,7 @@ while ($pager->next());
 ```
 This will iterate throgh every product and will load them 10 by 10. Sometimes if you have 99999 records in table and you have to affect them all it is extremly important not to load them all because objects in result might overload memory if they are large.
 
-####load using custom query
+#### Load using custom query
 ```php
 $query = new \db\query();
 $result = $database->path->to->table->load($query);
@@ -846,7 +903,7 @@ $result = $database->path->to->table->load($query);
 
 Next chapters will discuss how to adjust query order, specify custom select criteria in where, group using custom field, specify limit or even attach pager to custom query.
 
-####query helper functions
+#### Query helper functions
 Before using queries whe need to now about few helper functions:
 ```php
 namespace shop
@@ -864,7 +921,7 @@ In this case table with name 'shop_product' will be created with fields 'id' and
 
 In custum queries you will need to use full table and field names to avoid ambigous field name errors.
 
-#####\db\table::name
+##### \db\table::name
 To get **table name** use:
 ```php
 $database->shop->product->table();
@@ -876,7 +933,7 @@ $database->shop->product->name();
 //Outputs something like `my_db`.`shop_product`
 ```
 
-#####\db\table::field
+##### \db\table::field
 To get **field name** use:
 ```php
 $database->shop->product->field('name'); 
@@ -885,21 +942,21 @@ $database->shop->product->field('name');
 
 The **name** parameter for 'field' function must be property name, this means if you have public $login than property name is 'login' and to get full field name for login use $database->path->to->table->field('login')
 
-#####\db\table::value
+##### \db\table::value
 **value** function gerenates something useful also:
 ```php
 $database->shop->product->value('name','Milk'); 
 //`my_db`.`shop_product`.`name`='Milk'
 ```
 
-#####\db\string
+##### \db\string
 To **escape string** use function \db\string. Anything that does not go through the db.php functions like custom strings and comes from user input and used in queries must be escaped.
 ```php
 $database->shop->product->field('cost').">".\db\string($_REQUEST['cost']);
 //`my_db`.`shop_product`.`name`>5.1
 ```
 
-##query where
+## Query where
 First initialize query object:
 ```php
 $query = new \db\query ();
@@ -914,9 +971,19 @@ Run query:
 $heroes = $database->hero->load ($query);
 ```
 
+You can also use:
+```php
+$query->where->string .= ' AND ...';
+```
+
+And also set something that is string or reacts properly on strval()
+```php
+$query->where = $my_strval_object;
+```
+
 With queries you can adjust order, limit, group, join, cache type, pager usage and debug option. Next chapters will show you these tricks. But make sure you have read previous chapter about query helper functions like \db\table::name and \db\table::field or \db\string or \db\id.
 
-##query order
+## Query order
 In previous chapters we talked about query initialization and simle usage. Now let us list step by step query object features.
 
 Example class:
@@ -929,86 +996,108 @@ public product
 }
 ```
 
-The very simple and not recomended usage
+Query can be ordered many ways but two common behaviors needs to be remembered as single field order simpliest way is to call \db\query::order
 ```php
-$query->order->field = 'color';
-$query->order->method = 'desc';
+$query->order ('color','desc');
+//OR
+$query->order ('color');
+//OR
+$query->order ('color','asc');
+//asc is required when calling directly \db\query::order
 ```
 
-Some still simple usage
-```php
-$query->order->field ('color');
-$query->order->method ('asc');
-```
-Some little usefull trick
-```php
-$query->order->method->swap();
-```
-Now order method is 'desc'
 
-Order with multi fields
+And multi field order technics:
 ```php
 $query->order->add ('color','desc');
 $query->order->add ('name', 'asc');
 $query->order->add ('type');
 ```
-No we have color desc, name asc, type asc as order
+This will generate something like: order by color desc, name asc, type asc but with full field names
 
-Well this is also possible
+
+Single field order can by done with \db\order functions also
+```php
+$query->order->field ('color');
+$query->order->method ('desc');
+```
+
+The very simple and not recomended usage also:
+```php
+$query->order->field = 'color';
+$query->order->method = 'desc';
+```
+
+Some little usefull trick
+```php
+$query->order->method->swap();
+```
+It will swap order method 'asc' to 'desc', or if set to 'desc' than will swap to 'asc'.
+
+Well this is also possible:
 ```php
 $query->order->add (new \db\order('color','desc'));
 $query->order->add (new \db\order('name'));
 ```
 
-But that is not all if you are not still confused
-You can also try:
-```php
-$query->order ('color','asc');
+Have a look at \db\order class and \db\method class for further details.
+
+\db\order has
 ```
-Order method parameter is required here
-
-If you want to use method->swap
-Instead of passing method (desc or asc) by string
-Pass them as:
-```php
-new \db\method('asc')
-new \db\method('desc')
+\db\order::items - an array which stores \db\order objects if multi order takes place
+\db\order::field - here order stores field
+\db\order::method - here order stores method
+\db\order::add(field, method)
+\db\order::field(field)
+\db\order::method(method)
 ```
-Or
-```php
-\db\method(\db\method::asc)
-\db\method(\db\method::desc)
+
+\db\method has
 ```
-Thats almost all with order
-Have a nice day
+\db\method::mode - here method stores \db\method::asc or \db\method::desc
+\db\method::mode($mode) - set mode
+\db\method:swap() - swap modes 
+\db\method::asc() - set mode asc
+\db\method::desc() - set mode desc
+```
 
-##load using custom query with pager
-##load using query and return single object instead of object array
-##load affecting default load behavior or changing table default query
+## Query limit
+```php
+$query->limit(integer $from [, integer $count]);
+```
 
-##save single object to table
-##save with boolean result
-##save with saved object result
-##save without knowing object table
-##save objects to table
+Example:
+```php
+$query->limit (10);
+```
 
-##delete single object
-##delete by id
-##delete table objects
-##delete varius type of object same time
-##delete by query from table
+## load using custom query with pager
+## load using query and return single object instead of object array
+## load affecting default load behavior or changing table default query
 
-##cache user - cache table records on user level (default session)
-##cache long - table records on server level (default apc_cache)
-##cache temp - table records for script runtime (default memory)
-##develop and plug custom cache engine for desired cache level
+## save single object to table
+## save with boolean result
+## save with saved object result
+## save without knowing object table
+## save objects to table
 
-##universal time handling
+## delete single object
+## delete by id
+## delete table objects
+## delete varius type of object same time
+## delete by query from table
 
-#table modifiers
-##use custom name table for class
-##use custom name field of table for class property
+## cache user - cache table records on user level (default session)
+## cache long - table records on server level (default apc_cache)
+## cache temp - table records for script runtime (default memory)
+## develop and plug custom cache engine for desired cache level
 
-#field modifiers
+## universal time handling
 
-##field locaization
+# table modifiers
+## use custom name table for class
+## use custom name field of table for class property
+
+# field modifiers
+
+## field locaization
