@@ -704,22 +704,30 @@ echo $currency->name;
 ##load by field equals value or field like value
 To load object by custom field value:
 ```php
-$database->path->to->class->load (\db\by(string $field1, string $value1)->by(string $field2, string $value2)->in(string $field3, string $pattern));
+$database->path->to->class->load (\db\by(string $field1, mixed $value1)->by(string $field2, mixed $value2)->in(string $field3, mixed $value));
 ```
 
 \db\by and \db\in create instance of \db\by class which has to methods \db\by:by and \db\by::in each method returns instance of itself therefore you can add another criteria by calling again method 'in' or method 'by'. Table handler than generates a query with cross criterias with 'AND'.
 
 For example:
 ```php
-$database->user->user->load (\db\by('login','administrator')->by('password','1234')->in('group','%|1|%'));
+$database->user->user->load (\db\by('login','administrator')->by('password','1234')->in('group',1));
 ```
 
 Will generate query something like this:
 ```
 ... where login='administrator' and password='1234' and group like '%|1|%'
 ```
+'in' method generates 'like' statement for enumerated fields which in db.php are stored like '|value1|value2|value3|'. Enumerated fields are subject of further reading and we will not describe it here in details.
 
-Each string is escaped and protected from injection
+**value** parameter can also be objects or boolean values except of regular strings:
+```php
+$group = $database->user->group->load (1);
+
+$database->user->user->load (\db\by('group',$group)->by('active',true));
+```
+
+Each string is escaped and protected from injection.
 
 Dont get confused because of \db\ prefix in \db\by function call followed by simply ->by in \db\by()->by. \db\ is namespace prefix and it is necessary because by function resides in db namespace.
 
@@ -832,6 +840,8 @@ This will iterate throgh every product and will load them 10 by 10. Sometimes if
 
 ##load using custom query from table
 ##load using custom query with pager
+##load using query and return single object instead of object array
+##load affecting default load behavior or changing table default query
 
 ##save single object to table
 ##save with boolean result
