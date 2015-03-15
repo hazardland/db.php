@@ -3,11 +3,11 @@
 <!-- MarkdownTOC -->
 
 - [Things to know before using ORM](#things-to-know-before-using-orm)
-    - [What is MVC ? What is model view controller pattern ?](#what-is-mvc--what-is-model-view-controller-pattern-)
-    - [How can I develop my projcect model with classes](#model)
-    - [What is PHPDoc ?](#what-is-phpdoc-)
-    - [What is ORM ? What is Object Relational Mapper ?](#what-is-orm--what-is-object-relational-mapper-)
-    - [Why do i have low sallary as a php programmer ?](#why-do-i-have-low-sallary-as-a-php-programmer-)
+    - [What is MVC ? What is model view controller pattern?](#what-is-mvc--what-is-model-view-controller-pattern)
+    - [How can I develop my projcect model with classes?](#how-can-i-develop-my-projcect-model-with-classes)
+    - [What is PHPDoc?](#what-is-phpdoc)
+    - [What is ORM ? What is Object Relational Mapper?](#what-is-orm--what-is-object-relational-mapper)
+    - [Why do i have low sallary as a php programmer?](#why-do-i-have-low-sallary-as-a-php-programmer)
 - [Intermediate level](#intermediate-level)
     - [Installation](#installation)
     - [Connect simply](#connect-simply)
@@ -55,8 +55,8 @@
 <!-- /MarkdownTOC -->
 
 
-# [Things to know before using ORM](#orm)
-## What is MVC ? What is model view controller pattern ?
+# Things to know before using ORM
+## What is MVC ? What is model view controller pattern?
 
 **MVC** stands for **Model View Controller**. If you heard about it before but still dont know what it is you might be afraid of it.
 
@@ -153,7 +153,7 @@ namespace shop
 
 This file is **Model**. If that does not make sense for you I strongly recommend you to sell burgers.
 
-## How can I develop my projcect model with classes [model]
+## How can I develop my projcect model with classes?
 
 I assume that you will handle your controllers and views by yourself but what you need for using db.php is to have model in classes. First you must understand what is core of your project than you must describe it in classes.
 
@@ -247,7 +247,7 @@ What I try here is to give you an idea what and why can be placed in model. In e
 
 I assume you now know what is **model** and how to make it with **classes** and **namespaces**.
 
-## What is PHPDoc ?
+## What is PHPDoc?
 It is official documentation form supported by native PHP API. With PHPDoc you can document your classes, properties and methods and other things not related to classes. For example:
 ```php
 /**
@@ -271,7 +271,7 @@ Spaces tabs and other things does not matter. Only matters PHPDoc comment openin
 
 db.php uses PHPDoc comments to fetch additional informations about properties and classes.
 
-## What is ORM ? What is Object Relational Mapper ?
+## What is ORM ? What is Object Relational Mapper?
 In previous chapter we described classes in your model. Here we will copy only property declaration part of it:
 
 ```php
@@ -333,7 +333,7 @@ $database->user->group->delete ($group);
 
 Instance of \user\user was just saved,loaded and deleted for example in mysql database table but you dont see any queries here. This is ORM.
 
-## Why do i have low sallary as a php programmer ?
+## Why do i have low sallary as a php programmer?
 Because you dont use classes in your model or you dont have model in your projects at all.
 
 Nothing great can be done without it.
