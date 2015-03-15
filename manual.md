@@ -4,10 +4,10 @@
 
 - [Things to know before using ORM](#things-to-know-before-using-orm)
     - [What is MVC ? What is model view controller pattern?](#what-is-mvc--what-is-model-view-controller-pattern)
-    - [How can I develop my projcect model with classes?](#how-can-i-develop-my-projcect-model-with-classes)
+    - [How can I develop my project model with classes?](#how-can-i-develop-my-project-model-with-classes)
     - [What is PHPDoc?](#what-is-phpdoc)
     - [What is ORM ? What is Object Relational Mapper?](#what-is-orm--what-is-object-relational-mapper)
-    - [Why do i have low sallary as a php programmer?](#why-do-i-have-low-sallary-as-a-php-programmer)
+    - [Why do i have low salary as a php programmer?](#why-do-i-have-low-salary-as-a-php-programmer)
 - [Intermediate level](#intermediate-level)
     - [Installation](#installation)
     - [Connect simply](#connect-simply)
@@ -19,7 +19,7 @@
     - [Get table handler for class](#get-table-handler-for-class)
     - [Create databases for mapped classes](#create-databases-for-mapped-classes)
     - [Create tables for mapped classes](#create-tables-for-mapped-classes)
-    - [Synch changes to table structures](#synch-changes-to-table-structures)
+    - [Sync changes to table structures](#sync-changes-to-table-structures)
     - [Generate sql dump for database changes and save to file](#generate-sql-dump-for-database-changes-and-save-to-file)
     - [Load all from table iterate throught the result](#load-all-from-table-iterate-throught-the-result)
     - [Load by id from table](#load-by-id-from-table)
@@ -39,7 +39,7 @@
     - [delete single object](#delete-single-object)
     - [delete by id](#delete-by-id)
     - [delete table objects](#delete-table-objects)
-    - [delete varius type of object same time](#delete-varius-type-of-object-same-time)
+    - [delete various type of object same time](#delete-various-type-of-object-same-time)
     - [delete by query from table](#delete-by-query-from-table)
     - [cache user - cache table records on user level (default session)](#cache-user---cache-table-records-on-user-level-default-session)
     - [cache long - table records on server level (default apc_cache)](#cache-long---table-records-on-server-level-default-apc_cache)
@@ -82,7 +82,7 @@ We have two html files: product.html and success.html
 
 #### purchase.html
 ```html
-You have successfuly purchased {product_name}
+You have successfully purchased {product_name}
 ```
 
 This are two stupid static html files and we can totally consider them as **views**. In {product_name} there goes actual product name. When user clicks "Buy product" we will have page and product variables incoming in our script. Congratulations you know what views are !
@@ -131,7 +131,7 @@ else if ($_REQUEST['page']=='purchase')
 }
 ```
 
-So this is **Controller**. If you look closer it containts two sections. They are almost identical. One parses page "product" and another parses page "purchase". That sections are almost identicall except in section "purchase" user buys a product while in section "product" user views product page. View variables like {product_name} and {product_id} are replaced using simple str_replace function. Views files are loaded simply by file_get_contents. And line $product->buy() actually does what it says. But where is that method code called **buy** ?
+So this is **Controller**. If you look closer it contains two sections. They are almost identical. One parses page "product" and another parses page "purchase". That sections are almost identical except in section "purchase" user buys a product while in section "product" user views product page. View variables like {product_name} and {product_id} are replaced using simple str_replace function. Views files are loaded simply by file_get_contents. And line $product->buy() actually does what it says. But where is that method code called **buy** ?
 
 #### shop.php
 ```
@@ -153,7 +153,7 @@ namespace shop
 
 This file is **Model**. If that does not make sense for you I strongly recommend you to sell burgers.
 
-## How can I develop my projcect model with classes?
+## How can I develop my project model with classes?
 
 I assume that you will handle your controllers and views by yourself but what you need for using db.php is to have model in classes. First you must understand what is core of your project than you must describe it in classes.
 
@@ -239,6 +239,7 @@ echo $user->name()." is ".$user->age(); //Assume you are reading this in 2015
 ```
 
 Outputs:
+
 ```php
 John Smith is 30
 ```
@@ -249,6 +250,7 @@ I assume you now know what is **model** and how to make it with **classes** and 
 
 ## What is PHPDoc?
 It is official documentation form supported by native PHP API. With PHPDoc you can document your classes, properties and methods and other things not related to classes. For example:
+
 ```php
 /**
 * @var \user\group
@@ -257,12 +259,14 @@ public $group;
 ```
 
 @var tells PHP that following property is type of class located in namespace user and called group (\user\group). Unlike regular comments in PHP, PHPDoc comments first line must begin with
+
 ```php
 /**
 ```
 Must be followed with next lines containing special keywords which describe your subject to be documented. Line must begin with *.
 
 And PHPDoc comments section must be closed like regular comments section:
+
 ```php
 */
 ```
@@ -333,7 +337,7 @@ $database->user->group->delete ($group);
 
 Instance of \user\user was just saved,loaded and deleted for example in mysql database table but you dont see any queries here. This is ORM.
 
-## Why do i have low sallary as a php programmer?
+## Why do i have low salary as a php programmer?
 Because you dont use classes in your model or you dont have model in your projects at all.
 
 Nothing great can be done without it.
@@ -627,7 +631,7 @@ $database->shop->cart
 $database->shop->cost
 ```
 
-Table handler is an instance of \db\table it containts information for mapping class to actual database table. For further exploring table handlers see sample:
+Table handler is an instance of \db\table it contains information for mapping class to actual database table. For further exploring table handlers see sample:
 
 https://github.com/hazardland/db.php/blob/master/samples/003.class.php
 
@@ -697,7 +701,7 @@ $database->update();
 
 *$database->update() creates or updates any changes to databases, tables or fields*
 
-## Synch changes to table structures
+## Sync changes to table structures
 Any recent changes in tables or in fields settings (i.e. field type change) will be affected to databases by following function:
 ```php
 $database->update();
@@ -1062,16 +1066,39 @@ Have a look at \db\order class and \db\method class for further details.
 ```
 
 ## Query limit
+With two parameters from and count
 ```php
-$query->limit(integer $from [, integer $count]);
+$query->limit(integer $from, integer $count);
+```
+
+With only one parameter count
+```php
+$query->limit(integer $count);
 ```
 
 Example:
 ```php
-$query->limit (10);
+$query->limit (10, 30);
 ```
+Generates *limit 10, 30*
+
+Example:
+```php
+$query->limit (30);
+```
+Generates *limit 30*
 
 ## load using custom query with pager
+Query pager overrides query limit behavior if you call:
+
+```php
+$query->pager (integer page[, integer count=50])
+
+```
+
+This will create pager object at $query->pager and you can later access it. To know more about \db\pager class object please read [Load using pager from table](#load-using-pager-from-table).
+
+
 ## load using query and return single object instead of object array
 ## load affecting default load behavior or changing table default query
 
@@ -1084,7 +1111,7 @@ $query->limit (10);
 ## delete single object
 ## delete by id
 ## delete table objects
-## delete varius type of object same time
+## delete various type of object same time
 ## delete by query from table
 
 ## cache user - cache table records on user level (default session)
