@@ -2,60 +2,60 @@
 
 <!-- MarkdownTOC -->
 
-- [Things to know before using ORM][orm]
-    - What is MVC ? What is model view controller pattern ?
+- [Things to know before using ORM][things-to-know-before-using-orm]
+    - [What is MVC ? What is model view controller pattern ?][what-is-mvc--what-is-model-view-controller-pattern-]
     - [How can I develop my projcect model with classes][model]
-    - What is PHPDoc ?
-    - What is ORM ? What is Object Relational Mapper ?
-    - Why do i have low sallary as a php programmer ?
-- Intermediate level
-    - Installation
-    - Connect simply
-    - Connect using custom link
-    - Connect using many links
-    - Map class to table
-    - Map namespace classes to tables
-    - Map classes by pattern to tables
-    - Get table handler for class
-    - Create databases for mapped classes
-    - Create tables for mapped classes
-    - Synch changes to table structures
-    - Generate sql dump for database changes and save to file
-    - Load all from table iterate throught the result
-    - Load by id from table
-    - Load by field equals value or field like value
-    - Load using pager from table
-    - Query where
-    - Query order
-    - Query limit
-    - load using custom query with pager
-    - load using query and return single object instead of object array
-    - load affecting default load behavior or changing table default query
-    - save single object to table
-    - save with boolean result
-    - save with saved object result
-    - save without knowing object table
-    - save objects to table
-    - delete single object
-    - delete by id
-    - delete table objects
-    - delete varius type of object same time
-    - delete by query from table
-    - cache user - cache table records on user level (default session)
-    - cache long - table records on server level (default apc_cache)
-    - cache temp - table records for script runtime (default memory)
-    - develop and plug custom cache engine for desired cache level
-    - universal time handling
-- table modifiers
-    - use custom name table for class
-    - use custom name field of table for class property
-- field modifiers
-    - field locaization
+    - [What is PHPDoc ?][what-is-phpdoc-]
+    - [What is ORM ? What is Object Relational Mapper ?][what-is-orm--what-is-object-relational-mapper-]
+    - [Why do i have low sallary as a php programmer ?][why-do-i-have-low-sallary-as-a-php-programmer-]
+- [Intermediate level][intermediate-level]
+    - [Installation][installation]
+    - [Connect simply][connect-simply]
+    - [Connect using custom link][connect-using-custom-link]
+    - [Connect using many links][connect-using-many-links]
+    - [Map class to table][map-class-to-table]
+    - [Map namespace classes to tables][map-namespace-classes-to-tables]
+    - [Map classes by pattern to tables][map-classes-by-pattern-to-tables]
+    - [Get table handler for class][get-table-handler-for-class]
+    - [Create databases for mapped classes][create-databases-for-mapped-classes]
+    - [Create tables for mapped classes][create-tables-for-mapped-classes]
+    - [Synch changes to table structures][synch-changes-to-table-structures]
+    - [Generate sql dump for database changes and save to file][generate-sql-dump-for-database-changes-and-save-to-file]
+    - [Load all from table iterate throught the result][load-all-from-table-iterate-throught-the-result]
+    - [Load by id from table][load-by-id-from-table]
+    - [Load by field equals value or field like value][load-by-field-equals-value-or-field-like-value]
+    - [Load using pager from table][load-using-pager-from-table]
+    - [Query where][query-where]
+    - [Query order][query-order]
+    - [Query limit][query-limit]
+    - [load using custom query with pager][load-using-custom-query-with-pager]
+    - [load using query and return single object instead of object array][load-using-query-and-return-single-object-instead-of-object-array]
+    - [load affecting default load behavior or changing table default query][load-affecting-default-load-behavior-or-changing-table-default-query]
+    - [save single object to table][save-single-object-to-table]
+    - [save with boolean result][save-with-boolean-result]
+    - [save with saved object result][save-with-saved-object-result]
+    - [save without knowing object table][save-without-knowing-object-table]
+    - [save objects to table][save-objects-to-table]
+    - [delete single object][delete-single-object]
+    - [delete by id][delete-by-id]
+    - [delete table objects][delete-table-objects]
+    - [delete varius type of object same time][delete-varius-type-of-object-same-time]
+    - [delete by query from table][delete-by-query-from-table]
+    - [cache user - cache table records on user level (default session)][cache-user---cache-table-records-on-user-level-default-session]
+    - [cache long - table records on server level (default apc_cache)][cache-long---table-records-on-server-level-default-apc_cache]
+    - [cache temp - table records for script runtime (default memory)][cache-temp---table-records-for-script-runtime-default-memory]
+    - [develop and plug custom cache engine for desired cache level][develop-and-plug-custom-cache-engine-for-desired-cache-level]
+    - [universal time handling][universal-time-handling]
+- [table modifiers][table-modifiers]
+    - [use custom name table for class][use-custom-name-table-for-class]
+    - [use custom name field of table for class property][use-custom-name-field-of-table-for-class-property]
+- [field modifiers][field-modifiers]
+    - [field locaization][field-locaization]
 
 <!-- /MarkdownTOC -->
 
 
-# Things to know before using ORM [orm]
+# [Things to know before using ORM](#orm)
 ## What is MVC ? What is model view controller pattern ?
 
 **MVC** stands for **Model View Controller**. If you heard about it before but still dont know what it is you might be afraid of it.
