@@ -25,6 +25,8 @@
     - [Load by id from table](#load-by-id-from-table)
     - [Load by field equals value or field like value](#load-by-field-equals-value-or-field-like-value)
     - [Load using pager from table](#load-using-pager-from-table)
+    - [Load using custom query](#load-using-custom-query)
+    - [Query helper functions](#query-helper-functions)
     - [Query where](#query-where)
     - [Query order](#query-order)
     - [Query limit](#query-limit)
@@ -899,7 +901,7 @@ while ($pager->next());
 ```
 This will iterate throgh every product and will load them 10 by 10. Sometimes if you have 99999 records in table and you have to affect them all it is extremly important not to load them all because objects in result might overload memory if they are large.
 
-#### Load using custom query
+## Load using custom query
 ```php
 $query = new \db\query();
 $result = $database->path->to->table->load($query);
@@ -907,7 +909,7 @@ $result = $database->path->to->table->load($query);
 
 Next chapters will discuss how to adjust query order, specify custom select criteria in where, group using custom field, specify limit or even attach pager to custom query.
 
-#### Query helper functions
+## Query helper functions
 Before using queries whe need to now about few helper functions:
 ```php
 namespace shop
