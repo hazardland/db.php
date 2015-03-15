@@ -838,7 +838,64 @@ while ($pager->next());
 ```
 This will iterate throgh every product and will load them 10 by 10. Sometimes if you have 99999 records in table and you have to affect them all it is extremly important not to load them all because objects in result might overload memory if they are large.
 
+##load using custom query helper functions for field and table names
+Before using queries whe need to now about few helper functions:
+```php
+namespace shop
+{
+    class product
+    {
+        public $id;
+        public $name;
+    }    
+}
+$database->add ('shop.product');
+$database->update ();
+```
+In this case table with name 'shop_product' will be created with fields 'id' and 'name'. Full table name for class looks like `my_db`.`shop_product` and full field name for property 'name' looks like `my_db`.`shop_product`.`name`.
+
+In custum queries you will need to use full table and field names to avoid ambigous field name errors.
+
+To get **table name** use:
+```php
+$database->shop->product->table();
+//Outputs something like `my_db`.`shop_product`
+```
+Or:
+```php
+$database->shop->product->name();
+//Outputs something like `my_db`.`shop_product`
+```
+
+To get **field name** use:
+```php
+$database->shop->product->field('name'); 
+//Outputs something like `my_db`.`shop_product`.`name`
+```
+
+The **name** parameter for 'field' function must be property name, this means if you have public $login than property name is 'login' and to get full field name for login use $database->path->to->table->field('login')
+
+**value** function gerenates something useful also:
+```php
+$database->shop->product->value('name','Milk'); 
+//`my_db`.`shop_product`.`name`='Milk'
+```
+
+To **escape string** use function \db\string. Anything that does not go through the db.php functions like custom strings and comes from user input and used in queries must be escaped.
+```php
+$database->shop->product->field('cost').">".\db\string($_REQUEST['cost']);
+```
+
 ##load using custom query from table
+First initialize query object:
+```php
+$query = new \db\query ();
+```
+Than let us add custom select criteria:
+```php
+$query->where($database->hero->field('damage').">".\db\string($_REQUES['damage'])." or ".$database->hero->value('race',$_REQUEST['race']));
+```
+
 ##load using custom query with pager
 ##load using query and return single object instead of object array
 ##load affecting default load behavior or changing table default query
