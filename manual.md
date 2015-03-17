@@ -354,11 +354,9 @@ The only file you need is **db.php** iself. Just include db.php in your project 
 ```php
 include './db.php';
 ```
-#### apc_cache
+### apc_cache for php <= 5.4.x
 
-#### For php <= 5.4.x
-
-**db.php** requires **apc_cache** because it is default caching engine for it. You can also override default caching engine but it is subject for further reading. A link for apc_cache installation instructions is here http://php.net/manual/en/apc.installation.php. On windows you just need to download proper php_apc.dll and enable it in php.ini by uncommenting line extension=php_apc.dll
+**db.php** requires **apc_cache** module's user variable caching functions by default. You can also override default caching engine but it is subject for further reading. A link for apc_cache installation instructions is here http://php.net/manual/en/apc.installation.php. On windows you just need to download proper php_apc.dll and enable it in php.ini by uncommenting line extension=php_apc.dll
 
 In linux it is a bit difficult but usually you will and up with this commands:
 ```
@@ -371,14 +369,13 @@ make test
 make install
 ```
 
-#### For php >= 5.5.x
+### apc_cache for php >= 5.5.x
 
 apc_cache has two kind of functionality one for storing precompiled script byte code in shared memory and second for caching user variables. As from PHP version 5.5.x php comes with built in module for script byte code caching named OPcache, there is no point for developing apc_cache for new versions of php. Instead they initialized new module named APCu and the only thing it does is stores user variables in cache with same old functions.
 
 So if you are using PHP 5.5.x >= than you will need to install http://pecl.php.net/package/APCu for db.php to work.
 
-##### For Windows
-Download suitable dll file. There are 4 major builds for php:
+**For Windows:** download suitable dll file. There are 4 major builds for php:
 ```
 nts 32 bit (not thread safe)
 nts 64 bit (not thread safe)
@@ -397,8 +394,7 @@ Where x86 means 32 bit and x64 means 64 bit
 
 Copy to dll file contained in archive file to php extensions directory, by default it is php/ext and add line extension=php_apc.dll
 
-#### For Linux
-Show the world you are true linux power user, compile APCu by yourself.
+**For Linux:** show the world you are true linux power user, compile APCu by yourself.
 
 
 #### php notices
