@@ -1,3 +1,5 @@
+**Tip of the day: Rememmber tables are crated autmatically with db.php (Based on your class definitions).**
+
 # Table of contents
 
 <!-- MarkdownTOC -->
