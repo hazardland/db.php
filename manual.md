@@ -52,6 +52,7 @@
     - [delete table objects](#delete-table-objects)
     - [delete various type of object same time](#delete-various-type-of-object-same-time)
     - [delete by query from table](#delete-by-query-from-table)
+- [Debug](#debug)
 - [Cache](#cache)
     - [cache user - cache table records on user level (default session)](#cache-user---cache-table-records-on-user-level-default-session)
     - [cache long - table records on server level (default apc_cache)](#cache-long---table-records-on-server-level-default-apc_cache)
@@ -1189,6 +1190,8 @@ For more information about queries see: [Query where](#query-where), [Query orde
 ## delete table objects
 ## delete various type of object same time
 ## delete by query from table
+
+# Debug
 
 # Cache
 
