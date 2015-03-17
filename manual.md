@@ -776,7 +776,7 @@ $database->update('\path\to\database_changes.sql');
 # Load
 
 ## Load all from table and iterate throught the result
-To load all records for table which in case of ORM means to load all objects for class use:
+To load all records for table which in case of ORM means to **load all objects of class** use:
 ```php
 $result = $database->path->to->class->load ();
 ```
