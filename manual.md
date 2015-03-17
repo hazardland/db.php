@@ -373,11 +373,11 @@ make install
 
 #### For php >= 5.5.x
 
-apc_cache has two kind of functionality one for storing precompiled script byte code in shared memory and second for caching user variables. As from PHP version 5.5.x php comes with built in module for script byte code caching named OPcache there is was no point for developing apc_cache for new versions of php. Instead they initialized new module named APCu and the only thing it does is stores user variables in cache with same old functions.
+apc_cache has two kind of functionality one for storing precompiled script byte code in shared memory and second for caching user variables. As from PHP version 5.5.x php comes with built in module for script byte code caching named OPcache, there is no point for developing apc_cache for new versions of php. Instead they initialized new module named APCu and the only thing it does is stores user variables in cache with same old functions.
 
 So if you are using PHP 5.5.x >= than you will need to install http://pecl.php.net/package/APCu for db.php to work.
 
-##### For windows
+##### For Windows
 Download suitable dll file. There are 4 major builds for php:
 ```
 nts 32 bit (not thread safe)
@@ -395,8 +395,10 @@ Therefore you should know which kind of php you have and than you must choose on
 ```
 Where x86 means 32 bit and x64 means 64 bit
 
-#### For linux
-Compile APCu
+Copy to dll file contained in archive file to php extensions directory, by default it is php/ext and add line extension=php_apc.dll
+
+#### For Linux
+Show the world you are true linux power user, compile APCu by yourself.
 
 
 #### php notices
