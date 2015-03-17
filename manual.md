@@ -10,6 +10,7 @@
     - [Why do i have low salary as a php programmer?](#why-do-i-have-low-salary-as-a-php-programmer)
 - [Intermediate level](#intermediate-level)
     - [Installation](#installation)
+    - [Basic architecture](#basic-architecture)
     - [Connect simply](#connect-simply)
     - [Connect using custom link](#connect-using-custom-link)
     - [Connect using many links](#connect-using-many-links)
@@ -392,20 +393,30 @@ Therefore you should know which kind of php you have and than you must choose on
 ```
 Where x86 means 32 bit and x64 means 64 bit
 
-Copy to dll file contained in archive file to php extensions directory, by default it is php/ext and add line extension=php_apc.dll
+Copy to dll file contained in archive file to php extensions directory, by default it is php/ext and add line extension=php_apc.dll to php.ini
 
 **For Linux:** show the world you are true linux power user, compile APCu by yourself.
 
 
 ### PHP Notices
-For some real reasons **db.php** generates notice level errors. If you have not set restricted notices in error reporting section in your php.ini file you can set it manually on runtime like:
-
+For some real reasons **db.php** generates notice level errors. If you have not restricted notices in error reporting section in your php.ini file you can set it manually on runtime like:
 ```php
 // Report all errors except E_NOTICE
 error_reporting(E_ALL & ~E_NOTICE);
 ```
+In the begining of your php script before db.php include.
 
 For additional information read http://php.net/manual/en/function.error-reporting.php
+
+## Basic architecture
+To work with orm you will need an instance of class \db\database. It stores connection links (represented by default with \db\link class) and table handlers for classes. Any class you are willing to map table in actual database must have its own handler. Class handler repesents an instance of \db\table. By itself class properties have its own handlers represented by \db\field and instances of it are stored in table handler. Basic usage consists of this staps:
+
+1. Initialize \db\database, establish connections to data source(s)/sql server(s).
+2. Initialize desired class(es) handlers.
+[3. Optionally autmatically/manually update/create database(s)/table(s)/field(s) on servers you are connected.
+4. Using proper table handler save/load/delete/query objects of your classes in actual database tables.
+
+So next thing we are going to learn is how to initialize \db\database and establish connection(s).
 
 ## Connect simply
 Simple way to start is to specify server, database, username and password to database constructor.
