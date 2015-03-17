@@ -1627,7 +1627,7 @@
                     $result = true;
                     foreach ($object as &$item)
                     {
-                        if (!$this->save($item))
+                        if (!$this->save($item,$action))
                         {
                             $result = false;
                         }

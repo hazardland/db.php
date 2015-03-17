@@ -51,15 +51,14 @@ db.php - code first orm
     - [Save single object to table](#save-single-object-to-table)
     - [Force insert object to table](#force-insert-object-to-table)
     - [Save without knowing object class](#save-without-knowing-object-class)
-    - [Save with boolean as result](#save-with-boolean-as-result)
+    - [Save with boolean result](#save-with-boolean-result)
     - [Save with saved object as result](#save-with-saved-object-as-result)
-    - [Save object array to table](#save-object-array-to-table)
+    - [Save object array to table with boolean result](#save-object-array-to-table-with-boolean-result)
     - [save mixed object array to table](#save-mixed-object-array-to-table)
 - [Delete](#delete)
     - [delete single object](#delete-single-object)
     - [delete by id](#delete-by-id)
-    - [delete table objects](#delete-table-objects)
-    - [delete various type of object same time](#delete-various-type-of-object-same-time)
+    - [delete array of objects or ids](#delete-array-of-objects-or-ids)
     - [delete by query from table](#delete-by-query-from-table)
 - [Debug](#debug)
 - [Cache](#cache)
@@ -1375,9 +1374,9 @@ For more information about queries see: [Query where](#query-where), [Query orde
 ## Save single object to table
 If you know what class belongs an object you wish to save than you can use:
 ```php
-boolean $databse->path->to->class->save (\path\to\class &$object [, $action=null]);
+boolean $database->path->to->class->save (\path\to\class &$object [, integer $action=null]);
 ```
-Returns true if succeded and false if failed. Affects modifications to passed object. For example if you pass object with id is null and your table primary field is auto increment integer then after saving you will have newly assigned id in object's primary field specific property.
+Returns true if succeeded and false if failed. Affects modifications to passed object. For example if you pass object with id is null and your table primary field is auto increment integer then after saving you will have newly assigned id in object's primary field specific property.
 
 **Warning !**
 **Save method inserts** when primary field property value is empty.
@@ -1397,7 +1396,7 @@ class user
     }
 }
 ```
-Example usage which always will generate insert query because $user->id is null by default. If save succeds than you will have newly assigned id in $user->id if id field for of user table is primary auto increment integer.
+Example usage which always will generate insert query because $user->id is null by default. If save succeedes than you will have newly assigned id in $user->id if id field for of user table is primary auto increment integer.
 ```php
 $user = new user ('John Smith');
 if ($database->user->save($user))
@@ -1440,7 +1439,7 @@ else
 }
 
 ```
-*Note: Class handler always returns boolean value. True if save succeded or false if failed. Along other reasons save might fail if you have denied update or insert for this table. You can deny insert or update with class PHPDoc modifiers or from $database->path->to->class->insert = true/false / $database->path->to->class->update = true/false.*
+*Note: Class handler always returns boolean value. True if save succeeded or false if failed. Along other reasons save might fail if you have denied update or insert for this table. You can deny insert or update with class PHPDoc modifiers or from $database->path->to->class->insert = true/false / $database->path->to->class->update = true/false.*
 
 ## Force insert object to table
 ```php
@@ -1457,7 +1456,7 @@ See also: [Save single object to table](#save-single-object-to-table)
 ## Save without knowing object class
 If you donw know which class belongs to object but you know that class handler is registered in orm than just:
 ```php
-object $database->save (object $object);
+object $database->save (object $object [, integer $action=null]);
 ```
 This method returns same object you passed back.
 
@@ -1465,7 +1464,10 @@ And gives following possibility:
 ```php
 $user = $database->save (new user ('John Smith'));
 ```
-## Save with boolean as result
+
+$action optionally can be specified to force save behavior. Allowed values for action are \db\query::insert and \db\query::update.
+
+## Save with boolean result
 Example:
 ```php
 if ($database->shop->product->save($product))
@@ -1480,19 +1482,101 @@ Example:
 $product = $database->save ($product);
 ```
 See for more [Save without knowing object class](#save-without-knowing-object-class).
-## Save object array to table
+## Save object array to table with boolean result
+```php
+bolean $database->path->to->class (array $objects [, integer $action=null]);
+```
+If you pass an array of same type objects to their class handler they will be inserted or updated individually. If any of them fails save process will not be interrupted but result will be false. If everyone succeeds than result will be true. If you want to force insert given array than pass second parameter also with value \db\query::insert.
+
+Example:
+```php
+$users = array ();
+$users[] = new user ('John First');
+$users[] = new user ('John Second');
+$users[] = new user ('John Third');
+
+if ($database->user->save($users))
+{
+    echo "all users saved";
+    foreach ($users as $user)
+    {
+        echo $user->name." new id is ".$user->id;
+    }
+}
+else
+{
+    echo "something went wrong while saving users";
+}
+```
+For basic class handler save method behavior see [Save single object to table](#save-single-object-to-table).
 
 ## save mixed object array to table
+```php
+array $database->save (array $objects [, integer $action=null])
+```
+Example:
+```php
+$objects = $database->save (array (
+                            new product ('Apple'),
+                            new user ('John'),
+                            new currency ('Dollar')));
+```
+Will return saved objects.
 
 # Delete
 
 ## delete single object
+```php
+$database->path->to->class->delete (\path\to\class $object);
+```
+
+Example:
+```php
+$product = $database->shop->product->load (1);
+
+$database->shop->product->delete ($product);
+```
 ## delete by id
-## delete table objects
-## delete various type of object same time
+```php
+$database->path->to->class->delete (mixed $id);
+```
+
+Example:
+```php
+$database->shop->product->delete (12);
+
+$database->cashier->currency->delete ('USD');
+```
+## delete array of objects or ids
+```php
+$database->path->to->class->delete (array $objects);
+```
+
+Example:
+```php
+$product = $database->shop->product->load (12);
+
+$database->shop->product->delete (array($product,13,14));
+```
+Products with ids 12,13,14 will be deleted.
+
 ## delete by query from table
+```php
+$database->path->to->class->delete (\db\query $query);
+```
+Delete takes typical query as a parameter but for the moment use only query->where property in formating final delete query. See also [Query where](#query-where).
 
 # Debug
+To fast debug all queries from the point use:
+```php
+$database->debug (true); //true is default parameter
+```
+This will echo queries executed after this point and also error messages associated with queries (if any).
+
+To turn of query debugging use:
+```php
+$database->debug (false);
+```
 
 # Cache
 
