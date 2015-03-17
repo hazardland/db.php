@@ -1,3 +1,5 @@
+**Tip of the day: Rememmber tables are crated autmatically with db.php (Based on your class definitions).**
+
 # Table of contents
 
 <!-- MarkdownTOC -->
@@ -8,51 +10,147 @@
     - [What is PHPDoc?](#what-is-phpdoc)
     - [What is ORM ? What is Object Relational Mapper?](#what-is-orm--what-is-object-relational-mapper)
     - [Why do i have low salary as a php programmer?](#why-do-i-have-low-salary-as-a-php-programmer)
-- [Intermediate level](#intermediate-level)
-    - [Installation](#installation)
+- [Installation](#installation)
+    - [Include](#include)
+    - [apc_cache for php <= 5.4.x](#apc_cache-for-php--54x)
+    - [apc_cache for php >= 5.5.x](#apc_cache-for-php--55x)
+    - [PHP Notices](#php-notices)
+- [Connect](#connect)
+    - [Basic architecture](#basic-architecture)
     - [Connect simply](#connect-simply)
     - [Connect using custom link](#connect-using-custom-link)
     - [Connect using many links](#connect-using-many-links)
+- [Prepare](#prepare)
     - [Map class to table](#map-class-to-table)
     - [Map namespace classes to tables](#map-namespace-classes-to-tables)
     - [Map classes by pattern to tables](#map-classes-by-pattern-to-tables)
-    - [Get table handler for class](#get-table-handler-for-class)
+    - [Get registered table handler of class](#get-registered-table-handler-of-class)
     - [Create databases for mapped classes](#create-databases-for-mapped-classes)
     - [Create tables for mapped classes](#create-tables-for-mapped-classes)
-    - [Sync changes to table structures](#sync-changes-to-table-structures)
+    - [Update table structures or Update/create new fields](#update-table-structures-or-updatecreate-new-fields)
     - [Generate sql dump for database changes and save to file](#generate-sql-dump-for-database-changes-and-save-to-file)
-    - [Load all from table iterate throught the result](#load-all-from-table-iterate-throught-the-result)
+- [Load](#load)
+    - [Load all from table and iterate throught the result](#load-all-from-table-and-iterate-throught-the-result)
     - [Load by id from table](#load-by-id-from-table)
-    - [Load by field equals value or field like value](#load-by-field-equals-value-or-field-like-value)
+    - [Load by field equals value or field is like value](#load-by-field-equals-value-or-field-is-like-value)
     - [Load using pager from table](#load-using-pager-from-table)
+- [Query](#query)
     - [Load using custom query](#load-using-custom-query)
     - [Query helper functions](#query-helper-functions)
     - [Query where](#query-where)
     - [Query order](#query-order)
     - [Query limit](#query-limit)
-    - [load using custom query with pager](#load-using-custom-query-with-pager)
-    - [load using query and return single object instead of object array](#load-using-query-and-return-single-object-instead-of-object-array)
-    - [load affecting default load behavior or changing table default query](#load-affecting-default-load-behavior-or-changing-table-default-query)
-    - [save single object to table](#save-single-object-to-table)
-    - [save with boolean result](#save-with-boolean-result)
-    - [save with saved object result](#save-with-saved-object-result)
-    - [save without knowing object table](#save-without-knowing-object-table)
-    - [save objects to table](#save-objects-to-table)
+    - [Load using custom query with pager](#load-using-custom-query-with-pager)
+    - [Load using query and return single object instead of object array](#load-using-query-and-return-single-object-instead-of-object-array)
+    - [Load affecting default load behavior or changing table default query](#load-affecting-default-load-behavior-or-changing-table-default-query)
+- [Save](#save)
+    - [Save single object to table](#save-single-object-to-table)
+    - [Force insert object to table](#force-insert-object-to-table)
+    - [Save without knowing object class](#save-without-knowing-object-class)
+    - [Save with boolean as result](#save-with-boolean-as-result)
+    - [Save with saved object as result](#save-with-saved-object-as-result)
+    - [Save object array to table](#save-object-array-to-table)
+    - [save mixed object array to table](#save-mixed-object-array-to-table)
+- [Delete](#delete)
     - [delete single object](#delete-single-object)
     - [delete by id](#delete-by-id)
     - [delete table objects](#delete-table-objects)
     - [delete various type of object same time](#delete-various-type-of-object-same-time)
     - [delete by query from table](#delete-by-query-from-table)
+- [Debug](#debug)
+- [Cache](#cache)
     - [cache user - cache table records on user level (default session)](#cache-user---cache-table-records-on-user-level-default-session)
     - [cache long - table records on server level (default apc_cache)](#cache-long---table-records-on-server-level-default-apc_cache)
     - [cache temp - table records for script runtime (default memory)](#cache-temp---table-records-for-script-runtime-default-memory)
     - [develop and plug custom cache engine for desired cache level](#develop-and-plug-custom-cache-engine-for-desired-cache-level)
-    - [universal time handling](#universal-time-handling)
-- [table modifiers](#table-modifiers)
-    - [use custom name table for class](#use-custom-name-table-for-class)
-    - [use custom name field of table for class property](#use-custom-name-field-of-table-for-class-property)
-- [field modifiers](#field-modifiers)
-    - [field locaization](#field-locaization)
+- [Object](#object)
+    - [Set on create function](#set-on-create-function)
+- [Table](#table)
+    - [how class modifiers work](#how-class-modifiers-work)
+    - [set table engine type](#set-table-engine-type)
+    - [rename table](#rename-table)
+    - [set table database](#set-table-database)
+    - [set table link](#set-table-link)
+    - [set table charset](#set-table-charset)
+    - [link class to custom table name](#link-class-to-custom-table-name)
+    - [set prefix for table fields](#set-prefix-for-table-fields)
+    - [set default select order field(s)](#set-default-select-order-fields)
+    - [develope class for already existing table](#develope-class-for-already-existing-table)
+    - [set table cache level](#set-table-cache-level)
+    - [set table cache scope](#set-table-cache-scope)
+    - [ignore class while scanning namespace](#ignore-class-while-scanning-namespace)
+    - [deny insert, select, update or delete in table](#deny-insert-select-update-or-delete-in-table)
+- [Field](#field)
+    - [set variable data type](#set-variable-data-type)
+    - [set field type](#set-field-type)
+    - [set property relation to foreign class](#set-property-relation-to-foreign-class)
+    - [set enumeration](#set-enumeration)
+    - [link property to custom field name](#link-property-to-custom-field-name)
+    - [set length](#set-length)
+    - [set null](#set-null)
+    - [set primary field](#set-primary-field)
+    - [set create field first](#set-create-field-first)
+    - [set create field after field](#set-create-field-after-field)
+    - [set lazy load](#set-lazy-load)
+    - [set date on insert/update](#set-date-on-insertupdate)
+    - [set default value for field](#set-default-value-for-field)
+    - [set unsigned flag for field](#set-unsigned-flag-for-field)
+    - [set zerofill flag for field](#set-zerofill-flag-for-field)
+    - [require field value for insert/update](#require-field-value-for-insertupdate)
+    - [exclude field from insert/update](#exclude-field-from-insertupdate)
+- [Localization](#localization)
+    - [define local languages](#define-local-languages)
+    - [set active language locale](#set-active-language-locale)
+    - [localize field](#localize-field)
+- [Value](#value)
+    - [create custum value type](#create-custum-value-type)
+    - [restore value from database](#restore-value-from-database)
+    - [export value to database](#export-value-to-database)
+    - [example](#example)
+- [Time](#time)
+    - [How to render individual time for user with one date field value](#how-to-render-individual-time-for-user-with-one-date-field-value)
+- [Functions](#functions)
+    - [function \db\id](#function-\db\id)
+    - [function \db\string](#function-\db\string)
+    - [funciton \db\time](#funciton-\db\time)
+    - [funciton \db\date](#funciton-\db\date)
+    - [funciton \db\now](#funciton-\db\now)
+    - [function \db\debug](#function-\db\debug)
+    - [function \db\cache](#function-\db\cache)
+    - [function \db\type](#function-\db\type)
+    - [function \db\field](#function-\db\field)
+    - [function \db\scope](#function-\db\scope)
+    - [function \db\enum](#function-\db\enum)
+    - [function \db\round](#function-\db\round)
+    - [function \db\by](#function-\db\by)
+    - [function \db\in](#function-\db\in)
+- [Classes](#classes)
+    - [class \db\link](#class-\db\link)
+    - [class \db\field](#class-\db\field)
+    - [class \db\table](#class-\db\table)
+    - [class \db\database](#class-\db\database)
+    - [abstract class \db\value](#abstract-class-\db\value)
+    - [class \db\flag](#class-\db\flag)
+    - [class \db\type](#class-\db\type)
+    - [class \db\action](#class-\db\action)
+    - [class \db\event](#class-\db\event)
+    - [class \db\config](#class-\db\config)
+    - [class \db\query](#class-\db\query)
+    - [class \db\where](#class-\db\where)
+    - [class \db\group](#class-\db\group)
+    - [class \db\join](#class-\db\join)
+    - [class \db\order](#class-\db\order)
+    - [class \db\method](#class-\db\method)
+    - [class \db\limit](#class-\db\limit)
+    - [class \db\pager](#class-\db\pager)
+    - [abstract class \db\cache](#abstract-class-\db\cache)
+    - [class \db\limit](#class-\db\limit-1)
+    - [class \db\scope](#class-\db\scope)
+    - [class \db\load extends \db\cache](#class-\db\load-extends-\db\cache)
+    - [class \db\user extends \db\cache](#class-\db\user-extends-\db\cache)
+    - [class \db\long extends \db\cache](#class-\db\long-extends-\db\cache)
+    - [class \db\locale](#class-\db\locale)
+    - [class \db\by](#class-\db\by)
 
 <!-- /MarkdownTOC -->
 
@@ -344,19 +442,17 @@ Because you dont use classes in your model or you dont have model in your projec
 
 Nothing great can be done without it.
 
-# Intermediate level
+# Installation
 
-## Installation
-
-#### Include
+## Include
 The only file you need is **db.php** iself. Just include db.php in your project and you are ready to go. Other files in this repo are just samples and documents.
 
 ```php
 include './db.php';
 ```
+## apc_cache for php <= 5.4.x
 
-#### apc_cache
-**db.php** requires **apc_cache** because it is default caching engine for it. You can also override default caching engine but it is subject for further reading. A link for apc_cache installation instructions is here http://php.net/manual/en/apc.installation.php. On windows you just need to download proper php_apc.dll and enable it in php.ini by uncommenting line extension=php_apc.dll
+**db.php** requires **apc_cache** module's user variable caching functions by default. You can also override default caching engine but it is subject for further reading. A link for apc_cache installation instructions is here http://php.net/manual/en/apc.installation.php. On windows you just need to download proper php_apc.dll and enable it in php.ini by uncommenting line extension=php_apc.dll
 
 In linux it is a bit difficult but usually you will and up with this commands:
 
@@ -370,15 +466,55 @@ make test
 make install
 ```
 
-#### php notices
-For some real reasons **db.php** generates notice level errors. If you have not set restricted notices in error reporting section in your php.ini file you can set it manually on runtime like:
+## apc_cache for php >= 5.5.x
 
+apc_cache has two kind of functionality one for storing precompiled script byte code in shared memory and second for caching user variables. As from PHP version 5.5.x php comes with built in module for script byte code caching named OPcache, there is no point for developing apc_cache for new versions of php. Instead they initialized new module named APCu and the only thing it does is stores user variables in cache with same old functions.
+
+So if you are using PHP 5.5.x >= than you will need to install http://pecl.php.net/package/APCu for db.php to work.
+
+**For Windows:** download suitable dll file. There are 4 major builds for php:
+```
+nts 32 bit (not thread safe)
+nts 64 bit (not thread safe)
+ts 32 bit (thread safe)
+nts 64 bit (thread safe)
+```
+
+Therefore you should know which kind of php you have and than you must choose one from four from list like this:
+```
+5.5 Non Thread Safe (NTS) x86
+5.5 Thread Safe (TS) x86
+5.5 Non Thread Safe (NTS) x64
+5.5 Thread Safe (TS) x64
+```
+Where x86 means 32 bit and x64 means 64 bit
+
+Copy to dll file contained in archive file to php extensions directory, by default it is php/ext and add line extension=php_apc.dll to php.ini
+
+**For Linux:** show the world you are true linux power user, compile APCu by yourself.
+
+
+## PHP Notices
+For some real reasons **db.php** generates notice level errors. If you have not restricted notices in error reporting section in your php.ini file you can set it manually on runtime like:
 ```php
 // Report all errors except E_NOTICE
 error_reporting(E_ALL & ~E_NOTICE);
 ```
+In the begining of your php script before db.php include.
 
 For additional information read http://php.net/manual/en/function.error-reporting.php
+
+# Connect
+
+## Basic architecture
+To work with orm you will need an instance of class \db\database. It stores connection links (represented by default with \db\link class) and table handlers for classes. Any class you are willing to map table in actual database must have its own handler. Class handler is represented by an instance of \db\table. By itself class properties have its own handlers represented by \db\field and instances of it are stored in table handler. db.php basic usage contains following important steps:
+
+1. Initialize \db\database, establish connections to data source(s)/sql server(s).
+2. Initialize desired class(es) handlers.
+[3. Optionally autmatically/manually update/create database(s)/table(s)/field(s) on servers you are connected.
+4. Using proper table handler save/load/delete/query objects of your classes in actual database tables.
+
+So next thing we are going to learn is how to initialize \db\database and establish connection(s).
 
 ## Connect simply
 Simple way to start is to specify server, database, username and password to database constructor.
@@ -527,34 +663,34 @@ $database->link (new \db\link ('my_odbc_link', 'odbc:my_odbc_alias', 'my_user', 
 
 Additional link usage samples https://github.com/hazardland/db.php/blob/master/samples/002.link.php
 
-## Map class to table
-Here begins most interesting part of db.php as we have setted up desired connection(s) we now need to make database know about our class(es).
+# Prepare
 
-To add single class to table you have to:
+## Map class to table
+Here begins most interesting part of db.php as we have setted up desired connection(s) now we need to make database know about our class(es).
+
+To add single "class to table" handler or so called "class handler" you have to:
+
+```php
+$database->add (string $class);
+```
 
 ```php
 $database->add('\path\to\class');
 ```
-
 Or
 ```php
 $database->add('\\path\\to\\class');
 ```
-
 Also you can specify class path by dots:
-
 ```php
 $database->add('path.to.class');
 ```
-
-First dot makes no sense but you also can:
-
+First dot in string makes no sense but you also can:
 ```php
 $database->add('.path.to.class');
 ```
 
 For example if we have:
-
 ```php
 namespace shop;
 
@@ -570,22 +706,24 @@ We can:
 $database->add ('shop.product');
 ```
 
+We added class handler to orm now we need to access class handler.
+
 After adding class to database we can access class table handler by
 ```php
 $database->path->to->class
 ```
 
-In \shop\product class case:
-
+In \shop\product example class case we will access it like this:
 ```php
 $database->shop->product
 ```
 
-*Note*: The only reserved namespace name is 'context' it means you must not have namespace named 'context'. $database->context is used by database object.
+*Note*: The only reserved namespace name is 'context' it means you must not have classes in namespace named 'context' or class without namespace named 'context'. $database->context is used by database object for storing various data such is conenction links, table handlers, defined locales, varius cache handlers and so on.
+
 
 ## Map namespace classes to tables
 
-If we have many classes in namespace we can add in one line:
+If we have many classes in namespace we can add them using just one line of code:
 
 ```php
 namespace shop;
@@ -607,15 +745,11 @@ class cost
 ```php
 $database->scan ('\namespace');
 ```
-
 Or
-
 ```php
 $database->scan ('\\namespace');
 ```
-
 Or
-
 ```php
 $database->scan ('.namespace');
 ```
@@ -625,8 +759,7 @@ In this case if we scan:
 ```php
 $database->scan ('.shop');
 ```
-
-We will have following table handlers:
+We will have following class table handlers:
 
 ```php
 $database->shop->product
@@ -634,17 +767,14 @@ $database->shop->cart
 $database->shop->cost
 ```
 
-Table handler is an instance of \db\table it contains information for mapping class to actual database table. For further exploring table handlers see sample:
-
-https://github.com/hazardland/db.php/blob/master/samples/003.class.php
+Class table handler is an instance of \db\table it contains information for mapping class to actual database table and api for accessing class table data. For further exploration of class table handlers see sample at https://github.com/hazardland/db.php/blob/master/samples/003.class.php
 
 ## Map classes by pattern to tables
-
 ```php
 $database->scan (string $string);
 ```
 
-$database->scan also adds any class which full name (\path\to\class) begins on $string
+$database->scan also adds any class whose full name (\path\to\class) begins on given $string
 
 If we have:
 ```php
@@ -656,10 +786,17 @@ Than
 ```php
 $database->scan ('.ani');
 ```
+Or
+```php
+$database->scan ('\\ani');
+```
+Or
+```php
+$database->scan ('\ani');
+```
+Will add \animals\wolf and \animation classes table handlers to orm.
 
-Will add \animals\wolf and \animation classes
-
-## Get table handler for class
+## Get registered table handler of class
 
 By path to class
 ```php
@@ -689,7 +826,7 @@ $database->table($product);
 ```
 
 ## Create databases for mapped classes
-Any databases specified to tables or \db\database constructor which do not exist will be created by following function:
+Any databases specified to classes or specified to \db\database constructor which do not exist will be created on specified connection sql server or on specified data source by following function:
 ```php
 $database->update();
 ```
@@ -697,15 +834,15 @@ $database->update();
 *$database->update() creates or updates any changes to databases, tables or fields*
 
 ## Create tables for mapped classes
-Any tables added to $database object which do not exist will be created on their specified databases on their connection links by following function:
+Any non existent tables for registered classes in orm will be created on their specified databases on their connection links by following function:
 ```php
 $database->update();
 ```
 
 *$database->update() creates or updates any changes to databases, tables or fields*
 
-## Sync changes to table structures
-Any recent changes in tables or in fields settings (i.e. field type change) will be affected to databases by following function:
+## Update table structures or Update/create new fields
+Any recent changes in tables or in fields settings discovered in class or class property descriptions (i.e. field type change for class property) will be affected to databases by following function:
 ```php
 $database->update();
 ```
@@ -713,17 +850,18 @@ $database->update();
 *$database->update() creates or updates any changes to databases, tables or fields*
 
 ## Generate sql dump for database changes and save to file
-Instead of running alter queries when using $database->update you can save that queries to file for further testing and usage:
+Instead of running alter queries when using $database->update() you can save that queries to file for further testing and usage:
 
 ```php
 $database->update('\path\to\database_changes.sql');
 ```
 
-*Note: In case of dump file in case of multi server architecture you will not be able to distinguish which query belongs to which connection*
+*Note: In case of dump file in case of multi sql server/data source architecture you will not be able to distinguish which query belongs to which connection*
 
+# Load
 
-## Load all from table iterate throught the result
-To load all records for table which in case of ORM means to load all objects for class use:
+## Load all from table and iterate throught the result
+To load all records for table which in case of ORM means to **load all objects of class** use:
 ```php
 $result = $database->path->to->class->load ();
 ```
@@ -741,14 +879,14 @@ if ($products)
 }
 ```
 
-Result represents regular array, keys of array represents ids of objects. If we know that we have product with id 2 we can access it by following code:
+Result represents regular array, keys of array represents ids of objects. If we know that we have product with id 2 we can access it in load result by following code:
 
 ```php
 echo $products[2]->name;
 ```
 
 ## Load by id from table
-To load single object by it for class from table use following:
+To load single object by id for class from table use following:
 ```php
 $database->path->to->class->load (mixed $id);
 ```
@@ -759,13 +897,13 @@ $product = $database->shop->product->load (2);
 echo $product->name;
 ```
 
-If primary field is string like $currency->code:
+In case if primary field is string like $currency->code:
 ```php
 $currency = $database->cashier->currency->load ('USD');
 echo $currency->name;
 ```
 
-## Load by field equals value or field like value
+## Load by field equals value or field is like value
 To load object by custom field value:
 ```php
 $database->path->to->class->load (\db\by(string $field1, mixed $value1)->by(string $field2, mixed $value2)->in(string $field3, mixed $value));
@@ -901,6 +1039,8 @@ do
 while ($pager->next());
 ```
 This will iterate throgh every product and will load them 10 by 10. Sometimes if you have 99999 records in table and you have to affect them all it is extremly important not to load them all because objects in result might overload memory if they are large.
+
+# Query
 
 ## Load using custom query
 ```php
@@ -1092,7 +1232,7 @@ $query->limit (30);
 ```
 Generates *limit 30*
 
-## load using custom query with pager
+## Load using custom query with pager
 Query pager overrides query limit behavior if you call:
 
 ```php
@@ -1103,14 +1243,14 @@ $query->pager (integer page[, integer count=50])
 This will create pager object at $query->pager and you can later access it. To know more about \db\pager class object please read [Load using pager from table](#load-using-pager-from-table).
 
 
-## load using query and return single object instead of object array
+## Load using query and return single object instead of object array
 When using \db\query or \db\by by default \db\table returns array of objects. If you want to get only first object than call:
 ```php
 $database->path->to->table->load ($query, true);
 ```
 Second parameter of load notifies \db\table if user wants single object as result or array. True means single false means array. Default is false.
 
-## load affecting default load behavior or changing table default query
+## Load affecting default load behavior or changing table default query
 Every table handler has built in query object. When you call it without passing query handler uses built in query to process your request. For example if you want to change default behavior of load without creating query object:
 ```php
 $database->shop->product->load ();
@@ -1125,11 +1265,120 @@ $database->shop->product->load (\db\by('type',$type));
 ```
 For more information about queries see: [Query where](#query-where), [Query order](#query-order), [Query limit](#query-limit)
 
-## save single object to table
-## save with boolean result
-## save with saved object result
-## save without knowing object table
-## save objects to table
+# Save
+## Save single object to table
+If you know what class belongs an object you wish to save than you can use:
+```php
+boolean $databse->path->to->class->save (\path\to\class &$object [, $action=null]);
+```
+Returns true if succeded and false if failed. Affects modifications to passed object. For example if you pass object with id is null and your table primary field is auto increment integer then after saving you will have newly assigned id in object's primary field specific property.
+
+**Warning !**
+**Save method inserts** when primary field property value is empty.
+**Save method Updates** when primary field property value is not empty.
+
+**There are cases when you want to force insert object in table while you also have primary field value already defined for that object**. In this case you should use action parameter to specify save method how to act by passing \db\query::insert or \db\query::update as action value.
+
+Example class:
+```php
+class user
+{
+    public $id;
+    public $name;
+    public function __construct ($name)
+    {
+        $this->name = $name;
+    }
+}
+```
+Example usage which always will generate insert query because $user->id is null by default. If save succeds than you will have newly assigned id in $user->id if id field for of user table is primary auto increment integer.
+```php
+$user = new user ('John Smith');
+if ($database->user->save($user))
+{
+    echo "user successfully saved.";
+    echo "inserted user id is ".$user->id;
+}
+else
+{
+    echo "save failed";
+}
+```
+Exmaple usage which will always generate update query:
+```php
+//assuming we have user with id 1
+$user = $database->user->load (1);
+$user->name = 'John Drake';
+if ($database->user->save($user))
+{
+    echo "user successfully renamed";
+}
+else
+{
+    echo "save rename failed";
+}
+```
+
+Now let us define $user->id by ourself and force insert user
+```php
+$user = new user ('John Next');
+$user->id = 2;
+
+if ($database->user->save ($user, \db\query::insert))
+{
+    echo "new user with predefined id was created";
+}
+else
+{
+    echo "save faield";
+}
+
+```
+*Note: Class handler always returns boolean value. True if save succeded or false if failed. Along other reasons save might fail if you have denied update or insert for this table. You can deny insert or update with class PHPDoc modifiers or from $database->path->to->class->insert = true/false / $database->path->to->class->update = true/false.*
+
+## Force insert object to table
+```php
+$database->path->to->class (\path\to\class &$object, \db\query::insert);
+```
+
+Example:
+```php
+$database->shop->product->save ($product, \db\query::insert);
+```
+
+See also: [Save single object to table](#save-single-object-to-table)
+
+## Save without knowing object class
+If you donw know which class belongs to object but you know that class handler is registered in orm than just:
+```php
+object $database->save (object $object);
+```
+This method returns same object you passed back.
+
+And gives following possibility:
+```php
+$user = $database->save (new user ('John Smith'));
+```
+## Save with boolean as result
+Example:
+```php
+if ($database->shop->product->save($product))
+{
+    echo "save ok";
+}
+```
+See [Save single object to table](#save-single-object-to-table) for more details.
+## Save with saved object as result
+Example:
+```php
+$product = $database->save ($product);
+```
+See for more [Save without knowing object class](#save-without-knowing-object-class).
+## Save object array to table
+
+## save mixed object array to table
+
+# Delete
 
 ## delete single object
 ## delete by id
@@ -1137,17 +1386,111 @@ For more information about queries see: [Query where](#query-where), [Query orde
 ## delete various type of object same time
 ## delete by query from table
 
+# Debug
+
+# Cache
+
 ## cache user - cache table records on user level (default session)
 ## cache long - table records on server level (default apc_cache)
 ## cache temp - table records for script runtime (default memory)
 ## develop and plug custom cache engine for desired cache level
 
-## universal time handling
 
-# table modifiers
-## use custom name table for class
-## use custom name field of table for class property
+# Object
+## Set on create function
 
-# field modifiers
+# Table
+## how class modifiers work
+## set table engine type
+## rename table
+## set table database
+## set table link
+## set table charset
+## link class to custom table name
+## set prefix for table fields
+## set default select order field(s)
+## develope class for already existing table
+## set table cache level
+## set table cache scope
+## ignore class while scanning namespace
+## deny insert, select, update or delete in table
 
-## field locaization
+# Field
+
+## set variable data type
+## set field type
+## set property relation to foreign class
+## set enumeration
+## link property to custom field name
+## set length
+## set null
+## set primary field
+## set create field first
+## set create field after field
+## set lazy load
+## set date on insert/update
+## set default value for field
+## set unsigned flag for field
+## set zerofill flag for field
+## require field value for insert/update
+## exclude field from insert/update
+
+# Localization
+
+## define local languages
+## set active language locale
+## localize field
+
+# Value
+## create custum value type
+## restore value from database
+## export value to database
+## example
+
+# Time
+## How to render individual time for user with one date field value
+
+# Functions
+
+## function \db\id
+## function \db\string
+## funciton \db\time
+## funciton \db\date
+## funciton \db\now
+## function \db\debug
+## function \db\cache
+## function \db\type
+## function \db\field
+## function \db\scope
+## function \db\enum
+## function \db\round
+## function \db\by
+## function \db\in
+
+# Classes
+## class \db\link
+## class \db\field
+## class \db\table
+## class \db\database
+## abstract class \db\value
+## class \db\flag
+## class \db\type
+## class \db\action
+## class \db\event
+## class \db\config
+## class \db\query
+## class \db\where
+## class \db\group
+## class \db\join
+## class \db\order
+## class \db\method
+## class \db\limit
+## class \db\pager
+## abstract class \db\cache
+## class \db\limit
+## class \db\scope
+## class \db\load extends \db\cache
+## class \db\user extends \db\cache
+## class \db\long extends \db\cache
+## class \db\locale
+## class \db\by
