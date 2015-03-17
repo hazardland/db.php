@@ -354,8 +354,10 @@ The only file you need is **db.php** iself. Just include db.php in your project 
 ```php
 include './db.php';
 ```
-
 #### apc_cache
+
+#### For php <= 5.4.x
+
 **db.php** requires **apc_cache** because it is default caching engine for it. You can also override default caching engine but it is subject for further reading. A link for apc_cache installation instructions is here http://php.net/manual/en/apc.installation.php. On windows you just need to download proper php_apc.dll and enable it in php.ini by uncommenting line extension=php_apc.dll
 
 In linux it is a bit difficult but usually you will and up with this commands:
@@ -368,6 +370,34 @@ make
 make test
 make install
 ```
+
+#### For php >= 5.5.x
+
+apc_cache has two kind of functionality one for storing precompiled script byte code in shared memory and second for caching user variables. As from PHP version 5.5.x php comes with built in module for script byte code caching named OPcache there is was no point for developing apc_cache for new versions of php. Instead they initialized new module named APCu and the only thing it does is stores user variables in cache with same old functions.
+
+So if you are using PHP 5.5.x >= than you will need to install http://pecl.php.net/package/APCu for db.php to work.
+
+##### For windows
+Download suitable dll file. There are 4 major builds for php:
+```
+nts 32 bit (not thread safe)
+nts 64 bit (not thread safe)
+ts 32 bit (thread safe)
+nts 64 bit (thread safe)
+```
+
+Therefore you should know which kind of php you have and than you must choose one from four from list like this:
+```
+5.5 Non Thread Safe (NTS) x86
+5.5 Thread Safe (TS) x86
+5.5 Non Thread Safe (NTS) x64
+5.5 Thread Safe (TS) x64
+```
+Where x86 means 32 bit and x64 means 64 bit
+
+#### For linux
+Compile APCu
+
 
 #### php notices
 For some real reasons **db.php** generates notice level errors. If you have not set restricted notices in error reporting section in your php.ini file you can set it manually on runtime like:
