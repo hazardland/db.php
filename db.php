@@ -1459,37 +1459,37 @@
                 }
                 return false;
             }
-            public function save (&$object, $event=null)
+            public function save (&$object, $action=null)
             {
-                //debug ($event);
+                //debug ($action);
                 if (is_object($object))
                 {
                     $database = $this->database();
-                    if ($event===null)
+                    if ($action===null)
                     {
                         if ($object->{$this->primary->name})
                         {
-                            $event = query::update;
+                            $action = query::update;
                         }
                         else
                         {
-                            $event = query::insert;
+                            $action = query::insert;
                         }
                     }
-                    if (($event==query::update && $this->update) || ($event==query::insert && $this->insert))
+                    if (($action==query::update && $this->update) || ($action==query::insert && $this->insert))
                     {
                         //debug ($object);
                         $set = '';
                         foreach ($this->fields as &$field)
                         {
-                            if (($event==query::update && $field->update) || ($event==query::insert && $field->insert))
+                            if (($action==query::update && $field->update) || ($action==query::insert && $field->insert))
                             {
-                                //debug ($event);
-                                if (($event==query::update && $field->primary) || ($field->primary && !$object->{$this->primary->name}))
+                                //debug ($action);
+                                if (($action==query::update && $field->primary) || ($field->primary && !$object->{$this->primary->name}))
                                 {
                                     continue;
                                 }
-                                if (($event==query::update && $field->event->update->action==action::date) || ($event==query::insert && $field->event->insert->action==action::date))
+                                if (($action==query::update && $field->event->update->action==action::date) || ($action==query::insert && $field->event->insert->action==action::date))
                                 {
                                     $object->{$field->name} = now();
                                     $set .= $this->name($field)."='".time($object->{$field->name})."', ";
@@ -1586,7 +1586,7 @@
                         if ($set!='')
                         {
                             $set = substr ($set, 0, -2);
-                            if ($event==query::update)
+                            if ($action==query::update)
                             {
                                 $query = "update ".$this->name()." set ".$set." where ".$this->name($this->primary)."='".string($object->{$this->primary->name})."' limit 1";
                                 if ($database->link($this->link)->query ($query))
@@ -1893,13 +1893,13 @@
                     $this->context->tables[$table->id] = $table;
                 }
             }
-            public function save (&$object, $event=null)
+            public function save (&$object, $action=null)
             {
                 if (is_array($object))
                 {
                     foreach ($object as $item)
                     {
-                        $this->save ($item, $event);
+                        $this->save ($item, $action);
                     }
                 }
                 else
@@ -1910,7 +1910,7 @@
                         debug ($object);
                         exit;
                     }
-                    $table->save ($object, $event);
+                    $table->save ($object, $action);
                 }
                 return $object;
             }

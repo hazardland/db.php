@@ -42,11 +42,13 @@
     - [Load using query and return single object instead of object array](#load-using-query-and-return-single-object-instead-of-object-array)
     - [Load affecting default load behavior or changing table default query](#load-affecting-default-load-behavior-or-changing-table-default-query)
 - [Save](#save)
-    - [save single object to table](#save-single-object-to-table)
-    - [save with boolean result](#save-with-boolean-result)
-    - [save with saved object result](#save-with-saved-object-result)
-    - [save without knowing object table](#save-without-knowing-object-table)
-    - [save objects to table](#save-objects-to-table)
+    - [Save single object to table](#save-single-object-to-table)
+    - [Force insert object to table](#force-insert-object-to-table)
+    - [Save without knowing object class](#save-without-knowing-object-class)
+    - [Save with boolean as result](#save-with-boolean-as-result)
+    - [Save with saved object as result](#save-with-saved-object-as-result)
+    - [Save object array to table](#save-object-array-to-table)
+    - [save mixed object array to table](#save-mixed-object-array-to-table)
 - [Delete](#delete)
     - [delete single object](#delete-single-object)
     - [delete by id](#delete-by-id)
@@ -1260,12 +1262,117 @@ $database->shop->product->load (\db\by('type',$type));
 For more information about queries see: [Query where](#query-where), [Query order](#query-order), [Query limit](#query-limit)
 
 # Save
+## Save single object to table
+If you know what class belongs an object you wish to save than you can use:
+```php
+boolean $databse->path->to->class->save (\path\to\class &$object [, $action=null]);
+```
+Returns true if succeded and false if failed. Affects modifications to passed object. For example if you pass object with id is null and your table primary field is auto increment integer then after saving you will have newly assigned id in object's primary field specific property.
 
-## save single object to table
-## save with boolean result
-## save with saved object result
-## save without knowing object table
-## save objects to table
+**Warning !**
+**Save method inserts** when primary field property value is empty.
+**Save method Updates** when primary field property value is not empty.
+
+**There are cases when you want to force insert object in table while you also have primary field value already defined for that object**. In this case you should use action parameter to specify save method how to act by passing \db\query::insert or \db\query::update as action value.
+
+Example class:
+```php
+class user
+{
+    public $id;
+    public $name;
+    public function __construct ($name)
+    {
+        $this->name = $name;
+    }
+}
+```
+Example usage which always will generate insert query because $user->id is null by default. If save succeds than you will have newly assigned id in $user->id if id field for of user table is primary auto increment integer.
+```php
+$user = new user ('John Smith');
+if ($database->user->save($user))
+{
+    echo "user successfully saved.";
+    echo "inserted user id is ".$user->id;
+}
+else
+{
+    echo "save failed";
+}
+```
+Exmaple usage which will always generate update query:
+```php
+//assuming we have user with id 1
+$user = $database->user->load (1);
+$user->name = 'John Drake';
+if ($database->user->save($user))
+{
+    echo "user successfully renamed";
+}
+else
+{
+    echo "save rename failed";
+}
+```
+
+Now let us define $user->id by ourself and force insert user
+```php
+$user = new user ('John Next');
+$user->id = 2;
+
+if ($database->user->save ($user, \db\query::insert))
+{
+    echo "new user with predefined id was created";
+}
+else
+{
+    echo "save faield";
+}
+
+```
+*Note: Class handler always returns boolean value. True if save succeded or false if failed. Along other reasons save might fail if you have denied update or insert for this table. You can deny insert or update with class PHPDoc modifiers or from $database->path->to->class->insert = true/false / $database->path->to->class->update = true/false.*
+
+## Force insert object to table
+```php
+$database->path->to->class (\path\to\class &$object, \db\query::insert);
+```
+
+Example:
+```php
+$database->shop->product->save ($product, \db\query::insert);
+```
+
+See also: [Save single object to table](#save-single-object-to-table)
+
+## Save without knowing object class
+If you donw know which class belongs to object but you know that class handler is registered in orm than just:
+```php
+object $database->save (object $object);
+```
+This method returns same object you passed back.
+
+And gives following possibility:
+```php
+$user = $database->save (new user ('John Smith'));
+```
+## Save with boolean as result
+Example:
+```php
+if ($database->shop->product->save($product))
+{
+    echo "save ok";
+}
+```
+See [Save single object to table](#save-single-object-to-table) for more details.
+## Save with saved object as result
+Example:
+```php
+$product = $database->save ($product);
+```
+See for more [Save without knowing object class](#save-without-knowing-object-class).
+## Save object array to table
+
+## save mixed object array to table
 
 # Delete
 
