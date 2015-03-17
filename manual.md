@@ -348,7 +348,7 @@ Nothing great can be done without it.
 
 ## Installation
 
-#### Include
+### Include
 The only file you need is **db.php** iself. Just include db.php in your project and you are ready to go. Other files in this repo are just samples and documents.
 
 ```php
@@ -397,7 +397,7 @@ Copy to dll file contained in archive file to php extensions directory, by defau
 **For Linux:** show the world you are true linux power user, compile APCu by yourself.
 
 
-#### php notices
+### PHP Notices
 For some real reasons **db.php** generates notice level errors. If you have not set restricted notices in error reporting section in your php.ini file you can set it manually on runtime like:
 
 ```php
