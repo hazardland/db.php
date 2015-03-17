@@ -359,6 +359,7 @@ include './db.php';
 **db.php** requires **apc_cache** because it is default caching engine for it. You can also override default caching engine but it is subject for further reading. A link for apc_cache installation instructions is here http://php.net/manual/en/apc.installation.php. On windows you just need to download proper php_apc.dll and enable it in php.ini by uncommenting line extension=php_apc.dll
 
 In linux it is a bit difficult but usually you will and up with this commands:
+
 ```
 wget http://pecl.php.net/get/APC-3.1.9.tgz
 tar -xvf APC-3.1.9.tgz
@@ -993,7 +994,8 @@ With queries you can adjust order, limit, group, join, cache type, pager usage a
 In previous chapters we talked about query initialization and simle usage. Now let us list step by step query object features.
 
 Example class:
-```
+
+```php
 public product
 {
     public $name;
