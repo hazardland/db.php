@@ -8,21 +8,27 @@
     - [What is PHPDoc?](#what-is-phpdoc)
     - [What is ORM ? What is Object Relational Mapper?](#what-is-orm--what-is-object-relational-mapper)
     - [Why do i have low salary as a php programmer?](#why-do-i-have-low-salary-as-a-php-programmer)
-- [Intermediate level](#intermediate-level)
-    - [Installation](#installation)
+- [Installation](#installation)
+    - [Include](#include)
+    - [apc_cache for php <= 5.4.x](#apc_cache-for-php--54x)
+    - [apc_cache for php >= 5.5.x](#apc_cache-for-php--55x)
+    - [PHP Notices](#php-notices)
+- [Connect](#connect)
     - [Basic architecture](#basic-architecture)
     - [Connect simply](#connect-simply)
     - [Connect using custom link](#connect-using-custom-link)
     - [Connect using many links](#connect-using-many-links)
     - [Map class to table](#map-class-to-table)
+- [Prepare](#prepare)
     - [Map namespace classes to tables](#map-namespace-classes-to-tables)
     - [Map classes by pattern to tables](#map-classes-by-pattern-to-tables)
-    - [Get table handler for class](#get-table-handler-for-class)
+    - [Get registered table handler of class](#get-registered-table-handler-of-class)
     - [Create databases for mapped classes](#create-databases-for-mapped-classes)
     - [Create tables for mapped classes](#create-tables-for-mapped-classes)
-    - [Sync changes to table structures](#sync-changes-to-table-structures)
+    - [Update table structures or Update/create new fields](#update-table-structures-or-updatecreate-new-fields)
     - [Generate sql dump for database changes and save to file](#generate-sql-dump-for-database-changes-and-save-to-file)
-    - [Load all from table iterate throught the result](#load-all-from-table-iterate-throught-the-result)
+- [Load](#load)
+    - [Load all from table and iterate throught the result](#load-all-from-table-and-iterate-throught-the-result)
     - [Load by id from table](#load-by-id-from-table)
     - [Load by field equals value or field like value](#load-by-field-equals-value-or-field-like-value)
     - [Load using pager from table](#load-using-pager-from-table)
@@ -31,29 +37,34 @@
     - [Query where](#query-where)
     - [Query order](#query-order)
     - [Query limit](#query-limit)
-    - [load using custom query with pager](#load-using-custom-query-with-pager)
-    - [load using query and return single object instead of object array](#load-using-query-and-return-single-object-instead-of-object-array)
-    - [load affecting default load behavior or changing table default query](#load-affecting-default-load-behavior-or-changing-table-default-query)
+    - [Load using custom query with pager](#load-using-custom-query-with-pager)
+    - [Load using query and return single object instead of object array](#load-using-query-and-return-single-object-instead-of-object-array)
+    - [Load affecting default load behavior or changing table default query](#load-affecting-default-load-behavior-or-changing-table-default-query)
+- [Save](#save)
     - [save single object to table](#save-single-object-to-table)
     - [save with boolean result](#save-with-boolean-result)
     - [save with saved object result](#save-with-saved-object-result)
     - [save without knowing object table](#save-without-knowing-object-table)
     - [save objects to table](#save-objects-to-table)
+- [Delete](#delete)
     - [delete single object](#delete-single-object)
     - [delete by id](#delete-by-id)
     - [delete table objects](#delete-table-objects)
     - [delete various type of object same time](#delete-various-type-of-object-same-time)
     - [delete by query from table](#delete-by-query-from-table)
+- [Cache](#cache)
     - [cache user - cache table records on user level (default session)](#cache-user---cache-table-records-on-user-level-default-session)
     - [cache long - table records on server level (default apc_cache)](#cache-long---table-records-on-server-level-default-apc_cache)
     - [cache temp - table records for script runtime (default memory)](#cache-temp---table-records-for-script-runtime-default-memory)
     - [develop and plug custom cache engine for desired cache level](#develop-and-plug-custom-cache-engine-for-desired-cache-level)
-    - [universal time handling](#universal-time-handling)
+- [Table](#table)
 - [table modifiers](#table-modifiers)
     - [use custom name table for class](#use-custom-name-table-for-class)
     - [use custom name field of table for class property](#use-custom-name-field-of-table-for-class-property)
-- [field modifiers](#field-modifiers)
+- [Field](#field)
     - [field locaization](#field-locaization)
+- [Tools](#tools)
+    - [universal time handling](#universal-time-handling)
 
 <!-- /MarkdownTOC -->
 
@@ -345,17 +356,15 @@ Because you dont use classes in your model or you dont have model in your projec
 
 Nothing great can be done without it.
 
-# Intermediate level
+# Installation
 
-## Installation
-
-### Include
+## Include
 The only file you need is **db.php** iself. Just include db.php in your project and you are ready to go. Other files in this repo are just samples and documents.
 
 ```php
 include './db.php';
 ```
-### apc_cache for php <= 5.4.x
+## apc_cache for php <= 5.4.x
 
 **db.php** requires **apc_cache** module's user variable caching functions by default. You can also override default caching engine but it is subject for further reading. A link for apc_cache installation instructions is here http://php.net/manual/en/apc.installation.php. On windows you just need to download proper php_apc.dll and enable it in php.ini by uncommenting line extension=php_apc.dll
 
@@ -370,7 +379,7 @@ make test
 make install
 ```
 
-### apc_cache for php >= 5.5.x
+## apc_cache for php >= 5.5.x
 
 apc_cache has two kind of functionality one for storing precompiled script byte code in shared memory and second for caching user variables. As from PHP version 5.5.x php comes with built in module for script byte code caching named OPcache, there is no point for developing apc_cache for new versions of php. Instead they initialized new module named APCu and the only thing it does is stores user variables in cache with same old functions.
 
@@ -398,7 +407,7 @@ Copy to dll file contained in archive file to php extensions directory, by defau
 **For Linux:** show the world you are true linux power user, compile APCu by yourself.
 
 
-### PHP Notices
+## PHP Notices
 For some real reasons **db.php** generates notice level errors. If you have not restricted notices in error reporting section in your php.ini file you can set it manually on runtime like:
 ```php
 // Report all errors except E_NOTICE
@@ -407,6 +416,8 @@ error_reporting(E_ALL & ~E_NOTICE);
 In the begining of your php script before db.php include.
 
 For additional information read http://php.net/manual/en/function.error-reporting.php
+
+# Connect
 
 ## Basic architecture
 To work with orm you will need an instance of class \db\database. It stores connection links (represented by default with \db\link class) and table handlers for classes. Any class you are willing to map table in actual database must have its own handler. Class handler is represented by an instance of \db\table. By itself class properties have its own handlers represented by \db\field and instances of it are stored in table handler. db.php basic usage contains following important steps:
@@ -620,6 +631,8 @@ $database->shop->product
 
 *Note*: The only reserved namespace name is 'context' it means you must not have classes in namespace named 'context' or class without namespace named 'context'. $database->context is used by database object for storing various data such is conenction links, table handlers, defined locales, varius cache handlers and so on.
 
+# Prepare
+
 ## Map namespace classes to tables
 
 If we have many classes in namespace we can add them using just one line of code:
@@ -669,12 +682,11 @@ $database->shop->cost
 Class table handler is an instance of \db\table it contains information for mapping class to actual database table and api for accessing class table data. For further exploration of class table handlers see sample at https://github.com/hazardland/db.php/blob/master/samples/003.class.php
 
 ## Map classes by pattern to tables
-
 ```php
 $database->scan (string $string);
 ```
 
-$database->scan also adds any class which full name (\path\to\class) begins on $string
+$database->scan also adds any class whose full name (\path\to\class) begins on given $string
 
 If we have:
 ```php
@@ -686,10 +698,17 @@ Than
 ```php
 $database->scan ('.ani');
 ```
+Or
+```php
+$database->scan ('\\ani');
+```
+Or
+```php
+$database->scan ('\ani');
+```
+Will add \animals\wolf and \animation classes table handlers to orm.
 
-Will add \animals\wolf and \animation classes
-
-## Get table handler for class
+## Get registered table handler of class
 
 By path to class
 ```php
@@ -719,7 +738,7 @@ $database->table($product);
 ```
 
 ## Create databases for mapped classes
-Any databases specified to tables or \db\database constructor which do not exist will be created by following function:
+Any databases specified to classes or specified to \db\database constructor which do not exist will be created on specified connection sql server or on specified data source by following function:
 ```php
 $database->update();
 ```
@@ -727,15 +746,15 @@ $database->update();
 *$database->update() creates or updates any changes to databases, tables or fields*
 
 ## Create tables for mapped classes
-Any tables added to $database object which do not exist will be created on their specified databases on their connection links by following function:
+Any non existent tables for registered classes in orm will be created on their specified databases on their connection links by following function:
 ```php
 $database->update();
 ```
 
 *$database->update() creates or updates any changes to databases, tables or fields*
 
-## Sync changes to table structures
-Any recent changes in tables or in fields settings (i.e. field type change) will be affected to databases by following function:
+## Update table structures or Update/create new fields
+Any recent changes in tables or in fields settings discovered in class or class property descriptions (i.e. field type change for class property) will be affected to databases by following function:
 ```php
 $database->update();
 ```
@@ -743,16 +762,17 @@ $database->update();
 *$database->update() creates or updates any changes to databases, tables or fields*
 
 ## Generate sql dump for database changes and save to file
-Instead of running alter queries when using $database->update you can save that queries to file for further testing and usage:
+Instead of running alter queries when using $database->update() you can save that queries to file for further testing and usage:
 
 ```php
 $database->update('\path\to\database_changes.sql');
 ```
 
-*Note: In case of dump file in case of multi server architecture you will not be able to distinguish which query belongs to which connection*
+*Note: In case of dump file in case of multi sql server/data source architecture you will not be able to distinguish which query belongs to which connection*
 
+# Load
 
-## Load all from table iterate throught the result
+## Load all from table and iterate throught the result
 To load all records for table which in case of ORM means to load all objects for class use:
 ```php
 $result = $database->path->to->class->load ();
@@ -1121,7 +1141,7 @@ $query->limit (30);
 ```
 Generates *limit 30*
 
-## load using custom query with pager
+## Load using custom query with pager
 Query pager overrides query limit behavior if you call:
 
 ```php
@@ -1132,14 +1152,14 @@ $query->pager (integer page[, integer count=50])
 This will create pager object at $query->pager and you can later access it. To know more about \db\pager class object please read [Load using pager from table](#load-using-pager-from-table).
 
 
-## load using query and return single object instead of object array
+## Load using query and return single object instead of object array
 When using \db\query or \db\by by default \db\table returns array of objects. If you want to get only first object than call:
 ```php
 $database->path->to->table->load ($query, true);
 ```
 Second parameter of load notifies \db\table if user wants single object as result or array. True means single false means array. Default is false.
 
-## load affecting default load behavior or changing table default query
+## Load affecting default load behavior or changing table default query
 Every table handler has built in query object. When you call it without passing query handler uses built in query to process your request. For example if you want to change default behavior of load without creating query object:
 ```php
 $database->shop->product->load ();
@@ -1154,11 +1174,15 @@ $database->shop->product->load (\db\by('type',$type));
 ```
 For more information about queries see: [Query where](#query-where), [Query order](#query-order), [Query limit](#query-limit)
 
+# Save
+
 ## save single object to table
 ## save with boolean result
 ## save with saved object result
 ## save without knowing object table
 ## save objects to table
+
+# Delete
 
 ## delete single object
 ## delete by id
@@ -1166,17 +1190,23 @@ For more information about queries see: [Query where](#query-where), [Query orde
 ## delete various type of object same time
 ## delete by query from table
 
+# Cache
+
 ## cache user - cache table records on user level (default session)
 ## cache long - table records on server level (default apc_cache)
 ## cache temp - table records for script runtime (default memory)
 ## develop and plug custom cache engine for desired cache level
 
-## universal time handling
+
+# Table
 
 # table modifiers
 ## use custom name table for class
 ## use custom name field of table for class property
 
-# field modifiers
+# Field
 
 ## field locaization
+
+# Tools
+## universal time handling
