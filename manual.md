@@ -566,33 +566,31 @@ $database->link (new \db\link ('my_odbc_link', 'odbc:my_odbc_alias', 'my_user', 
 Additional link usage samples https://github.com/hazardland/db.php/blob/master/samples/002.link.php
 
 ## Map class to table
-Here begins most interesting part of db.php as we have setted up desired connection(s) we now need to make database know about our class(es).
+Here begins most interesting part of db.php as we have setted up desired connection(s) now we need to make database know about our class(es).
 
-To add single class to table you have to:
+To add single "class to table" handler or so called "class handler" you have to:
+
+```php
+$database->add (string $class);
+```
 
 ```php
 $database->add('\path\to\class');
 ```
-
 Or
 ```php
 $database->add('\\path\\to\\class');
 ```
-
 Also you can specify class path by dots:
-
 ```php
 $database->add('path.to.class');
 ```
-
-First dot makes no sense but you also can:
-
+First dot in string makes no sense but you also can:
 ```php
 $database->add('.path.to.class');
 ```
 
 For example if we have:
-
 ```php
 namespace shop;
 
@@ -608,22 +606,23 @@ We can:
 $database->add ('shop.product');
 ```
 
+We added class handler to orm now we need to access class handler.
+
 After adding class to database we can access class table handler by
 ```php
 $database->path->to->class
 ```
 
-In \shop\product class case:
-
+In \shop\product example class case we will access it like this:
 ```php
 $database->shop->product
 ```
 
-*Note*: The only reserved namespace name is 'context' it means you must not have namespace named 'context'. $database->context is used by database object.
+*Note*: The only reserved namespace name is 'context' it means you must not have classes in namespace named 'context' or class without namespace named 'context'. $database->context is used by database object for storing various data such is conenction links, table handlers, defined locales, varius cache handlers and so on.
 
 ## Map namespace classes to tables
 
-If we have many classes in namespace we can add in one line:
+If we have many classes in namespace we can add them using just one line of code:
 
 ```php
 namespace shop;
@@ -645,15 +644,11 @@ class cost
 ```php
 $database->scan ('\namespace');
 ```
-
 Or
-
 ```php
 $database->scan ('\\namespace');
 ```
-
 Or
-
 ```php
 $database->scan ('.namespace');
 ```
@@ -663,8 +658,7 @@ In this case if we scan:
 ```php
 $database->scan ('.shop');
 ```
-
-We will have following table handlers:
+We will have following class table handlers:
 
 ```php
 $database->shop->product
@@ -672,9 +666,7 @@ $database->shop->cart
 $database->shop->cost
 ```
 
-Table handler is an instance of \db\table it contains information for mapping class to actual database table. For further exploring table handlers see sample:
-
-https://github.com/hazardland/db.php/blob/master/samples/003.class.php
+Class table handler is an instance of \db\table it contains information for mapping class to actual database table and api for accessing class table data. For further exploration of class table handlers see sample at https://github.com/hazardland/db.php/blob/master/samples/003.class.php
 
 ## Map classes by pattern to tables
 
