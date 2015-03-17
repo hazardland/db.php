@@ -32,7 +32,7 @@
     - [Load by id from table](#load-by-id-from-table)
     - [Load by field equals value or field like value](#load-by-field-equals-value-or-field-like-value)
     - [Load using pager from table](#load-using-pager-from-table)
-- [uery](#uery)
+- [Query](#query)
     - [Load using custom query](#load-using-custom-query)
     - [Query helper functions](#query-helper-functions)
     - [Query where](#query-where)
@@ -955,7 +955,7 @@ while ($pager->next());
 ```
 This will iterate throgh every product and will load them 10 by 10. Sometimes if you have 99999 records in table and you have to affect them all it is extremly important not to load them all because objects in result might overload memory if they are large.
 
-#Query
+# Query
 
 ## Load using custom query
 ```php
