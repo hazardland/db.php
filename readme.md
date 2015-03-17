@@ -54,19 +54,15 @@ db.php - code first orm
     - [Save with boolean result](#save-with-boolean-result)
     - [Save with saved object as result](#save-with-saved-object-as-result)
     - [Save object array to table with boolean result](#save-object-array-to-table-with-boolean-result)
-    - [save mixed object array to table](#save-mixed-object-array-to-table)
+    - [Save mixed object array to table](#save-mixed-object-array-to-table)
 - [Delete](#delete)
-    - [delete single object](#delete-single-object)
-    - [delete by id](#delete-by-id)
-    - [delete array of objects or ids](#delete-array-of-objects-or-ids)
-    - [delete by query from table](#delete-by-query-from-table)
+    - [Delete single object](#delete-single-object)
+    - [Delete by id](#delete-by-id)
+    - [Delete array of objects or ids](#delete-array-of-objects-or-ids)
+    - [Delete by query from table](#delete-by-query-from-table)
 - [Debug](#debug)
-- [Cache](#cache)
-    - [cache user - cache table records on user level (default session)](#cache-user---cache-table-records-on-user-level-default-session)
-    - [cache long - table records on server level (default apc_cache)](#cache-long---table-records-on-server-level-default-apc_cache)
-    - [cache temp - table records for script runtime (default memory)](#cache-temp---table-records-for-script-runtime-default-memory)
-    - [develop and plug custom cache engine for desired cache level](#develop-and-plug-custom-cache-engine-for-desired-cache-level)
-- [Object](#object)
+- [Class](#class)
+    - [Best practices for declaring class](#best-practices-for-declaring-class)
     - [Set on create function](#set-on-create-function)
 - [Table](#table)
     - [how class modifiers work](#how-class-modifiers-work)
@@ -101,6 +97,11 @@ db.php - code first orm
     - [set zerofill flag for field](#set-zerofill-flag-for-field)
     - [require field value for insert/update](#require-field-value-for-insertupdate)
     - [exclude field from insert/update](#exclude-field-from-insertupdate)
+- [Cache](#cache)
+    - [cache user - cache table records on user level (default session)](#cache-user---cache-table-records-on-user-level-default-session)
+    - [cache long - table records on server level (default apc_cache)](#cache-long---table-records-on-server-level-default-apc_cache)
+    - [cache temp - table records for script runtime (default memory)](#cache-temp---table-records-for-script-runtime-default-memory)
+    - [develop and plug custom cache engine for desired cache level](#develop-and-plug-custom-cache-engine-for-desired-cache-level)
 - [Localization](#localization)
     - [define local languages](#define-local-languages)
     - [set active language locale](#set-active-language-locale)
@@ -1510,7 +1511,7 @@ else
 ```
 For basic class handler save method behavior see [Save single object to table](#save-single-object-to-table).
 
-## save mixed object array to table
+## Save mixed object array to table
 ```php
 array $database->save (array $objects [, integer $action=null])
 ```
@@ -1525,7 +1526,7 @@ Will return saved objects.
 
 # Delete
 
-## delete single object
+## Delete single object
 ```php
 $database->path->to->class->delete (\path\to\class $object);
 ```
@@ -1536,7 +1537,7 @@ $product = $database->shop->product->load (1);
 
 $database->shop->product->delete ($product);
 ```
-## delete by id
+## Delete by id
 ```php
 $database->path->to->class->delete (mixed $id);
 ```
@@ -1547,7 +1548,7 @@ $database->shop->product->delete (12);
 
 $database->cashier->currency->delete ('USD');
 ```
-## delete array of objects or ids
+## Delete array of objects or ids
 ```php
 $database->path->to->class->delete (array $objects);
 ```
@@ -1560,7 +1561,7 @@ $database->shop->product->delete (array($product,13,14));
 ```
 Products with ids 12,13,14 will be deleted.
 
-## delete by query from table
+## Delete by query from table
 ```php
 $database->path->to->class->delete (\db\query $query);
 ```
@@ -1578,16 +1579,43 @@ To turn of query debugging use:
 $database->debug (false);
 ```
 
-# Cache
+# Class
+## Best practices for declaring class
+It is best you declare your class constructors without requiring parameters. Therefore with default parameters otherwise errors will be generated.
 
-## cache user - cache table records on user level (default session)
-## cache long - table records on server level (default apc_cache)
-## cache temp - table records for script runtime (default memory)
-## develop and plug custom cache engine for desired cache level
-
-
-# Object
+For example if you have user class constructor and you wish to pass some parameters to it, declare constructor like this:
+```php
+class user
+{
+    ...
+    public function __construct ($email=null, $name=null)
+    {
+        ....
+    }
+}
+```
+In this declaration all constructor parameters have their defaults and it gives db.php an ability to initialize object of user without passing parameters like this:
+```php
+new user ();
+```
 ## Set on create function
+As class handler initializes empty object first of his class and than fills its properties with values there is difficult to write some catchy initialization code in class constructor.
+
+Therefore after filling properties with values class handler calls $object->create() function if such exists. So if you want to do something after object is created than create function is for you.
+
+Example:
+```php
+class user
+{
+    public $id;
+    public $name;
+    public function create ()
+    {
+        echo "an user was just created and filled by db.php";
+    }
+}
+```
+
 
 # Table
 ## how class modifiers work
@@ -1624,6 +1652,13 @@ $database->debug (false);
 ## set zerofill flag for field
 ## require field value for insert/update
 ## exclude field from insert/update
+
+# Cache
+
+## cache user - cache table records on user level (default session)
+## cache long - table records on server level (default apc_cache)
+## cache temp - table records for script runtime (default memory)
+## develop and plug custom cache engine for desired cache level
 
 # Localization
 
