@@ -30,7 +30,7 @@
 - [Load](#load)
     - [Load all from table and iterate throught the result](#load-all-from-table-and-iterate-throught-the-result)
     - [Load by id from table](#load-by-id-from-table)
-    - [Load by field equals value or field like value](#load-by-field-equals-value-or-field-like-value)
+    - [Load by field equals value or field is like value](#load-by-field-equals-value-or-field-is-like-value)
     - [Load using pager from table](#load-using-pager-from-table)
 - [Query](#query)
     - [Load using custom query](#load-using-custom-query)
@@ -59,14 +59,94 @@
     - [cache long - table records on server level (default apc_cache)](#cache-long---table-records-on-server-level-default-apc_cache)
     - [cache temp - table records for script runtime (default memory)](#cache-temp---table-records-for-script-runtime-default-memory)
     - [develop and plug custom cache engine for desired cache level](#develop-and-plug-custom-cache-engine-for-desired-cache-level)
+- [Object](#object)
+    - [Set on create function](#set-on-create-function)
 - [Table](#table)
-- [table modifiers](#table-modifiers)
-    - [use custom name table for class](#use-custom-name-table-for-class)
-    - [use custom name field of table for class property](#use-custom-name-field-of-table-for-class-property)
+    - [how class modifiers work](#how-class-modifiers-work)
+    - [set table engine type](#set-table-engine-type)
+    - [rename table](#rename-table)
+    - [set table database](#set-table-database)
+    - [set table link](#set-table-link)
+    - [set table charset](#set-table-charset)
+    - [link class to custom table name](#link-class-to-custom-table-name)
+    - [set prefix for table fields](#set-prefix-for-table-fields)
+    - [set default select order field(s)](#set-default-select-order-fields)
+    - [develope class for already existing table](#develope-class-for-already-existing-table)
+    - [set table cache level](#set-table-cache-level)
+    - [set table cache scope](#set-table-cache-scope)
+    - [ignore class while scanning namespace](#ignore-class-while-scanning-namespace)
+    - [deny insert, select, update or delete in table](#deny-insert-select-update-or-delete-in-table)
 - [Field](#field)
-    - [field locaization](#field-locaization)
-- [Tools](#tools)
-    - [universal time handling](#universal-time-handling)
+    - [set variable data type](#set-variable-data-type)
+    - [set field type](#set-field-type)
+    - [set property relation to foreign class](#set-property-relation-to-foreign-class)
+    - [set enumeration](#set-enumeration)
+    - [link property to custom field name](#link-property-to-custom-field-name)
+    - [set length](#set-length)
+    - [set null](#set-null)
+    - [set primary field](#set-primary-field)
+    - [set create field first](#set-create-field-first)
+    - [set create field after field](#set-create-field-after-field)
+    - [set lazy load](#set-lazy-load)
+    - [set date on insert/update](#set-date-on-insertupdate)
+    - [set default value for field](#set-default-value-for-field)
+    - [set unsigned flag for field](#set-unsigned-flag-for-field)
+    - [set zerofill flag for field](#set-zerofill-flag-for-field)
+    - [require field value for insert/update](#require-field-value-for-insertupdate)
+    - [exclude field from insert/update](#exclude-field-from-insertupdate)
+- [Localization](#localization)
+    - [define local languages](#define-local-languages)
+    - [set active language locale](#set-active-language-locale)
+    - [localize field](#localize-field)
+- [Value](#value)
+    - [create custum value type](#create-custum-value-type)
+    - [restore value from database](#restore-value-from-database)
+    - [export value to database](#export-value-to-database)
+    - [example](#example)
+- [Time](#time)
+    - [How to render individual time for user with one date field value](#how-to-render-individual-time-for-user-with-one-date-field-value)
+- [Functions](#functions)
+    - [function \db\id](#function-\db\id)
+    - [function \db\string](#function-\db\string)
+    - [funciton \db\time](#funciton-\db\time)
+    - [funciton \db\date](#funciton-\db\date)
+    - [funciton \db\now](#funciton-\db\now)
+    - [function \db\debug](#function-\db\debug)
+    - [function \db\cache](#function-\db\cache)
+    - [function \db\type](#function-\db\type)
+    - [function \db\field](#function-\db\field)
+    - [function \db\scope](#function-\db\scope)
+    - [function \db\enum](#function-\db\enum)
+    - [function \db\round](#function-\db\round)
+    - [function \db\by](#function-\db\by)
+    - [function \db\in](#function-\db\in)
+- [Classes](#classes)
+    - [class \db\link](#class-\db\link)
+    - [class \db\field](#class-\db\field)
+    - [class \db\table](#class-\db\table)
+    - [class \db\database](#class-\db\database)
+    - [abstract class \db\value](#abstract-class-\db\value)
+    - [class \db\flag](#class-\db\flag)
+    - [class \db\type](#class-\db\type)
+    - [class \db\action](#class-\db\action)
+    - [class \db\event](#class-\db\event)
+    - [class \db\config](#class-\db\config)
+    - [class \db\query](#class-\db\query)
+    - [class \db\where](#class-\db\where)
+    - [class \db\group](#class-\db\group)
+    - [class \db\join](#class-\db\join)
+    - [class \db\order](#class-\db\order)
+    - [class \db\method](#class-\db\method)
+    - [class \db\limit](#class-\db\limit)
+    - [class \db\pager](#class-\db\pager)
+    - [abstract class \db\cache](#abstract-class-\db\cache)
+    - [class \db\limit](#class-\db\limit-1)
+    - [class \db\scope](#class-\db\scope)
+    - [class \db\load extends \db\cache](#class-\db\load-extends-\db\cache)
+    - [class \db\user extends \db\cache](#class-\db\user-extends-\db\cache)
+    - [class \db\long extends \db\cache](#class-\db\long-extends-\db\cache)
+    - [class \db\locale](#class-\db\locale)
+    - [class \db\by](#class-\db\by)
 
 <!-- /MarkdownTOC -->
 
@@ -794,14 +874,14 @@ if ($products)
 }
 ```
 
-Result represents regular array, keys of array represents ids of objects. If we know that we have product with id 2 we can access it by following code:
+Result represents regular array, keys of array represents ids of objects. If we know that we have product with id 2 we can access it in load result by following code:
 
 ```php
 echo $products[2]->name;
 ```
 
 ## Load by id from table
-To load single object by it for class from table use following:
+To load single object by id for class from table use following:
 ```php
 $database->path->to->class->load (mixed $id);
 ```
@@ -812,13 +892,13 @@ $product = $database->shop->product->load (2);
 echo $product->name;
 ```
 
-If primary field is string like $currency->code:
+In case if primary field is string like $currency->code:
 ```php
 $currency = $database->cashier->currency->load ('USD');
 echo $currency->name;
 ```
 
-## Load by field equals value or field like value
+## Load by field equals value or field is like value
 To load object by custom field value:
 ```php
 $database->path->to->class->load (\db\by(string $field1, mixed $value1)->by(string $field2, mixed $value2)->in(string $field3, mixed $value));
@@ -1205,15 +1285,101 @@ For more information about queries see: [Query where](#query-where), [Query orde
 ## develop and plug custom cache engine for desired cache level
 
 
-# Table
+# Object
+## Set on create function
 
-# table modifiers
-## use custom name table for class
-## use custom name field of table for class property
+# Table
+## how class modifiers work
+## set table engine type
+## rename table
+## set table database
+## set table link
+## set table charset
+## link class to custom table name
+## set prefix for table fields
+## set default select order field(s)
+## develope class for already existing table
+## set table cache level
+## set table cache scope
+## ignore class while scanning namespace
+## deny insert, select, update or delete in table
 
 # Field
 
-## field locaization
+## set variable data type
+## set field type
+## set property relation to foreign class
+## set enumeration
+## link property to custom field name
+## set length
+## set null
+## set primary field
+## set create field first
+## set create field after field
+## set lazy load
+## set date on insert/update
+## set default value for field
+## set unsigned flag for field
+## set zerofill flag for field
+## require field value for insert/update
+## exclude field from insert/update
 
-# Tools
-## universal time handling
+# Localization
+
+## define local languages
+## set active language locale
+## localize field
+
+# Value
+## create custum value type
+## restore value from database
+## export value to database
+## example
+
+# Time
+## How to render individual time for user with one date field value
+
+# Functions
+
+## function \db\id
+## function \db\string
+## funciton \db\time
+## funciton \db\date
+## funciton \db\now
+## function \db\debug
+## function \db\cache
+## function \db\type
+## function \db\field
+## function \db\scope
+## function \db\enum
+## function \db\round
+## function \db\by
+## function \db\in
+
+# Classes
+## class \db\link
+## class \db\field
+## class \db\table
+## class \db\database
+## abstract class \db\value
+## class \db\flag
+## class \db\type
+## class \db\action
+## class \db\event
+## class \db\config
+## class \db\query
+## class \db\where
+## class \db\group
+## class \db\join
+## class \db\order
+## class \db\method
+## class \db\limit
+## class \db\pager
+## abstract class \db\cache
+## class \db\limit
+## class \db\scope
+## class \db\load extends \db\cache
+## class \db\user extends \db\cache
+## class \db\long extends \db\cache
+## class \db\locale
+## class \db\by

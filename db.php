@@ -43,8 +43,8 @@
          * objects with which database can work via interfaces:
          * user - your instance of user
          * group - your instance of user group
-         * culture - your instance of culture
-         * cultures - your instance of cultures
+         * locale - your instance of locale
+         * locales - your instance of locales
          * cache - your instance of cache
          * link - your database connection
          * solution
