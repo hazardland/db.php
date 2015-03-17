@@ -409,7 +409,7 @@ In the begining of your php script before db.php include.
 For additional information read http://php.net/manual/en/function.error-reporting.php
 
 ## Basic architecture
-To work with orm you will need an instance of class \db\database. It stores connection links (represented by default with \db\link class) and table handlers for classes. Any class you are willing to map table in actual database must have its own handler. Class handler repesents an instance of \db\table. By itself class properties have its own handlers represented by \db\field and instances of it are stored in table handler. Basic usage consists of this staps:
+To work with orm you will need an instance of class \db\database. It stores connection links (represented by default with \db\link class) and table handlers for classes. Any class you are willing to map table in actual database must have its own handler. Class handler is represented by an instance of \db\table. By itself class properties have its own handlers represented by \db\field and instances of it are stored in table handler. Basic usage consists of this staps:
 
 1. Initialize \db\database, establish connections to data source(s)/sql server(s).
 2. Initialize desired class(es) handlers.
