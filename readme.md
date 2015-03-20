@@ -1624,7 +1624,7 @@ class user
 db.php uses php doc comments to gather additional information for property related fields. To set special attributes for real fields in which property values are stored (in database table record columns) we specify special keywords in property doc comments. See also php doc comments.
 
 For example if we want to make a property related field primary we write above it before property declaration a doc comment:
-`php
+```php
 /**
 * primary
 */
