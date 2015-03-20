@@ -1669,10 +1669,14 @@ binary
 By default property type is string. By default if property name is id and is first property than its type is integer (If no property named id found than first property gets primary but not integer).
 
 This property types come with their defaults:
-integer property type sets field type also as integer with.
-string property type sets field type as char with length 128.
-float property type sets field type as float.
-boolean property type sets field type as smallint with length 1.
+    **integer** property type sets field type also as *integer* with.
+    **string** property type sets field type as *char* with length *128*.
+    **float** property type sets field type as *float*.
+    **boolean** property type sets field type as *smallint* with length *1*.
+    **binary** property type sets field type as *blob*
+    **date** property type sets field type as *date*
+    **time** property type sets field type as *datetime*
+
 
 ## set field type
 ## set property relation to foreign class
