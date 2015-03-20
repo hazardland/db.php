@@ -1677,6 +1677,17 @@ This property types come with their defaults:
     **date** property type sets field type as *date*
     **time** property type sets field type as *datetime*
 
+So all this types can go as @var parameter. But you can also specify there any other class like:
+
+```php
+/**
+* @var \user\group
+*/
+public $group;
+```
+This means property group represents instance of \user\group. In case class specified as @var parameter property field type is set to integer by default. Specifying class as property type also sets up relation. Of course you can change field type separately from property type.
+
+But also if specified class extends abstract class \db\value than no relation is set instead it is treated as custom value type and its field type is set to string by default and custom value types are subjects of further reading.
 
 ## set field type
 ## set property relation to foreign class
