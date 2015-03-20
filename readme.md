@@ -1631,7 +1631,7 @@ For example if we want to make a property related field primary we write above i
 public $id;
 ``
 
-Consider that first line of doc comments always begins with following three symbols: ```/**``` on separate line and ends with line ```*/"```. Any middle line begins with single ```*```.
+Consider that first line of doc comments always begin with following three symbols ```/**``` given on separate line and end with symbols ```*/"``` on given also on separate line. Any middle line begins with single symbol ```*```.
 
 So for example if yo want to make a property field primary but string:
 ```php
