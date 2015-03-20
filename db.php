@@ -3515,7 +3515,7 @@
             $result = "<div style=\"font-family:'dejavu sans mono','consolas','monospaced','monospace';font-size:10pt;width:600px;margin-bottom:20px;margin-left:20px;\"><div style='background:#f0f0f0'>";
             foreach ($backtrace as $key => $value)
             {
-                $result .= "<a href='file://localhost/".str_replace('\\','/',$value['file'])."' onclick=\"window.open('".addslashes($value['file'])."')\" target='_blank' style='color:black;text-decoration:none;'>".$value['file']."</a> [".$value['line']."] <font color=red>".$value['function']."</font><br>";
+                $result .= "<a href='subl://".str_replace('\\','/',$value['file']).":".$value['line']."' style='color:black;text-decoration:none;'>".$value['file']."</a> [".$value['line']."] <font color=red>".$value['function']."</font><br>";
             }
             $result .= '</div>';
             if ($title!==null)
