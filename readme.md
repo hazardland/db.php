@@ -65,8 +65,8 @@ db.php - code first orm
     - [Best practices for declaring class](#best-practices-for-declaring-class)
     - [Set on create function](#set-on-create-function)
 - [Field](#field)
-    - [how field attributes work](#how-field-attributes-work)
-    - [set property type](#set-property-type)
+    - [How field attributes work](#how-field-attributes-work)
+    - [Set property type](#set-property-type)
     - [set field type](#set-field-type)
     - [set property relation to foreign class](#set-property-relation-to-foreign-class)
     - [set enumeration](#set-enumeration)
@@ -1620,10 +1620,10 @@ class user
 ```
 
 # Field
-## how field attributes work
+## How field attributes work
 db.php uses php doc comments to gather additional information for property related fields. To set special attributes for real fields in which property values are stored (in database table record columns) we specify special keywords in property doc comments. See also php doc comments.
 
-For example if we want to make a property related field primary we write above it before property declaration a doc comment:
+For example if we want to make a property related field primary we write above it (before property declaration) a doc comment:
 ```php
 /**
 * primary
@@ -1642,7 +1642,38 @@ So for example if yo want to make a property field primary but string:
 public $id;
 ```
 
-## set property type
+## Set property type
+As you know php does not have strongly shaped primitive variable types like string, integer, float, boolean, time and date.  But db.php still needs to know what primitive type your properties represent if they represent primitive type at all.
+
+Do not confuse field type and property type. Field is database table field associated to class property. You have classes and properties in your code not fields and tables. Field type defines type of a field in actual database table while property type defines type of your property in class.
+
+Defining property type goes with php doc standard with @var keyword like:
+```php
+/**
+* @var integer
+*/
+public $foo;
+```
+
+This types are available as basic pseudo types in db.php:
+```php
+integer
+boolean
+float
+string
+date
+time
+binary
+```
+
+By default property type is string. By default if property name is id and is first property than its type is integer (If no property named id found than first property gets primary but not integer).
+
+This property types come with their defaults:
+integer property type sets field type also as integer with.
+string property type sets field type as char with length 128.
+float property type sets field type as float.
+boolean property type sets field type as smallint with length 1.
+
 ## set field type
 ## set property relation to foreign class
 ## set enumeration
