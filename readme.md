@@ -10,7 +10,7 @@ db.php - code first orm
 - [Things to know before using ORM](#things-to-know-before-using-orm)
     - [What is MVC ? What is model view controller pattern?](#what-is-mvc--what-is-model-view-controller-pattern)
     - [How can I develop my project model with classes?](#how-can-i-develop-my-project-model-with-classes)
-    - [What is PHPDoc?](#what-is-phpdoc)
+    - [What is php doc comments?](#what-is-php-doc-comments)
     - [What is ORM ? What is Object Relational Mapper?](#what-is-orm--what-is-object-relational-mapper)
     - [Why do i have low salary as a php programmer?](#why-do-i-have-low-salary-as-a-php-programmer)
 - [Showcase](#showcase)
@@ -64,23 +64,9 @@ db.php - code first orm
 - [Class](#class)
     - [Best practices for declaring class](#best-practices-for-declaring-class)
     - [Set on create function](#set-on-create-function)
-- [Table](#table)
-    - [how class modifiers work](#how-class-modifiers-work)
-    - [set table engine type](#set-table-engine-type)
-    - [rename table](#rename-table)
-    - [set table database](#set-table-database)
-    - [set table link](#set-table-link)
-    - [set table charset](#set-table-charset)
-    - [link class to custom table name](#link-class-to-custom-table-name)
-    - [set prefix for table fields](#set-prefix-for-table-fields)
-    - [set default select order field(s)](#set-default-select-order-fields)
-    - [develope class for already existing table](#develope-class-for-already-existing-table)
-    - [set table cache level](#set-table-cache-level)
-    - [set table cache scope](#set-table-cache-scope)
-    - [ignore class while scanning namespace](#ignore-class-while-scanning-namespace)
-    - [deny insert, select, update or delete in table](#deny-insert-select-update-or-delete-in-table)
 - [Field](#field)
-    - [set variable data type](#set-variable-data-type)
+    - [how field attributes work](#how-field-attributes-work)
+    - [set property type](#set-property-type)
     - [set field type](#set-field-type)
     - [set property relation to foreign class](#set-property-relation-to-foreign-class)
     - [set enumeration](#set-enumeration)
@@ -97,6 +83,21 @@ db.php - code first orm
     - [set zerofill flag for field](#set-zerofill-flag-for-field)
     - [require field value for insert/update](#require-field-value-for-insertupdate)
     - [exclude field from insert/update](#exclude-field-from-insertupdate)
+- [Table](#table)
+    - [how class modifiers work](#how-class-modifiers-work)
+    - [set table engine type](#set-table-engine-type)
+    - [rename table](#rename-table)
+    - [set table database](#set-table-database)
+    - [set table link](#set-table-link)
+    - [set table charset](#set-table-charset)
+    - [link class to custom table name](#link-class-to-custom-table-name)
+    - [set prefix for table fields](#set-prefix-for-table-fields)
+    - [set default select order field(s)](#set-default-select-order-fields)
+    - [develope class for already existing table](#develope-class-for-already-existing-table)
+    - [set table cache level](#set-table-cache-level)
+    - [set table cache scope](#set-table-cache-scope)
+    - [ignore class while scanning namespace](#ignore-class-while-scanning-namespace)
+    - [deny insert, select, update or delete in table](#deny-insert-select-update-or-delete-in-table)
 - [Cache](#cache)
     - [cache user - cache table records on user level (default session)](#cache-user---cache-table-records-on-user-level-default-session)
     - [cache long - table records on server level (default apc_cache)](#cache-long---table-records-on-server-level-default-apc_cache)
@@ -352,8 +353,8 @@ What I try here is to give you an idea what and why can be placed in model. In e
 
 I assume you now know what is **model** and how to make it with **classes** and **namespaces**.
 
-## What is PHPDoc?
-It is official documentation form supported by native PHP API. With PHPDoc you can document your classes, properties and methods and other things not related to classes. For example:
+## What is php doc comments?
+It is official documentation form supported by native PHP API. With php doc comments you can document your classes, properties and methods and other things not related to classes. For example:
 
 ```php
 /**
@@ -362,22 +363,24 @@ It is official documentation form supported by native PHP API. With PHPDoc you c
 public $group;
 ```
 
-@var tells PHP that following property is type of class located in namespace user and called group (\user\group). Unlike regular comments in PHP, PHPDoc comments first line must begin with
+@var tells PHP that following property is type of class located in namespace user and called group (\user\group). Unlike regular comments in PHP, php doc comments first line must begin with
 
 ```php
 /**
 ```
 Must be followed with next lines containing special keywords which describe your subject to be documented. Line must begin with *.
 
-And PHPDoc comments section must be closed like regular comments section:
+And php doc comments section must be closed like regular comments section:
 
 ```php
 */
 ```
 
-Spaces tabs and other things does not matter. Only matters PHPDoc comment opening.
+Spaces tabs and other things does not matter. Only matters php doc comments comment opening.
 
-db.php uses PHPDoc comments to fetch additional informations about properties and classes.
+db.php uses php doc comments to fetch additional informations about properties and classes.
+
+Get more info at http://php.net/manual/en/reflectionclass.getdoccomment.php
 
 ## What is ORM ? What is Object Relational Mapper?
 In previous chapter we described classes in your model. Here we will copy only property declaration part of it:
@@ -1440,7 +1443,7 @@ else
 }
 
 ```
-*Note: Class handler always returns boolean value. True if save succeeded or false if failed. Along other reasons save might fail if you have denied update or insert for this table. You can deny insert or update with class PHPDoc modifiers or from $database->path->to->class->insert = true/false / $database->path->to->class->update = true/false.*
+*Note: Class handler always returns boolean value. True if save succeeded or false if failed. Along other reasons save might fail if you have denied update or insert for this table. You can deny insert or update with class php doc comments modifiers or from $database->path->to->class->insert = true/false / $database->path->to->class->update = true/false.*
 
 ## Force insert object to table
 ```php
@@ -1616,6 +1619,46 @@ class user
 }
 ```
 
+# Field
+## how field attributes work
+db.php uses php doc comments to gather additional information for property related fields. To set special attributes for real fields in which property values are stored (in database table record columns) we specify special keywords in property doc comments. See also php doc comments.
+
+For example if we want to make a property related field primary we write above it before property declaration a doc comment:
+`php
+/**
+* primary
+*/
+public $id;
+``
+
+Consider that first line of doc comments always begins with following three symbols: ```/**``` on separate line and ends with line ```*/"```. Any middle line begins with single ```*```.
+
+So for example if yo want to make a property field primary but string:
+```php
+/**
+* primary
+* @var string
+*/
+public $id;
+```
+
+## set property type
+## set field type
+## set property relation to foreign class
+## set enumeration
+## link property to custom field name
+## set length
+## set null
+## set primary field
+## set create field first
+## set create field after field
+## set lazy load
+## set date on insert/update
+## set default value for field
+## set unsigned flag for field
+## set zerofill flag for field
+## require field value for insert/update
+## exclude field from insert/update
 
 # Table
 ## how class modifiers work
@@ -1633,25 +1676,6 @@ class user
 ## ignore class while scanning namespace
 ## deny insert, select, update or delete in table
 
-# Field
-
-## set variable data type
-## set field type
-## set property relation to foreign class
-## set enumeration
-## link property to custom field name
-## set length
-## set null
-## set primary field
-## set create field first
-## set create field after field
-## set lazy load
-## set date on insert/update
-## set default value for field
-## set unsigned flag for field
-## set zerofill flag for field
-## require field value for insert/update
-## exclude field from insert/update
 
 # Cache
 
