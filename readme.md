@@ -1,4 +1,4 @@
-db.php - code first orm
+[!][http://icons.iconarchive.com/icons/custom-icon-design/flatastic-6/32/Sharpen-tool-icon.png] db.php - code first orm
 ================
 
 **Tip of the day: Rememmber tables are created autmatically with db.php (Based on your class definitions) and all work and no play makes a quick brown fox lazy dog.**
