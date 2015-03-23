@@ -7,6 +7,7 @@ db.php - code first orm
 
 <!-- MarkdownTOC -->
 
+- [Composer install](#composer-install)
 - [Things to know before using ORM](#things-to-know-before-using-orm)
     - [What is MVC ? What is model view controller pattern?](#what-is-mvc--what-is-model-view-controller-pattern)
     - [How can I develop my project model with classes?](#how-can-i-develop-my-project-model-with-classes)
@@ -159,6 +160,33 @@ db.php - code first orm
 
 <!-- /MarkdownTOC -->
 
+
+# Composer install
+```
+composer require hazardland/db:dev-master
+```
+
+db.php is single file and does not care for PSR so after installing with composer you should:
+
+```php
+include './vendor/hazardland/db/db.php';
+```
+
+Because autoload.php will not help here.
+
+
+To test your installation with mysql server run this code (change *test* to your database name, change *root* to your mysql user name, change *1234* to your mysql user password):
+
+```php
+$database = new \db\database ('mysql:host=127.0.0.1', 'test', 'root', '1234');
+
+$database->debug();
+$result = $database->link()->select ('show tables from mysql');
+foreach ($result as $row)
+{
+    \db\debug ($row);
+}
+```
 
 # Things to know before using ORM
 ## What is MVC ? What is model view controller pattern?
