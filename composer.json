@@ -1,0 +1,8 @@
+{
+    "name": "hazardland/db",
+    "require" : 
+    {
+        "php" : ">=5.4.21",
+        "ext-apcu" : "*"
+    },
+}
