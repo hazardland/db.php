@@ -15,7 +15,8 @@
     ],
     "require":
     {
-        "php": ">=5.4.21"
+        "php": ">=5.4.21",
+        "ext-apc": "*",
     },
     "autoload": {
         "files": ["db.php"]
