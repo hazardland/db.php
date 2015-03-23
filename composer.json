@@ -3,6 +3,6 @@
     "require":
     {
         "php": ">=5.4.21",
-        "ext-apcu": "*",
-    },
+        "ext-apcu": "*"
+    }
 }
