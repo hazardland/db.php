@@ -1,5 +1,18 @@
 {
     "name": "hazardland/db",
+    "type": "library",
+    "description": "php orm",
+    "keywords": ["orm","db","code","first"],
+    "homepage": "http://github.com/hazardland/db.php",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "hazardland",
+            "email": "hazardland@gmail.com",
+            "homepage": "hazardland.com",
+            "role": "Developer"
+        }
+    ],
     "require":
     {
         "php": ">=5.4.21",
