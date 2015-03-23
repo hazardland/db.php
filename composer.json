@@ -2,7 +2,7 @@
     "name": "hazardland/db",
     "type": "library",
     "description": "php orm",
-    "keywords": ["orm","db","code","first"],
+    "keywords": ["db.php","orm","db","code","first"],
     "homepage": "http://github.com/hazardland/db.php",
     "license": "MIT",
     "authors": [
