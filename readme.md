@@ -12,7 +12,7 @@ composer require hazardland/db:dev-master
 <!-- MarkdownTOC -->
 
 - [Things to know before using ORM](#things-to-know-before-using-orm)
-    - [What is MVC ? What is model view controller pattern?](#what-is-mvc--what-is-model-view-controller-pattern)
+    - [What is MVC? What is model view controller pattern?](#what-is-mvc-what-is-model-view-controller-pattern)
     - [How can I develop my project model with classes?](#how-can-i-develop-my-project-model-with-classes)
     - [What is php doc comments?](#what-is-php-doc-comments)
     - [What is ORM ? What is Object Relational Mapper?](#what-is-orm--what-is-object-relational-mapper)
@@ -164,7 +164,7 @@ composer require hazardland/db:dev-master
 <!-- /MarkdownTOC -->
 
 # Things to know before using ORM
-## What is MVC ? What is model view controller pattern?
+## What is MVC? What is model view controller pattern?
 
 **MVC** stands for **Model View Controller**. If you heard about it before but still dont know what it is you might be afraid of it.
 
