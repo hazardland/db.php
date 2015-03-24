@@ -4,7 +4,7 @@
 **Tip of the day: Rememmber tables are created autmatically with db.php (Based on your class definitions) and all work and no play makes a quick brown fox lazy dog.**
 
 ```
-composer require hazardland/db:dev-master
+composer require system/db:dev-master
 ```
 
 # Table of contents
