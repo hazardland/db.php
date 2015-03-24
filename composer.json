@@ -1,5 +1,5 @@
 {
-    "name": "hazardland/db",
+    "name": "system/db",
     "type": "library",
     "description": "php orm",
     "keywords": ["db.php","orm","db","code","first"],
