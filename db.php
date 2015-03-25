@@ -1052,6 +1052,10 @@
             }
             public function value ($field, $value)
             {
+                if ($value===null)
+                {
+                    debug('d');
+                }
                 return $this->field($field)."='".id($value)."'";
             }
             public function with ($field, $value)
@@ -1202,7 +1206,10 @@
                         }
                         else if ($field->value && is_object($field->class))
                         {
-                            $result->{$field->name} = @$field->class->newInstance();
+                            if (!is_object($result->{$field->name}))
+                            {
+                                $result->{$field->name} = @$field->class->newInstance();
+                            }
                             $result->{$field->name}->set ($row[$cell]);
                             $cell++;
                         }
@@ -2574,6 +2581,7 @@
                 $this->where = new where ();
                 $this->order = new order ();
                 $this->limit = new limit ();
+                $this->join = new join ();
             }
             public function where ($table)
             {
@@ -2763,7 +2771,7 @@
             {
                 if ($this->string!='')
                 {
-                    return " join ".$this->string." ";
+                    return " ".$this->string." ";
                 }
                 return "";
             }
