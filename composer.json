@@ -1,8 +1,8 @@
 {
-    "name": "system/db",
+    "name": "hazardland/db",
     "type": "library",
     "description": "php orm",
-    "keywords": ["db.php","orm","db","system"],
+    "keywords": ["db.php","orm","db"],
     "homepage": "http://github.com/hazardland/db.php",
     "license": "MIT",
     "authors": [
