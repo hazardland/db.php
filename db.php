@@ -2250,7 +2250,6 @@
                                 foreach ($locales as $locale)
                                 {
                                     $query = "alter table ".$table->name()." change ".($field->rename ? ("`".field($table->prefix,$field->rename,$locale)."`") : $table->name($field,$locale,true))." ".$table->name($field,$locale,true)." ".$field->type()." ".$field->extra();
-                                    //debug ($query);
                                     if ($file)
                                     {
                                         $log .= $query.";\n";
