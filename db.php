@@ -2581,6 +2581,7 @@
                 $this->order = new order ();
                 $this->limit = new limit ();
                 $this->join = new join ();
+                $this->group = new group ();
             }
             public function where ($table)
             {
@@ -2678,7 +2679,14 @@
             }
             public function pager ($page, $count=50)
             {
-                $this->pager = new pager ($page, $count);
+                if (is_object($page))
+                {
+                    $this->pager = $page;
+                }
+                else
+                {
+                    $this->pager = new pager ($page, $count);
+                }
                 $this->limit = &$this->pager;
             }
             public function hash ($table)
@@ -2750,7 +2758,7 @@
             {
                 if ($this->string!='')
                 {
-                    return " group ".$this->string." ";
+                    return " group by ".$this->string." ";
                 }
                 return "";
             }
