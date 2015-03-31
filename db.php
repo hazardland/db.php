@@ -2790,6 +2790,7 @@
 
         class order
         {
+            private $table;
             private $items = array();
             private $field;
             private $method;
@@ -2821,8 +2822,20 @@
             {
                 $this->method->mode ($method);
             }
-            public function result (table &$table)
+            public function table (table &$table)
             {
+                $this->table = &$table;
+            }
+            public function result (table &$table=null)
+            {
+                if ($table===null && $this->table)
+                {
+                    $table = &$this->table;
+                }
+                if ($table===null)
+                {
+                    return;
+                }
                 if (is_array($this->items) && $this->items)
                 {
                     $result = " order by ";
@@ -2837,6 +2850,14 @@
                     $database = $table->database();
                     return " order by ".$table->name($this->field,$database->locale())." ".$this->method->result($table)." ";
                 }
+            }
+            public function filled ()
+            {
+                if ($this->field==null && !$this->items)
+                {
+                    return false;
+                }
+                return true;
             }
         }
 
