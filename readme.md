@@ -15,7 +15,7 @@ composer require hazardland/db:dev-master
     - [What is MVC? What is model view controller pattern?](#what-is-mvc-what-is-model-view-controller-pattern)
     - [How can I develop my project model with classes?](#how-can-i-develop-my-project-model-with-classes)
     - [What is php doc comments?](#what-is-php-doc-comments)
-    - [What is ORM ? What is Object Relational Mapper?](#what-is-orm--what-is-object-relational-mapper)
+    - [What is ORM? What is Object Relational Mapper?](#what-is-orm-what-is-object-relational-mapper)
     - [Why do i have low salary as a php programmer?](#why-do-i-have-low-salary-as-a-php-programmer)
 - [Showcase](#showcase)
 - [Installation](#installation)
@@ -153,7 +153,6 @@ composer require hazardland/db:dev-master
     - [class \db\limit](#class-\db\limit)
     - [class \db\pager](#class-\db\pager)
     - [abstract class \db\cache](#abstract-class-\db\cache)
-    - [class \db\limit](#class-\db\limit-1)
     - [class \db\scope](#class-\db\scope)
     - [class \db\load extends \db\cache](#class-\db\load-extends-\db\cache)
     - [class \db\user extends \db\cache](#class-\db\user-extends-\db\cache)
@@ -195,7 +194,7 @@ You have successfully purchased {product_name}
 
 This are two stupid static html files and we can totally consider them as **views**. In {product_name} there goes actual product name. When user clicks "Buy product" we will have page and product variables incoming in our script. Congratulations you know what views are !
 
-But how to use that views in actual task ? Here we need a controller. Let us assume we are so stupid we build our entire site php script in only index.php?
+But how to use that views in actual task? Here we need a controller. Let us assume we are so stupid we build our entire site php script in only index.php?
 
 #### index.php
 ```php
@@ -239,7 +238,7 @@ else if ($_REQUEST['page']=='purchase')
 }
 ```
 
-So this is **Controller**. If you look closer it contains two sections. They are almost identical. One parses page "product" and another parses page "purchase". That sections are almost identical except in section "purchase" user buys a product while in section "product" user views product page. View variables like {product_name} and {product_id} are replaced using simple str_replace function. Views files are loaded simply by file_get_contents. And line $product->buy() actually does what it says. But where is that method code called **buy** ?
+So this is **Controller**. If you look closer it contains two sections. They are almost identical. One parses page "product" and another parses page "purchase". That sections are almost identical except in section "purchase" user buys a product while in section "product" user views product page. View variables like {product_name} and {product_id} are replaced using simple str_replace function. Views files are loaded simply by file_get_contents. And line $product->buy() actually does what it says. But where is that method code called **buy**?
 
 #### shop.php
 ```
@@ -385,7 +384,7 @@ db.php uses php doc comments to fetch additional informations about properties a
 
 Get more info at http://php.net/manual/en/reflectionclass.getdoccomment.php
 
-## What is ORM ? What is Object Relational Mapper?
+## What is ORM? What is Object Relational Mapper?
 In previous chapter we described classes in your model. Here we will copy only property declaration part of it:
 
 ```php
@@ -640,7 +639,7 @@ $database = new \db\database('mysql:host=127.0.0.1', 'my_db', 'root', '1234');
 ```
 
 **hostname**
-Is first parameter confusing ? It is actually a data source name. db.php uses **PDO** as default link provider so first parameter is actually PDO data source name string.
+Is first parameter confusing? It is actually a data source name. db.php uses **PDO** as default link provider so first parameter is actually PDO data source name string.
 
 **database**
 Second parameter is **database name** and used by **db.php** to locate your tables on this connection.
@@ -1785,7 +1784,6 @@ But also if specified class extends abstract class \db\value than no relation is
 ## class \db\limit
 ## class \db\pager
 ## abstract class \db\cache
-## class \db\limit
 ## class \db\scope
 ## class \db\load extends \db\cache
 ## class \db\user extends \db\cache
