@@ -180,7 +180,7 @@ Imagine a task. We must build a product page where user will purchase product.
 We have two html files: product.html and success.html
 
 #### product.html
-```html
+```php
 <h1>{product_name}</h1>
 <a href="{project_link}?page=purchase&product={product_id}">
     Buy product
@@ -188,7 +188,7 @@ We have two html files: product.html and success.html
 ```
 
 #### purchase.html
-```html
+```php
 You have successfully purchased {product_name}
 ```
 
@@ -453,7 +453,7 @@ Nothing great can be done without it.
 
 # Showcase
 
-**Imagine you have a simple user class namespace in 'user.php'**
+Imagine you have a simple user class namespace in 'user.php'
 
 ```php
 namespace user;
@@ -496,7 +496,7 @@ class group
 }
 ```
 
-**And imagine you have simple 'action.php'**
+And imagine you have simple 'action.php'
 ```php
 
     include './db.php';
