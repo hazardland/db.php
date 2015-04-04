@@ -2467,14 +2467,6 @@
                 }
                 return false;
             }
-            public function base (&$object)
-            {
-                if (is_string($object))
-                {
-                    return $this->{before('\\',$object)};
-                }
-                return $this->{before('\\',get_class($object))};
-            }
         }
 
         abstract class value

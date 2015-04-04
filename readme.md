@@ -20,8 +20,8 @@ composer require hazardland/db:dev-master
 - [Showcase](#showcase)
 - [Installation](#installation)
     - [Include](#include)
-    - [apc_cache for php <= 5.4.x](#apc_cache-for-php--54x)
-    - [apc_cache for php >= 5.5.x](#apc_cache-for-php--55x)
+    - [apc_cache for php 5.4.x](#apc_cache-for-php-54x)
+    - [apc_cache for php 5.5.x](#apc_cache-for-php-55x)
     - [PHP Notices](#php-notices)
 - [Connect](#connect)
     - [Basic architecture](#basic-architecture)
@@ -103,9 +103,9 @@ composer require hazardland/db:dev-master
     - [ignore class while scanning namespace](#ignore-class-while-scanning-namespace)
     - [deny insert, select, update or delete in table](#deny-insert-select-update-or-delete-in-table)
 - [Cache](#cache)
-    - [cache user - cache table records on user level (default session)](#cache-user---cache-table-records-on-user-level-default-session)
-    - [cache long - table records on server level (default apc_cache)](#cache-long---table-records-on-server-level-default-apc_cache)
-    - [cache temp - table records for script runtime (default memory)](#cache-temp---table-records-for-script-runtime-default-memory)
+    - [cache user: cache table records on user level (default session)](#cache-user-cache-table-records-on-user-level-default-session)
+    - [cache long: table records on server level (default apc_cache)](#cache-long-table-records-on-server-level-default-apc_cache)
+    - [cache temp: table records for script runtime (default memory)](#cache-temp-table-records-for-script-runtime-default-memory)
     - [develop and plug custom cache engine for desired cache level](#develop-and-plug-custom-cache-engine-for-desired-cache-level)
 - [Localization](#localization)
     - [define local languages](#define-local-languages)
@@ -119,46 +119,46 @@ composer require hazardland/db:dev-master
 - [Time](#time)
     - [How to render individual time for user with one date field value](#how-to-render-individual-time-for-user-with-one-date-field-value)
 - [Functions](#functions)
-    - [function \db\id](#function-\db\id)
-    - [function \db\string](#function-\db\string)
-    - [funciton \db\time](#funciton-\db\time)
-    - [funciton \db\date](#funciton-\db\date)
-    - [funciton \db\now](#funciton-\db\now)
-    - [function \db\debug](#function-\db\debug)
-    - [function \db\cache](#function-\db\cache)
-    - [function \db\type](#function-\db\type)
-    - [function \db\field](#function-\db\field)
-    - [function \db\scope](#function-\db\scope)
-    - [function \db\enum](#function-\db\enum)
-    - [function \db\round](#function-\db\round)
-    - [function \db\by](#function-\db\by)
-    - [function \db\in](#function-\db\in)
+    - [function id](#function-id)
+    - [function string](#function-string)
+    - [funciton time](#funciton-time)
+    - [funciton date](#funciton-date)
+    - [funciton now](#funciton-now)
+    - [function debug](#function-debug)
+    - [function cache](#function-cache)
+    - [function type](#function-type)
+    - [function field](#function-field)
+    - [function scope](#function-scope)
+    - [function enum](#function-enum)
+    - [function round](#function-round)
+    - [function by](#function-by)
+    - [function in](#function-in)
 - [Classes](#classes)
-    - [class \db\link](#class-\db\link)
-    - [class \db\field](#class-\db\field)
-    - [class \db\table](#class-\db\table)
-    - [class \db\database](#class-\db\database)
-    - [abstract class \db\value](#abstract-class-\db\value)
-    - [class \db\flag](#class-\db\flag)
-    - [class \db\type](#class-\db\type)
-    - [class \db\action](#class-\db\action)
-    - [class \db\event](#class-\db\event)
-    - [class \db\config](#class-\db\config)
-    - [class \db\query](#class-\db\query)
-    - [class \db\where](#class-\db\where)
-    - [class \db\group](#class-\db\group)
-    - [class \db\join](#class-\db\join)
-    - [class \db\order](#class-\db\order)
-    - [class \db\method](#class-\db\method)
-    - [class \db\limit](#class-\db\limit)
-    - [class \db\pager](#class-\db\pager)
-    - [abstract class \db\cache](#abstract-class-\db\cache)
-    - [class \db\scope](#class-\db\scope)
-    - [class \db\load extends \db\cache](#class-\db\load-extends-\db\cache)
-    - [class \db\user extends \db\cache](#class-\db\user-extends-\db\cache)
-    - [class \db\long extends \db\cache](#class-\db\long-extends-\db\cache)
-    - [class \db\locale](#class-\db\locale)
-    - [class \db\by](#class-\db\by)
+    - [class link](#class-link)
+    - [class field](#class-field)
+    - [class table](#class-table)
+    - [class database](#class-database)
+    - [abstract class value](#abstract-class-value)
+    - [class flag](#class-flag)
+    - [class type](#class-type)
+    - [class action](#class-action)
+    - [class event](#class-event)
+    - [class config](#class-config)
+    - [class query](#class-query)
+    - [class where](#class-where)
+    - [class group](#class-group)
+    - [class join](#class-join)
+    - [class order](#class-order)
+    - [class method](#class-method)
+    - [class limit](#class-limit)
+    - [class pager](#class-pager)
+    - [abstract class cache](#abstract-class-cache)
+    - [class scope](#class-scope)
+    - [class load extends cache](#class-load-extends-cache)
+    - [class user extends cache](#class-user-extends-cache)
+    - [class long extends cache](#class-long-extends-cache)
+    - [class locale](#class-locale)
+    - [class by](#class-by)
 
 <!-- /MarkdownTOC -->
 
@@ -561,7 +561,7 @@ The only file you need is **db.php** iself. Just include db.php in your project 
 ```php
 include './db.php';
 ```
-## apc_cache for php <= 5.4.x
+## apc_cache for php 5.4.x
 
 **db.php** requires **apc_cache** module's user variable caching functions by default. You can also override default caching engine but it is subject for further reading. A link for apc_cache installation instructions is here http://php.net/manual/en/apc.installation.php. On windows you just need to download proper php_apc.dll and enable it in php.ini by uncommenting line extension=php_apc.dll
 
@@ -577,7 +577,7 @@ make test
 make install
 ```
 
-## apc_cache for php >= 5.5.x
+## apc_cache for php 5.5.x
 
 apc_cache has two kind of functionality one for storing precompiled script byte code in shared memory and second for caching user variables. As from PHP version 5.5.x php comes with built in module for script byte code caching named OPcache, there is no point for developing apc_cache for new versions of php. Instead they initialized new module named APCu and the only thing it does is stores user variables in cache with same old functions.
 
@@ -1727,9 +1727,9 @@ But also if specified class extends abstract class \db\value than no relation is
 
 # Cache
 
-## cache user - cache table records on user level (default session)
-## cache long - table records on server level (default apc_cache)
-## cache temp - table records for script runtime (default memory)
+## cache user: cache table records on user level (default session)
+## cache long: table records on server level (default apc_cache)
+## cache temp: table records for script runtime (default memory)
 ## develop and plug custom cache engine for desired cache level
 
 # Localization
@@ -1749,44 +1749,44 @@ But also if specified class extends abstract class \db\value than no relation is
 
 # Functions
 
-## function \db\id
-## function \db\string
-## funciton \db\time
-## funciton \db\date
-## funciton \db\now
-## function \db\debug
-## function \db\cache
-## function \db\type
-## function \db\field
-## function \db\scope
-## function \db\enum
-## function \db\round
-## function \db\by
-## function \db\in
+## function id
+## function string
+## funciton time
+## funciton date
+## funciton now
+## function debug
+## function cache
+## function type
+## function field
+## function scope
+## function enum
+## function round
+## function by
+## function in
 
 # Classes
-## class \db\link
-## class \db\field
-## class \db\table
-## class \db\database
-## abstract class \db\value
-## class \db\flag
-## class \db\type
-## class \db\action
-## class \db\event
-## class \db\config
-## class \db\query
-## class \db\where
-## class \db\group
-## class \db\join
-## class \db\order
-## class \db\method
-## class \db\limit
-## class \db\pager
-## abstract class \db\cache
-## class \db\scope
-## class \db\load extends \db\cache
-## class \db\user extends \db\cache
-## class \db\long extends \db\cache
-## class \db\locale
-## class \db\by
+## class link
+## class field
+## class table
+## class database
+## abstract class value
+## class flag
+## class type
+## class action
+## class event
+## class config
+## class query
+## class where
+## class group
+## class join
+## class order
+## class method
+## class limit
+## class pager
+## abstract class cache
+## class scope
+## class load extends cache
+## class user extends cache
+## class long extends cache
+## class locale
+## class by
