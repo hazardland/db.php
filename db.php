@@ -60,7 +60,7 @@
          * charset [utf8] (table default charset)
          * engine [myisam]
          * rename [original_name] (rename table 'original_name' to the class current name)
-         * cache [none|load|user|long] (select your cache type, long=\apc_cache by default, user=session, load=per_scrip_life)
+         * cache [none|load|user|long] (select your cache type, long=\apcu by default, user=session, load=per_scrip_life)
          * scope [project|solution] (select your cache scope, used by system.php framework)
          * unique [name] (under developement, define simple unique index)
          * unique [search id, name] (under developement, define compound unique index)
@@ -3234,25 +3234,43 @@
         {
             function store ($name, $value)
             {
-                if (is_bool($value))
+                if (function_exists('\apc_store'))
                 {
-                    \apc_delete ($name);
+                    if (is_bool($value))
+                    {
+                        \apc_delete ($name);
+                    }
+                    else
+                    {
+                        \apc_store ($name, $value);
+                    }
                 }
                 else
                 {
-                    \apc_store ($name, $value);
+                    parent::store ($name,$value);
                 }
-                // debug ($name);
-                // debug ($value);
-                //exit;
             }
             function fetch ($name)
             {
-                return \apc_fetch ($name);
+                if (function_exists('\apc_fetch'))
+                {
+                    return \apc_fetch ($name);
+                }
+                else
+                {
+                    return parent::fetch($name);
+                }
             }
             function clear ()
             {
-                \apc_clear_cache ('user');
+                if (function_exists('\apc_clear_cache'))
+                {
+                    \apc_clear_cache ('user');
+                }
+                else
+                {
+                    parent::clear();
+                }
             }
         }
 
@@ -3607,53 +3625,6 @@
                     return md5($system->solution->path.'|')."|";
                 }
             }
-        }
-
-        function cache ($table, $object, $delete=false)
-        {
-            global $database;
-            if (is_object($object))
-            {
-                if (!$database->save ($object))
-                {
-                    return;
-                }
-                $id = \db\id($object,$table);
-                $flush = true;
-            }
-            else if ($clean)
-            {
-                if ($table->delete($object))
-                {
-                    \apc_delete (id($object,$table));
-                }
-                return;
-            }
-            else
-            {
-                $id = id ($object,$table);
-            }
-            if (!$id)
-            {
-                return;
-            }
-            $key = 'database|'.$table->class->getName().'|'.$id;
-            if ($flush || !\apc_exists($key))
-            {
-                $result = $table->load($id);
-                if (!$result)
-                {
-                    \apc_delete ($key);
-                    return $id;
-                }
-                \apc_store ($key, $result);
-                return $result;
-            }
-            else if (\apc_exists($key))
-            {
-                return \apc_fetch ($key);
-            }
-            return $id;
         }
 
         function enum ()
