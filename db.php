@@ -2534,6 +2534,80 @@
 
         }
 
+        class string implements \ArrayAccess,\IteratorAggregate
+        {
+            public $items = array ();
+            public $value;
+            public function __construct ($value)
+            {
+                $this->value = $value;
+            }
+            public function define ($name, $value)
+            {
+                $this->items[$name] = $value;
+            }
+            public function render ()
+            {
+                if (!$this->items)
+                {
+                    return $this->value;
+                }
+                if ($this->value=='')
+                {
+                    return '';
+                }
+                $result = $this->value;
+                foreach ($this->items as $name=>$value)
+                {
+                    if (is_object($value) && type($value)=='.db.string')
+                    {
+                        $result = str_replace ('{'.$name.'}', $value->render(), $result);
+                    }
+                    else if (is_object($value) && method_exists($value, '__toString'))
+                    {
+                        $value = strval ($value);
+                        $result = str_replace ('{'.$name.'}', id($value), $result);
+                    }
+                    else
+                    {
+                        $result = str_replace ('{'.$name.'}', id($value), $result);
+                    }
+                }
+                return preg_replace ("/{[A-Za-z0-9_\]\[]*}/", "", $result);
+            }
+            public function __toString ()
+            {
+                return $this->render();
+            }
+            public function offsetSet ($key, $value)
+            {
+                if (is_null($key))
+                {
+                    $this->items[] = $value;
+                }
+                else
+                {
+                    $this->items[$key] = $value;
+                }
+            }
+            public function offsetExists ($key)
+            {
+                return isset($this->items[$key]);
+            }
+            public function offsetUnset ($key)
+            {
+                unset($this->items[$key]);
+            }
+            public function offsetGet ($key)
+            {
+                return isset($this->items[$key])?$this->items[$key]:null;
+            }
+            public function getIterator()
+            {
+                return new \ArrayIterator ($this->items);
+            }
+        }
+
         class query
         {
             const select = 1;
@@ -3090,7 +3164,7 @@
             {
                 return $this->from;
             }
-            public function result (table &$table)
+            public function result ($table=null)
             {
                 if (!$this->count)
                 {
@@ -3101,6 +3175,10 @@
                     return " limit ".intval($this->count)." ";
                 }
                 return " limit ".intval($this->from()).",".intval($this->count())." ";
+            }
+            public function __toString ()
+            {
+                return $this->result ();
             }
         }
 

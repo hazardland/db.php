@@ -177,22 +177,22 @@ View is very simple thing. Dont get anything what you read here literally I m tr
 
 Imagine a task. We must build a product page where user will purchase product.
 
-We have two html files: product.html and success.html
+We have two html files: product.html and purchase.html
 
 #### product.html
 ```php
-<h1>{product_name}</h1>
-<a href="{project_link}?page=purchase&product={product_id}">
+<h1>[product_name]</h1>
+<a href="[project_link]?page=purchase&product=[product_id]">
     Buy product
 </a>
 ```
 
 #### purchase.html
 ```php
-You have successfully purchased {product_name}
+You have successfully purchased [product_name]
 ```
 
-This are two stupid static html files and we can totally consider them as **views**. In {product_name} there goes actual product name. When user clicks "Buy product" we will have page and product variables incoming in our script. Congratulations you know what views are !
+This are two stupid static html files and we can totally consider them as **views**. In [product_name] goes an actual product name. When user clicks "Buy product" we will have page and product variables incoming in our script. Congratulations you know what views are !
 
 But how to use that views in actual task? Here we need a controller. Let us assume we are so stupid we build our entire site php script in only index.php?
 
@@ -210,7 +210,7 @@ if ($_REQUEST['page']=='product')
     $view = file_get_contents ('./product.html');
     foreach ($output as $field = > $value)
     {
-        $view = str_replace ('{'.$field.'}', $value);
+        $view = str_replace ('['.$field.']', $value);
     }
     echo $view;
     exit;
@@ -230,7 +230,7 @@ else if ($_REQUEST['page']=='purchase')
     $view = file_get_contents ('./purchase.html');
     foreach ($output as $field = > $value)
     {
-        $view = str_replace ('{'.$field.'}', $value);
+        $view = str_replace ('['.$field.']', $value);
     }
     echo $view;
     exit;
@@ -238,7 +238,7 @@ else if ($_REQUEST['page']=='purchase')
 }
 ```
 
-So this is **Controller**. If you look closer it contains two sections. They are almost identical. One parses page "product" and another parses page "purchase". That sections are almost identical except in section "purchase" user buys a product while in section "product" user views product page. View variables like {product_name} and {product_id} are replaced using simple str_replace function. Views files are loaded simply by file_get_contents. And line $product->buy() actually does what it says. But where is that method code called **buy**?
+So this is **Controller**. If you look closer it contains two sections. They are almost identical. One parses page "product" and another parses page "purchase". That sections are almost identical except in section "purchase" user buys a product while in section "product" user views product page. View variables like [product_name] and [product_id] are replaced using simple str_replace function. Views files are loaded simply by file_get_contents. And line $product->buy() actually does what it says. But where is that method code called **buy**?
 
 #### shop.php
 ```
@@ -356,7 +356,7 @@ What I try here is to give you an idea what and why can be placed in model. In e
 I assume you now know what is **model** and how to make it with **classes** and **namespaces**.
 
 ## What is php doc comments?
-It is official documentation form supported by native PHP API. With php doc comments you can document your classes, properties and methods and other things not related to classes. For example:
+It is official code documentation form supported by native PHP API. With php doc comments you can document your classes, properties and methods and other things not related to classes. For example:
 
 ```php
 /**
@@ -365,22 +365,28 @@ It is official documentation form supported by native PHP API. With php doc comm
 public $group;
 ```
 
-@var tells PHP that following property is type of class located in namespace user and called group (\user\group). Unlike regular comments in PHP, php doc comments first line must begin with
+PHP fetches this comment section (which begins with ```/**``` line and ends with line ```*/```) as ```public $group``` property documentation. This documentation can be accessed later using php reflection class. There are couple of standard keywords which can be used inside this doc comments. These keywords are used by various php IDEs and by other projects like phpdoc.
+
+*More information about accessing doc comments with php can be seen at [ReflectionProperty::getDocComment](http://php.net/manual/en/reflectionproperty.getdoccomment.php) and at [ReflectionClass::getDocComment](http://php.net/manual/en/reflectionclass.getdoccomment.php).*
+
+For example ```@var \user\group``` tells that following property is type of class located in namespace user and called group (\user\group). Unlike regular comments in PHP, php doc comments first line must begin with:
 
 ```php
 /**
 ```
-Must be followed with next lines containing special keywords which describe your subject to be documented. Line must begin with *.
-
+Must be followed with next lines containing special keywords. These lines must begin with:
+```php
+*
+```
 And php doc comments section must be closed like regular comments section:
 
 ```php
 */
 ```
 
-Spaces tabs and other things does not matter. Only matters php doc comments comment opening.
+Spaces tabs and other things does not matter. Indeed only matters php doc comments comment opening.
 
-db.php uses php doc comments to fetch additional informations about properties and classes.
+db.php uses php doc comments to extract additional informations about properties and classes.
 
 Get more info at http://php.net/manual/en/reflectionclass.getdoccomment.php
 
