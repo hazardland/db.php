@@ -18,6 +18,7 @@ composer require hazardland/db:dev-master
     - [What is ORM? What is Object Relational Mapper?](#what-is-orm-what-is-object-relational-mapper)
     - [Why do i have low salary as a php programmer?](#why-do-i-have-low-salary-as-a-php-programmer)
 - [Showcase](#showcase)
+    - [Basic usage](#basic-usage)
 - [Installation](#installation)
     - [Include](#include)
     - [apc_cache for php 5.4.x](#apc_cache-for-php-54x)
@@ -65,6 +66,7 @@ composer require hazardland/db:dev-master
     - [Delete array of objects or ids](#delete-array-of-objects-or-ids)
     - [Delete by query from table](#delete-by-query-from-table)
 - [Debug](#debug)
+    - [Query debug](#query-debug)
 - [Class](#class)
     - [Best practices for declaring class](#best-practices-for-declaring-class)
     - [Set on create function](#set-on-create-function)
@@ -458,6 +460,7 @@ Because you dont use classes in your model or you dont have model in your projec
 Nothing great can be done without it.
 
 # Showcase
+## Basic usage
 
 Imagine you have a simple user class namespace in 'user.php'
 
@@ -569,7 +572,7 @@ include './db.php';
 ```
 ## apc_cache for php 5.4.x
 
-**db.php** requires **apc_cache** module's user variable caching functions by default. You can also override default caching engine but it is subject for further reading. A link for apc_cache installation instructions is here http://php.net/manual/en/apc.installation.php. On windows you just need to download proper php_apc.dll and enable it in php.ini by uncommenting line extension=php_apc.dll
+**db.php** recommends **apc_cache** module's user variable caching functions. If apcu is available than db.php uses it to store cache values by default. You can also override default caching engine but it is subject for further reading. A link for apc_cache installation instructions is here http://php.net/manual/en/apc.installation.php. On windows you just need to download proper php_apc.dll and enable it in php.ini by uncommenting line extension=php_apc.dll
 
 In linux it is a bit difficult but usually you will and up with this commands:
 
@@ -609,7 +612,6 @@ Where x86 means 32 bit and x64 means 64 bit
 Copy to dll file contained in archive file to php extensions directory, by default it is php/ext and add line extension=php_apc.dll to php.ini
 
 **For Linux:** show the world you are true linux power user, compile APCu by yourself.
-
 
 ## PHP Notices
 For some real reasons **db.php** generates notice level errors. If you have not restricted notices in error reporting section in your php.ini file you can set it manually on runtime like:
@@ -1579,6 +1581,7 @@ $database->path->to->class->delete (\db\query $query);
 Delete takes typical query as a parameter but for the moment use only query->where property in formating final delete query. See also [Query where](#query-where).
 
 # Debug
+## Query debug
 To fast debug all queries from the point use:
 ```php
 $database->debug (true); //true is default parameter
