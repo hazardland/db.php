@@ -71,20 +71,20 @@ composer require hazardland/db:dev-master
 - [Field](#field)
     - [How field attributes work](#how-field-attributes-work)
     - [Set property type](#set-property-type)
-    - [set field type](#set-field-type)
-    - [set property relation to foreign class](#set-property-relation-to-foreign-class)
-    - [set enumeration](#set-enumeration)
-    - [link property to custom field name](#link-property-to-custom-field-name)
-    - [set length](#set-length)
-    - [set null](#set-null)
-    - [set primary field](#set-primary-field)
+    - [Set table field type](#set-table-field-type)
+    - [Set table field length](#set-table-field-length)
+    - [Set table field default value](#set-table-field-default-value)
+    - [Define property field as primary field](#define-property-field-as-primary-field)
+    - [Set relation](#set-relation)
+    - [Set enumeration](#set-enumeration)
+    - [Implement custom value type](#implement-custom-value-type)
+    - [Map property to custom field name](#map-property-to-custom-field-name)
+    - [Set null](#set-null)
+    - [Set unsigned](#set-unsigned)
+    - [Set zerofill](#set-zerofill)
+    - [Set date on insert on update](#set-date-on-insert-on-update)
     - [set create field first](#set-create-field-first)
     - [set create field after field](#set-create-field-after-field)
-    - [set lazy load](#set-lazy-load)
-    - [set date on insert/update](#set-date-on-insertupdate)
-    - [set default value for field](#set-default-value-for-field)
-    - [set unsigned flag for field](#set-unsigned-flag-for-field)
-    - [set zerofill flag for field](#set-zerofill-flag-for-field)
     - [require field value for insert/update](#require-field-value-for-insertupdate)
     - [exclude field from insert/update](#exclude-field-from-insertupdate)
 - [Table](#table)
@@ -1697,20 +1697,552 @@ This means property group represents instance of \user\group. In case class spec
 
 But also if specified class extends abstract class \db\value than no relation is set instead it is treated as custom value type and its field type is set to string by default and custom value types are subjects of further reading.
 
-## set field type
-## set property relation to foreign class
-## set enumeration
-## link property to custom field name
-## set length
-## set null
-## set primary field
+## Set table field type
+If you want that your table field had other type than property type offers by deault you can achieve that by keyword type:
+
+```php
+/**
+* type your_sql_field_type_statement
+*/
+```
+
+For example:
+
+```php
+/**
+* type bigint
+*/
+```
+
+db.php first checks if value for keyword type referrences to a db.php basic type (one from integer,string,float,bool\boolean,binary,date,time) or if type value represents class name if after negative result it uses type keyword value to a property field column type.
+
+*Remember that property type and field type(or column type) are different things. Property type defines runtime type for your class property value and field type defines field type in your database table.*
+
+## Set table field length
+
+Defining length for your property related table field is simple:
+
+```php
+/**
+* length your_sql_length_statement
+*/
+public $name;
+```
+
+For example a property for hero level in dota 2:
+
+```php
+/**
+* type smallint
+* length 2
+* unsigned
+* default 1
+* @var integer
+*/
+public $level;
+```
+
+0r if field type is double
+
+```php
+/**
+* length 10,2
+* type double
+* @var float
+*/
+public $scale;
+```
+
+## Set table field default value
+
+Usage:
+```php
+/**
+* default your_sql_default_statement
+*/
+```
+
+Defining default for time:
+```php
+/**
+* default 0000-00-00 00:00:00
+* @var time
+*/
+public $update;
+```
+Defining default value as ```NULL```
+```php
+/**
+* default null
+* @var time
+*/
+```
+## Define property field as primary field
+
+Field is set as primary field by just specfying primary keyword to its specific property.
+
+If you do not mark any property as primary in your class than field of property named as id will became primary. If no property with name id is found in class then first ever property field in class will became primary.
+
+If field is primary but no property type data or field type data is provided: Then if field name is id field data type will became integer.
+
+So this:
+```php
+class something
+{
+    /**
+    * primary
+    */
+    public $id;
+
+....
+````
+Table field id will became primary auto_increment integer.
+
+Has same effect as this (as far as id is first property in class definition):
+```php
+class something
+{
+    public $id;
+
+....
+```
+Table field id will became primary auto_increment integer.
+
+
+But there:
+```php
+class currency
+{
+    public $code;
+
+....
+```
+Table field code will became primary char and class property code will became type string.
+
+If you want that your class property field id was char:
+```php
+class something
+{
+    /**
+    * primary
+    * @var string
+    */
+    public $id;
+
+....
+```
+
+## Set relation
+
+Relation in orm means that one property of class represents another object of class. For example:
+
+```php
+namespace shop
+{
+    class cart
+    {
+        public $id;
+        /**
+        * @var \shop\product
+        */
+        public $product;
+        public function __construct ($product=null)
+        {
+            $this->product = $product;
+        }
+    }
+
+    class product
+    {
+        public $id;
+        public $title;
+        public function __construct ($title=null)
+        {
+            $this->title = $title;
+        }
+    }
+}
+```
+
+In this example we have two classes. ```\shop\cart``` has property product. ```@var``` keyword value of product property can specify which class will represent that property in this case it will represent ```\shop\product```.
+
+So let us create product:
+```php
+$product = $database->save (new \shop\product('Apple'));
+```
+
+And create cart item with this product:
+```php
+$cart = new \shop\cart ($product);
+```
+
+If we later load that cart item:
+```php
+$cart = $database->shop->cart->load (1);
+
+echo $cart->product->title;
+```
+It will output Apple
+
+Interested how this 2 records look in table?
+
+Products table:
+```php
+shop_product
+----------------------------
+id | title
+----------------------------
+1  | Apple
+```
+
+Carts table:
+```php
+shop_cart
+----------------------------
+id | product
+----------------------------
+1  | 1
+```
+
+By default related property field type is integer. But if the class you are relating has primary property not integer, for example string then you have to set also type to your related property field:
+
+If we have:
+```php
+class currency
+{
+    /**
+    * primary
+    * length 3
+    * @var string
+    */
+    public $code;
+}
+```
+
+And if we want to relate to it we must make related field char(3) as currency id field is:
+```php
+class cost
+{
+    public $id;
+    /**
+    * type char
+    * length 3
+    * @var currency
+    */
+    public $currency;
+    public $value;
+}
+```
+
+## Set enumeration
+
+Enumeration is additional attribute to [relation](#set-relation). As without it regular relation relates one object to one other object. With enumerated relation many objects can be related to one object.
+
+
+Let us extend regular [relation example](#set-relation). Imagine we have product class and we want to put products in cart.
+```php
+class product
+{
+    public $id;
+    public $title;
+}
+```
+
+And we have a cart class:
+```php
+class cart
+{
+    public $id;
+    /**
+    * @var product
+    */
+    public $product;
+}
+```
+This is regular relation and in this case we have ```$cart->product->title``` for example. But as we add ```enum``` as product property attribute:
+
+```php
+class cart
+{
+    public $id;
+    /**
+    * enum
+    * @var product
+    */
+    public $product;
+}
+```
+
+Than we will have:
+```php
+$cart->product[1]->title;
+```
+Where key of an enumerated array represents id of related object (id of product).
+
+And how it is saved in table?
+
+Products table:
+```php
+shop_product
+----------------------------
+id | title
+----------------------------
+1  | Apple
+2  | Banana
+```
+
+Carts table:
+```php
+shop_cart
+----------------------------
+id | product
+----------------------------
+1  | |1|2|
+```
+
+By default enumerated property objects are loaded with single query on object load but if you dont want to waste additional resources on object load you can use lazy keyword.
+
+```php
+class cart
+{
+    public $id;
+    /**
+    * lazy
+    * enum
+    * @var product
+    */
+    public $product;
+}
+```
+As a result values of array $cart->product will represents id's of related objects:
+
+```php
+echo $cart->product[2];
+```
+Will output 2
+
+Enumerated field is always char type. You can set only length for that property field. Enumerated property values are separated with symbol ```|```. Typical enumerated value in table looks like: ```|23|2|45|1|``` or if enumerated property is related to class having char as primary property field type then: ```|EUR|USD|GEL|```.
+
+In common cases you can query this field with like:```cart.product like '%|24|%'```.
+
+## Implement custom value type
+
+Do you want that your property value was stored in json in database but you had actual structure in your class object? Or do you want that your property value was some string array but stored as string in database? Or generally do you want some custom property value that has custom structure when using and custom form when stored? Than this article is for you.
+
+Let us go with json example. db.php has absract class \db\value. This class has two methods called ```void set(value)``` and ```mixed get``.
+
+And it looks like:
+
+```php
+abstract class value
+{
+    public function set ($value)
+    {
+
+    }
+    public function get ()
+    {
+    }
+}
+```
+Once the property of class implementing this abstract class is saved ```get``` method is called. Once property is restored or loaded ```set``` method is called.
+
+Imagine you are have some kind of algorithm which crypts string data and also you can decrypt that data. You want plain text for some property when loaded but when stored crypted text. Assuming we have ```crypt``` and ```decrypt`` magic methods we can implement this solution in two steps:
+
+First extend \db\value class:
+
+```php
+cryptable extends \db\value
+{
+    public $value;
+    public function set ($value)
+    {
+        $this->value = decrypt($value);
+    }
+    public function get ()
+    {
+        return encrypt ($this->value);
+    }
+}
+```
+
+Second step is to use newly developed class ```cryptable``` by specifieng it as a type to a desired property. In this case imagine we are using it in password (and our system is easyly hackable).
+
+```php
+class foo
+{
+    public $id;
+    /**
+    * @var cryptable
+    */
+    public $password;
+}
+```
+Once object of class foo will be saved its property password value will be crypted and stored in table. Once this class object is loaded its field value will be decrypted and stored in property value.
+
+With same trick we can store property value in json:
+
+```php
+class json extends \db\value
+{
+    public $value;
+    //orm wants to set your property
+    public function set ($value)
+    {
+        $this->value = json_decode ($value);
+    }
+    //orm wants to get your property
+    public function get ()
+    {
+        return json_encode ($this->value);
+    }
+}
+```
+
+Usage:
+```php
+/**
+* @var json
+*/
+public $somedata;
+```
+
+Just another example with string array:
+```php
+namespace tools
+{
+    class listing extends \db\value
+    {
+        public $value;
+        //orm wants to set your property
+        public function set ($value)
+        {
+            $this->value = explode(',',$value);
+        }
+        //orm wants to get your property
+        public function get ()
+        {
+            return implode (',',$this->value);
+        }
+    }
+}
+```
+
+Additionaly you can set field type for custom value as by default it is char(128) for example like this:
+
+```php
+/**
+* type text
+* @var \tools\listing
+*/
+public $mylisting;
+```
+
+## Map property to custom field name
+In case you have table field named by some other developer who does not care how your code looks like and he named product title field in products table like ```productTitle``` but you have product class and property named ```title``` in it. In regular world you have two options: 1. rename your class property to productTitle and you will have ```$product->productTitle``` 2. or rename table field to title and you will have ```$product->title```. But in db.php you can leave field title as is and link your property to that field. This is done by **field** keyword.
+
+```php
+class product
+{
+...
+    /**
+    * field productTitle
+    */
+    public $title;
+...
+}
+```
+And after this ```$product->title``` will be mapped to ```productTitle``` field. Have fun and note that simillary you can map class to custom table name but it is subject of further reading.
+
+## Set null
+Specifieng keyword null will allow null values in property table field.
+```php
+/**
+* null
+*/
+public $order;
+```
+Property fields have no null specified by default.
+## Set unsigned
+Some numeric types in sql have unsigned flag. Which means that numeric field values can not go under zero. It is sometimes good way to reduce table disk space usage and to incrase performance.
+```php
+/**
+* unsigned
+*/
+public $order;
+```
+Note that integer id primary property fields are unsigned by default.
+## Set zerofill
+```php
+/**
+* zerofill
+*/
+public $order;
+```
+Or
+```php
+/**
+* zero
+*/
+public $order;
+```
+## Set date on insert on update
+You can set predefined action values on insert or on update per property. For only db.php users there is only date action availale. So you can use ```on insert set date``` and ```on update set date```. You can specify them to one property at same time. Note that if you specify ```set date``` to time type field then will be set current date and time as value.
+
+All cases below are valid and will work:
+
+```php
+/**
+* on insert set date
+* @var date
+*/
+public $date;
+```
+
+```php
+/**
+* on insert set date
+* @var time
+*/
+public $date;
+```
+
+```php
+/**
+* on update set date
+* @var date
+*/
+public $date;
+```
+
+```php
+/**
+* on update set date
+* @var time
+*/
+public $date;
+```
+
+```php
+/**
+* on insert set date
+* on update set date
+* @var date
+*/
+public $date;
+```
+
+```php
+/**
+* on insert set date
+* on update set date
+* @var time
+*/
+public $date;
+```
+
 ## set create field first
 ## set create field after field
-## set lazy load
-## set date on insert/update
-## set default value for field
-## set unsigned flag for field
-## set zerofill flag for field
 ## require field value for insert/update
 ## exclude field from insert/update
 
