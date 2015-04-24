@@ -2538,9 +2538,10 @@
         {
             public $items = array ();
             public $value;
-            public function __construct ($value)
+            public function __construct ($value,$items=array())
             {
                 $this->value = $value;
+                $this->items = $items;
             }
             public function define ($name, $value)
             {
