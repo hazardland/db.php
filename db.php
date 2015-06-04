@@ -3618,10 +3618,11 @@
             {
                 return '0000-00-00 00:00:00';
             }
-            if ($user)
+/*            if ($user)
             {
                 $timezone = $user;
             }
+*/
             return \date('Y-m-d H:i:s',$destroy-$timezone);
         }
 
