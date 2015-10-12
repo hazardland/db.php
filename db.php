@@ -98,11 +98,6 @@
 
         }
 
-        class bar
-        {
-
-        }
-
         class link
         {
             public $name;
@@ -3707,6 +3702,10 @@
             }
         }
 
+        /*
+        * if input is array raturns enom string
+        * else returns parameters as single array
+        */
         function enum ()
         {
             if (func_num_args()==0)
