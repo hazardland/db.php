@@ -2804,7 +2804,7 @@
             {
                 $this->string = $string;
             }
-            public function append ()
+            public function append ($string)
             {
                 $this->string .= " ".$string;
             }
