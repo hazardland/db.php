@@ -2529,7 +2529,7 @@
 
         }
 
-        class string implements \ArrayAccess,\IteratorAggregate
+        class statement implements \ArrayAccess,\IteratorAggregate
         {
             public $items = array ();
             public $value;
@@ -2555,7 +2555,7 @@
                 $result = $this->value;
                 foreach ($this->items as $name=>$value)
                 {
-                    if (is_object($value) && type($value)=='.db.string')
+                    if (is_object($value) && type($value)=='.db.statement')
                     {
                         $result = str_replace ('{'.$name.'}', $value->render(), $result);
                     }
