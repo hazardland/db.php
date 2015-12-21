@@ -3308,7 +3308,18 @@
         {
             function store ($name, $value)
             {
-                if (function_exists('\apc_store'))
+                if (function_exists('\apcu_store'))
+                {
+                    if (is_bool($value))
+                    {
+                        \apcu_delete ($name);
+                    }
+                    else
+                    {
+                        \apcu_store ($name, $value);
+                    }
+                }
+                else if (function_exists('\apc_store'))
                 {
                     if (is_bool($value))
                     {
@@ -3326,7 +3337,11 @@
             }
             function fetch ($name)
             {
-                if (function_exists('\apc_fetch'))
+                if (function_exists('\apcu_fetch'))
+                {
+                    return \apcu_fetch ($name);
+                }
+                else if (function_exists('\apc_fetch'))
                 {
                     return \apc_fetch ($name);
                 }
@@ -3337,7 +3352,11 @@
             }
             function clear ()
             {
-                if (function_exists('\apc_clear_cache'))
+                if (function_exists('\apcu_clear_cache'))
+                {
+                    \apcu_clear_cache  ();
+                }
+                else if (function_exists('\apc_clear_cache'))
                 {
                     \apc_clear_cache ('user');
                 }
