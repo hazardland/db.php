@@ -138,7 +138,7 @@
                     if ($this->error())
                     {
                         $error = $this->error();
-                        $debug = $query.($error[2]?"\n".$error[2]:"");
+                        $debug = $query.($error[2]?"<p>".$error[2]:"");
                         debug ($debug,$this);
                     }
                     else
@@ -158,7 +158,7 @@
                     if ($this->error())
                     {
                         $error = $this->error();
-                        $debug = $query.($error[2]?"\n".$error[2]:"");
+                        $debug = $query.($error[2]?"<p>".$error[2]:"");
                         debug ($debug,$this);
                     }
                     else
@@ -178,7 +178,7 @@
                     if ($this->error())
                     {
                         $error = $this->error();
-                        $debug = $query.($error[2]?"\n".$error[2]:"");
+                        $debug = $query.($error[2]?"<p>".$error[2]:"");
                         debug ($debug,$this);
                     }
                     else
@@ -200,7 +200,7 @@
                     if ($this->error())
                     {
                         $error = $this->error();
-                        $debug = $query.($error[2]?"\n".$error[2]:"");
+                        $debug = $query.($error[2]?"<p>".$error[2]:"");
                         debug ($debug,$this);
                     }
                     else
