@@ -726,6 +726,32 @@
                     $this->type = type::string;
                 }
             }
+            public function foreign ($value)
+            {
+                if ($value===null)
+                {
+                    $this->foreign = null;
+                    $this->class = null;
+                    return;
+                }
+                try
+                {
+                    $this->class= new \ReflectionClass($value);
+                }
+                catch (\Exception $error)
+                {
+
+                }
+                if ($this->class!=null)
+                {
+                    $this->foreign = type ($value);
+                }
+                else
+                {
+                    $this->foreign = type ($value);
+                    $this->class = $value;
+                }
+            }
             public function type ()
             {
                 $result = strtolower($this->data);
@@ -1799,6 +1825,12 @@
             public function database ()
             {
                 return database::$object;
+            }
+            public function foreign ($field, $class)
+            {
+                $this->fields[$field]->foreign ($class);
+                $this->columns = null;
+                $this->tables = null;
             }
         }
 
